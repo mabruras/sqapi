@@ -39,6 +39,14 @@ NiFi is used to move files into the message queue.
 Redis is used for key-value store/map cache,
 to keep metadata about files uploaded.
 
+### Tools
+Within the [Redis directory](./redis) theres exists two scripts,
+one for writing to Redis, and one to read out based on input arguments.
+
+#### Prerequisites
+* Using _redis_ python client for communication with the Redis instance
+  * `pip3 install redis --upgrade`
+
 
 ## RabbitMQ
 RabbitMQ is used as message broker.
@@ -53,8 +61,8 @@ and a [consumer](./rabbitmq/consumer.py) to fetch messages from queue.
 These files are only used as a PoC for this system.
 
 #### Prerequisites
-* Using _Pika Python_ client for AMQP protocol
-  * `pip install pika --upgrade`
+* Using _Pika_ python client for AMQP protocol
+  * `pip3 install pika --upgrade`
 
 
 ## sqAPI
