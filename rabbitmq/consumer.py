@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 
 import pika
-import json
+
 
 def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
+    print(" [x] Received %r" % body)
+
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
@@ -19,6 +20,3 @@ channel.basic_consume(queue='content',
                       on_message_callback=callback)
 
 channel.start_consuming()
-connection.close()
-print('Connection closed')
-
