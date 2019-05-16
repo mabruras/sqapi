@@ -36,7 +36,7 @@ services:
     container_name: postgres
     restart: unless-stopped
     ports:
-    - ''
+    - '5432:5432'
 
   web:
     build: ./web
