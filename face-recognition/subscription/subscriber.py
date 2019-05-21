@@ -6,18 +6,15 @@ from subscription.listeners.RabbitMQ import RabbitMQ
 #from listeners.RabbitMQ import RabbitMQ
 
 
-def start_listener(configuration: dict, callback=None):
+def start_listener(configuration: dict, transformer, callback):
     print('Initializing message queue listener')
-    if not callback:
-        print('Using default callback')
-        callback = default_callback
 
     listener = detect_listener(configuration)
 
     threading.Thread(
         name='Message Broker Listener',
         target=listener.listen,
-        args=[callback]
+        args=[transformer, callback]
     ).start()
 
 
@@ -41,10 +38,3 @@ def detect_listener(configuration):
         exit(1)
 
     return clazz(host)
-
-
-def default_callback(ch, method, properties, body):
-    print('Received channel: {}'.format(ch))
-    print('Received method: {}'.format(method))
-    print('Received properties: {}'.format(properties))
-    print('Received message: {}'.format(body))

@@ -5,4 +5,4 @@ import redis
 r = redis.Redis(host='localhost', port=6379, db=0)
 
 v = r.get('foo')
-print(f'value of foo: {v}')
+print('value of foo: {}'.format(v))

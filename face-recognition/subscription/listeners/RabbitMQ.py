@@ -24,7 +24,7 @@ class RabbitMQ:
             print('Connection tested: {}'.format(error))
             interrupt_main()
 
-    def listen(self, callback):
+    def listen(self, transformer, callback):
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
 

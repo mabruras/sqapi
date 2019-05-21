@@ -3,6 +3,8 @@ import os
 
 import yaml
 
+from transform import transformer
+
 CONFIG = dict()
 
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
@@ -26,11 +28,16 @@ def initialize_subscriber():
     print('Initializing subscriber')
     from subscription import subscriber
     # subscriber.start_listener(configuration=CONFIG.get('listener', {}), callback=callback)
-    subscriber.start_listener(configuration=CONFIG.get('listener', {}))
+    cfg = CONFIG.get('listener', {})
+    callback = get_msg_transformer()
+
+    subscriber.start_listener(configuration=cfg, transformer=transformer, callback=callback)
 
 
-def callback():
-    pass
+def get_msg_transformer():
+    cfg = CONFIG.get('transformer', {})
+
+    return transformer.get_message_transformer(configuration=cfg)
 
 
 def initialize_queries():

@@ -24,9 +24,9 @@ services:
     - '5672:5672'
 
   sqapi:
-    build: ./sqapi
-    image: mabruras/sqapi:${SQAPI_V:-latest}
-    container_name: sqapi
+    build: ./face-recognition
+    image: mabruras/face-recognition_sqapi:${SQAPI_V:-latest}
+    container_name: face-recognition_sqapi
     restart: unless-stopped
     ports:
     - '5000:5000'
