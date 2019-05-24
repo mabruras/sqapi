@@ -7,7 +7,7 @@ import yaml
 from flask import Flask
 from flask_cors import CORS
 
-from sqapi.listeners.RabbitMQ import RabbitMQ
+from listeners.RabbitMQ import RabbitMQ
 
 CONFIG = dict()
 
