@@ -4,18 +4,18 @@ import json
 
 import pika
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672))
 channel = connection.channel()
 print('Established connection')
 
 # Create a queue
-channel.queue_declare(queue='content')
-print('Queue created')
+declared_queue = channel.exchange_declare(exchange='content', exchange_type='fanout')
+print('Exchange created')
 
-channel.basic_publish(exchange='',
-                      routing_key='content',
+channel.basic_publish(exchange='content',
+                      routing_key='',
                       body=json.dumps({
-                          'type': 'face/encoding',
+                          'type': 'application/json',
                           's3': 'mybucket/28c98ee8b211be21d4a9f4ef1687c4d36f',
                           'redis': 'redis-ref',
                       })

@@ -54,9 +54,11 @@ RabbitMQ is used as message broker.
 * Publish these messages on the queue
 
 ### Tools
-Within the [RabbitMQ directory](./rabbitmq) there is created two files,
-one [producer](./rabbitmq/producer.py) to publish messages,
-and a [consumer](./rabbitmq/consumer.py) to fetch messages from queue.
+Within the [RabbitMQ directory](./rabbitmq) there is created four files:
+* [queue_producer](rabbitmq/queue_producer.py): publish single messages
+* [queue_consumer](rabbitmq/queue_consumer.py): fetch messages from single queue
+* [exchange_producer](rabbitmq/exchange_producer.py): publish messages to all queues
+* [exchange_consumer](rabbitmq/exchange_consumer.py): fetch messages from custom queue
 
 These files are only used as a PoC for this system.
 

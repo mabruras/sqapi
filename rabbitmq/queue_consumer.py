@@ -7,7 +7,7 @@ def callback(ch, method, properties, body):
     print(" [x] Received %r" % body)
 
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672))
 channel = connection.channel()
 print('Established connection')
 
