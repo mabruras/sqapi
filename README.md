@@ -40,7 +40,7 @@ Redis is used for key-value store/map cache,
 to keep metadata about files uploaded.
 
 ### Tools
-Within the [Redis directory](./redis) theres exists two scripts,
+Within the [Redis directory](./redis) it exists two scripts,
 one for writing to Redis, and one to read out based on input arguments.
 
 #### Prerequisites
@@ -71,7 +71,7 @@ These files are only used as a PoC for this system.
 _Subscription, Query, API_ is a component intended to subscribe to the message broker,
 query data from disk/storage place and metadata from key-value store/map cache.
 
-New data from the queue will trigger a query and aggregation of the newly incomming data.
+New data from the queue will trigger a query and aggregation of the newly incoming data.
 All aggregated data will be stored in a *sqAPI* specific storage solution,
 dependent on the current *sqAPI* intentions.
 
@@ -79,13 +79,13 @@ When a used wants to access the *sqAPI*s data, they will connect to the API and 
 will perform necessary searches and queries towards its local database,
 or towards the storage for fetching data and metadata to return to the user.
 
-### Incomming data
+### Incoming data
 * Register subscription to RabbitMQ
 * Query for file data when RaMQ notifies
 * Query for files on disk when RaMQ notifies
 * Store data in local storage (ES)
 
-### Incomming user request
+### Incoming user request
 * Perform necessary searches in local database
 * Fetch data/metadata based on local results
 * Return data/metadata to used based on request
@@ -96,3 +96,34 @@ PostgreSQL is used to keep the data for the current PoC
 ## User Interface
 Curl/Kibana
 
+
+# Testing
+## sqAPI
+This PoC is based on a file system as origin to the files,
+a Redis instance as origin for the metadata,
+a RabbitMQ for message bus,
+and PostgreSQL to store the processed data.
+
+### Up and running
+
+```bash
+# Start Redis, RabbitMQ and PostgreSQL
+docker run -d -p 6379:6379 redis:latest
+docker run -d -p 5672:5672 rabbitmq:latest
+docker run -d -p 5432:5432 postgres
+
+# Start sqAPI
+./start.py
+
+# Produce test data
+./data_producer.py
+```
+
+### Docker Compose
+This is not tested yet,
+but is intended to spin up all PoC examples,
+within the same Docker network
+
+```bash
+docker-compose up -d
+```
