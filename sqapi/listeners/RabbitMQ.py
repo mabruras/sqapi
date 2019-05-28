@@ -3,12 +3,15 @@ from _thread import interrupt_main
 
 import pika
 
+EXCHANGE_TYPE = 'fanout'
+EXCHANGE = 'x_sqapi'
+ROUTING_KEY = 'q_sqapi'
+
 
 class RabbitMQ:
 
-    def __init__(self, host: str, routing_key: str = 'content'):
+    def __init__(self, host: str):
         self.host = host
-        self.routing_key = routing_key
         self.test_connection()
 
     def test_connection(self):
@@ -24,12 +27,26 @@ class RabbitMQ:
             print('Connection tested: {}'.format(error))
             interrupt_main()
 
-    def listen(self, callback):
+    def listen_queue(self, callback, routing_key=ROUTING_KEY):
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
 
         # Create a queue
-        channel.queue_declare(queue=self.routing_key)
-        channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=callback)
+        channel.queue_declare(queue=routing_key)
+        channel.basic_consume(queue=routing_key, auto_ack=True, on_message_callback=callback)
+
+        channel.start_consuming()
+
+    def listen_exchange(self, callback):
+        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
+        channel = connection.channel()
+
+        channel.exchange_declare(exchange=EXCHANGE, exchange_type=EXCHANGE_TYPE)
+
+        # Create a queue
+        res = channel.queue_declare('', exclusive=True)
+        queue_name = res.method.queue
+        channel.queue_bind(exchange=EXCHANGE, queue=queue_name)
+        channel.basic_consume(queue=queue_name, auto_ack=True, on_message_callback=callback)
 
         channel.start_consuming()

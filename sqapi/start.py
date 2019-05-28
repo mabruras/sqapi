@@ -3,6 +3,7 @@ import json
 import os
 import threading
 
+import redis
 import yaml
 from flask import Flask
 from flask_cors import CORS
@@ -14,6 +15,8 @@ CONFIG = dict()
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 CONFIG_DIR = '{}{}conf'.format(PROJECT_DIR, os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
+MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid']
 
 
 def load_config():
@@ -31,17 +34,25 @@ def load_config():
 def start_subscription():
     listener = detect_listener()
 
+    # Setup sqAPI general exchange listener
     threading.Thread(
-        name='Message Broker Listener',
-        target=listener.listen,
+        name='Exchange Listener',
+        target=listener.listen_exchange,
         args=[process_message]
+    ).start()
+
+    # Setup sqAPI unique queue listener
+    routing_key = CONFIG.get('msg_broker_routing', 'content')
+    threading.Thread(
+        name='Queue Listener',
+        target=listener.listen_queue,
+        args=[process_message, routing_key]
     ).start()
 
 
 def detect_listener():
     listener_type = CONFIG.get('msg_broker_type', 'rabbitmq')
     host = CONFIG.get('msg_broker_host', 'localhost')
-    routing_key = CONFIG.get('msg_broker_routing', 'msg_queue')
 
     # TODO: More generic selection of listener type?
     if not listener_type:
@@ -56,7 +67,7 @@ def detect_listener():
         clazz = None
         exit(1)
 
-    return clazz(host, routing_key)
+    return clazz(host)
 
 
 def process_message(ch, method, properties, body):
@@ -66,46 +77,91 @@ def process_message(ch, method, properties, body):
     print('Received message: {}'.format(body))
 
     try:
-        # TODO: Formatting should be configurable here
-        # Format
-        message = json.loads(body)
+        message = validate_message(body)
 
         # Query
-        q_data, q_kv = build_queries(message)
-        data, kv = execute_queries(q_data, q_kv)
+        data = query_data(message)
+        meta = query_metadata(message)
 
-        # Storage
-        store_data(data)
-        store_kv(kv)
+        process_content(meta, data)
     except Exception as e:
-        print('Could not parse message body to dictionary')
+        print('Could not process message')
         print(body)
         print(e)
 
 
-def build_queries(message):
+def validate_message(body):
+    # TODO: Formatting should be configurable here
+    # Format
+    message = json.loads(body)
+
+    print('MESSAGE:')
+    print(message)
+    print('TYPE:')
+    print(type(message))
+
+    # Validate fields
+    for f in MSG_FIELDS:
+        if f not in dict(message.items()):
+            raise AttributeError('The field "{}" is missing in the message'.format(f))
+
+    msg_type = message.get('data_type', 'UNKNOWN')
+    if msg_type not in MIME_TYPES:
+        raise NotImplementedError('Mime-type "{}" is not supported by this sqAPI'.format(msg_type))
+
+    return message
+
+
+def query_data(message):
     # TODO: Based on message extract the following:
     # Data location (database, disk, object store etc.) + identifier (lookup reference)
+    loc = message.get('data_location', None)
+    if not loc:
+        raise AttributeError('Could not find "data_location" in message')
+    data = fetch_data(loc)
+
+    return data
+
+
+def fetch_data(location):
+    disk_loc = fetch_data_to_disk(location)
+
+    return fetch_file_from_disk(disk_loc)
+
+
+def fetch_data_to_disk(location):
+    # TODO: this return should be from a specific/configurable module
+    # so it will download/get file data from all kinds of storage places
+
+    # TODO: Now location is returned since we know in this POC that the file is on disk
+    return location
+
+
+def fetch_file_from_disk(file):
+    return open(file, "rb")
+
+
+def query_metadata(message):
+    # TODO: Based on query content, the query should be executed to the intended system:
     # Key/Value location (Redis, file etc.) + identifier (lookup reference) + optional field limitation
 
-    return message, message
+    return fetch_meta_from_redis(message)
 
 
-def execute_queries(data_query, kv_query):
-    # TODO: Based on query content, the query should be executed to the intended system:
-    # Use _query.location to find defined system, _query.id for lookup and kv_query.fields ([]) for optional limitation
+def fetch_meta_from_redis(message):
+    r = redis.Redis()
 
-    return data_query, kv_query
-
-
-def store_data(data):
-    # TODO: Connect to a database defined in configuration and store based on configured structure
-    pass
+    return r.hgetall(message.get('uuid'))
 
 
-def store_kv(kv):
-    # TODO: Connect to a database defined in configuration and store based on configured structure
-    pass
+def process_content(meta, data):
+    print('Meta processing:')
+    print(meta)
+
+    print('Data processing:')
+    out = data.read()
+    data.close()
+    print('File size: {}'.format(len(out)))
 
 
 def start_api():
@@ -127,5 +183,12 @@ def register_endpoints(app):
 
 if __name__ == '__main__':
     load_config()
+
+    # action = sys.argv[0]
+    # if action == 'sq':
+    #     start_subscription()
+    # else:
+    #     start_api()
+
     start_subscription()
     start_api()
