@@ -23,11 +23,19 @@ services:
     #- '5671:5671'
     - '5672:5672'
 
-  sqapi:
-    build: ./face-recognition
-    image: mabruras/face-recognition_sqapi:${SQAPI_V:-latest}
-    container_name: face-recognition_sqapi
+  sqapi-loader:
+    build: ./sqapi
+    image: mabruras/sqapi:${SQAPI_V:-latest}
+    container_name: sqapi-loader
     restart: unless-stopped
+    command: ['python', 'start.py', 'loader']
+
+  sqapi-api:
+    build: ./sqapi
+    image: mabruras/sqapi:${SQAPI_V:-latest}
+    container_name: sqapi-api
+    restart: unless-stopped
+    command: ['python', 'start.py', 'api']
     ports:
     - '5000:5000'
 

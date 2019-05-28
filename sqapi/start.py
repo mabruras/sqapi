@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import json
 import os
+import sys
 import threading
 
 import redis
@@ -145,11 +146,28 @@ def query_metadata(message):
     # TODO: Based on query content, the query should be executed to the intended system:
     # Key/Value location (Redis, file etc.) + identifier (lookup reference) + optional field limitation
 
-    return fetch_meta_from_redis(message)
+    meta_store = CONFIG.get('meta_store_type', 'redis')
+
+    # TODO: More generic selection of metadata store?
+    if not meta_store:
+        # Default Metadata store is Redis
+        print('Using default listener')
+        clazz = redis.Redis
+    elif meta_store.lower() == 'redis':
+        print('RabbitMQ detected as metadata type')
+        clazz = redis.Redis
+    else:
+        print('{} is not a supported metadata type'.format(type))
+        clazz = None
+        exit(1)
+
+    return fetch_meta_from_redis(clazz, message)
 
 
-def fetch_meta_from_redis(message):
-    r = redis.Redis()
+def fetch_meta_from_redis(clazz, message):
+    host = CONFIG.get('meta_store_host', 'localhost')
+    port = CONFIG.get('meta_store_port', 6379)
+    r = clazz(host=host, port=port)
 
     return r.hgetall(message.get('uuid'))
 
@@ -184,11 +202,10 @@ def register_endpoints(app):
 if __name__ == '__main__':
     load_config()
 
-    # action = sys.argv[0]
-    # if action == 'sq':
-    #     start_subscription()
-    # else:
-    #     start_api()
-
-    start_subscription()
-    start_api()
+    if len(sys.argv) > 1 and sys.argv[1] == 'loader':
+        start_subscription()
+    elif len(sys.argv) > 1 and sys.argv[1] == 'api':
+        start_api()
+    else:
+        start_subscription()
+        start_api()
