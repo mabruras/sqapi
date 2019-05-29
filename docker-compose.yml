@@ -20,7 +20,6 @@ services:
     container_name: rabbit
     restart: unless-stopped
     ports:
-    #- '5671:5671'
     - '5672:5672'
 
   sqapi-loader:
@@ -40,17 +39,17 @@ services:
     - '5000:5000'
 
   db:
-    image: postgres:{DB_V:-latest}
+    image: postgres:${DB_V:-latest}
     container_name: postgres
     restart: unless-stopped
     ports:
     - '5432:5432'
 
-  web:
-    build: ./web
-    image: mabruras/sqapi-web
-    container_name: web
-    restart: unless-stopped
-    ports:
-    - '3000:3000'
+  # web:
+  #   build: ./web
+  #   image: mabruras/sqapi-web
+  #   container_name: web
+  #   restart: unless-stopped
+  #   ports:
+  #   - '3000:3000'
 
