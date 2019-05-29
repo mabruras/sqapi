@@ -12,15 +12,15 @@ services:
     image: redis:${REDIS_V:-latest}
     container_name: redis
     restart: unless-stopped
-    ports:
-    - '6379:6379'
+    # ports:
+    # - '6379:6379'
 
   mq:
     image: rabbitmq:${RABBIT_V:-latest}
     container_name: rabbit
     restart: unless-stopped
-    ports:
-    - '5672:5672'
+    # ports:
+    # - '5672:5672'
 
   sqapi-loader:
     build: ./sqapi
@@ -28,6 +28,8 @@ services:
     container_name: sqapi-loader
     restart: unless-stopped
     command: ['python', 'start.py', 'loader']
+    environment:
+    - 'CONFIG_FILE=${WRK_DIR}/conf/docker_sqapi.yml'
 
   sqapi-api:
     build: ./sqapi
@@ -35,15 +37,17 @@ services:
     container_name: sqapi-api
     restart: unless-stopped
     command: ['python', 'start.py', 'api']
-    ports:
-    - '5000:5000'
+    environment:
+    - 'CONFIG_FILE=${WRK_DIR}/conf/docker_sqapi.yml'
+    # ports:
+    # - '5000:5000'
 
   db:
     image: postgres:${DB_V:-latest}
     container_name: postgres
     restart: unless-stopped
-    ports:
-    - '5432:5432'
+    # ports:
+    # - '5432:5432'
 
   # web:
   #   build: ./web
@@ -52,4 +56,3 @@ services:
   #   restart: unless-stopped
   #   ports:
   #   - '3000:3000'
-

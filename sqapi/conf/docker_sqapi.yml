@@ -1,10 +1,10 @@
 msg_broker:
   type: 'rabbitmq'
   routing: 'q_sqapi'
-  host: 'localhost'
+  host: 'mq'
   port: 5672
 
 meta_store:
   type: 'redis'
-  host: 'localhost'
+  host: 'redis'
   port: 6379

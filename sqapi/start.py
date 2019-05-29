@@ -43,7 +43,7 @@ def start_subscription():
     ).start()
 
     # Setup sqAPI unique queue listener
-    routing_key = CONFIG.get('msg_broker_routing', 'content')
+    routing_key = cfg_broker('routing', 'q_sqapi')
     threading.Thread(
         name='Queue Listener',
         target=listener.listen_queue,
@@ -52,8 +52,9 @@ def start_subscription():
 
 
 def detect_listener():
-    listener_type = CONFIG.get('msg_broker_type', 'rabbitmq')
-    host = CONFIG.get('msg_broker_host', 'localhost')
+    listener_type = cfg_broker('type', 'rabbitmq')
+    host = cfg_broker('host', 'localhost')
+    port = cfg_broker('port', 5672)
 
     # TODO: More generic selection of listener type?
     if not listener_type:
@@ -68,7 +69,7 @@ def detect_listener():
         clazz = None
         exit(1)
 
-    return clazz(host)
+    return clazz(host, port)
 
 
 def process_message(ch, method, properties, body):
@@ -146,7 +147,7 @@ def query_metadata(message):
     # TODO: Based on query content, the query should be executed to the intended system:
     # Key/Value location (Redis, file etc.) + identifier (lookup reference) + optional field limitation
 
-    meta_store = CONFIG.get('meta_store_type', 'redis')
+    meta_store = cfg_meta('type', 'redis')
 
     # TODO: More generic selection of metadata store?
     if not meta_store:
@@ -165,8 +166,8 @@ def query_metadata(message):
 
 
 def fetch_meta_from_redis(clazz, message):
-    host = CONFIG.get('meta_store_host', 'localhost')
-    port = CONFIG.get('meta_store_port', 6379)
+    host = cfg_meta('host', 'localhost')
+    port = cfg_meta('port', 6379)
     r = clazz(host=host, port=port)
 
     return r.hgetall(message.get('uuid'))
@@ -197,6 +198,18 @@ def register_endpoints(app):
     from api import edge
 
     app.register_blueprint(edge.bp)
+
+
+def cfg_broker(key, default=None):
+    return cfg('msg_broker', {}).get(key, default)
+
+
+def cfg_meta(key, default=None):
+    return cfg('meta_store', {}).get(key, default)
+
+
+def cfg(key, default):
+    return CONFIG.get(key, default)
 
 
 if __name__ == '__main__':

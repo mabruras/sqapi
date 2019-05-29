@@ -10,13 +10,15 @@ ROUTING_KEY = 'q_sqapi'
 
 class RabbitMQ:
 
-    def __init__(self, host: str):
+    def __init__(self, host: str, port: int):
         self.host = host
+        self.port = port
         self.test_connection()
 
     def test_connection(self):
 
         try:
+            print('Testing connection to RabbitMQ on {}:{}'.format(self.host, self.port))
             connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
             if connection.is_open:
                 print('Connection tested: OK')
