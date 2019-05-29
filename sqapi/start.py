@@ -21,13 +21,12 @@ MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid']
 
 
 def load_config():
-    print('Loading configuration')
+    print('Loading configuration: {}'.format(CONFIG_FILE))
     with open(CONFIG_FILE, 'r') as stream:
         try:
             global CONFIG
             CONFIG = yaml.safe_load(stream) or dict()
-            print('Config loaded')
-            print(CONFIG)
+            print('Config loaded: {}'.format(CONFIG))
         except yaml.YAMLError as exc:
             print(exc)
 

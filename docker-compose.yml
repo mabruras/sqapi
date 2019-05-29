@@ -1,27 +1,6 @@
 version: '3'
 
 services:
-  nifi:
-    image: apache/nifi:${NIFI_V:-latest}
-    container_name: nifi
-    restart: unless-stopped
-    ports:
-    - '8080:8080'
-
-  redis:
-    image: redis:${REDIS_V:-latest}
-    container_name: redis
-    restart: unless-stopped
-    # ports:
-    # - '6379:6379'
-
-  mq:
-    image: rabbitmq:${RABBIT_V:-latest}
-    container_name: rabbit
-    restart: unless-stopped
-    # ports:
-    # - '5672:5672'
-
   sqapi-loader:
     build: ./sqapi
     image: mabruras/sqapi:${SQAPI_V:-latest}
@@ -29,7 +8,13 @@ services:
     restart: unless-stopped
     command: ['python', 'start.py', 'loader']
     environment:
-    - 'CONFIG_FILE=${WRK_DIR}/conf/docker_sqapi.yml'
+    - 'CFG_FILE=./conf/docker_sqapi.yml'
+
+    depends_on:
+    - mq
+    - redis
+    - db
+
 
   sqapi-api:
     build: ./sqapi
@@ -38,9 +23,52 @@ services:
     restart: unless-stopped
     command: ['python', 'start.py', 'api']
     environment:
-    - 'CONFIG_FILE=${WRK_DIR}/conf/docker_sqapi.yml'
+    - 'CFG_FILE=./conf/docker_sqapi.yml'
     # ports:
     # - '5000:5000'
+
+    depends_on:
+      - mq
+      - redis
+      - db
+
+
+  nifi:
+    image: apache/nifi:${NIFI_V:-latest}
+    container_name: nifi
+    restart: unless-stopped
+    ports:
+    - '8080:8080'
+
+
+  redis:
+    image: redis:${REDIS_V:-latest}
+    container_name: redis
+    restart: unless-stopped
+    # ports:
+    # - '6379:6379'
+
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: ["CMD", "bash", "-c", "exec", "3<>", "/dev/tcp/127.0.0.1/6379", "&&", "echo", "PING", ">&3", "&&", "head", "-1", "<&3", "|", "grep PONG"]
+
+
+  mq:
+    image: rabbitmq:${RABBIT_V:-latest}
+    container_name: rabbit
+    restart: unless-stopped
+    # ports:
+    # - '5672:5672'
+
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: [ "CMD", "rabbitmqctl", "status" ]
+
+
 
   db:
     image: postgres:${DB_V:-latest}
@@ -48,6 +76,13 @@ services:
     restart: unless-stopped
     # ports:
     # - '5432:5432'
+
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: ["CMD-SHELL", "pg_isread", "--dbname=postgres", "--host=localhost", "--username=postgres"]
+
 
   # web:
   #   build: ./web
