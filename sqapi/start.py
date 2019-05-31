@@ -17,7 +17,7 @@ PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 CONFIG_DIR = '{}{}conf'.format(PROJECT_DIR, os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
 MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
-MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid']
+MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 
 def load_config():
@@ -96,11 +96,6 @@ def validate_message(body):
     # Format
     message = json.loads(body)
 
-    print('MESSAGE:')
-    print(message)
-    print('TYPE:')
-    print(type(message))
-
     # Validate fields
     for f in MSG_FIELDS:
         if f not in dict(message.items()):
@@ -151,13 +146,13 @@ def query_metadata(message):
     # TODO: More generic selection of metadata store?
     if not meta_store:
         # Default Metadata store is Redis
-        print('Using default listener')
+        print('Using default metadata store: Redis')
         clazz = redis.Redis
     elif meta_store.lower() == 'redis':
-        print('RabbitMQ detected as metadata type')
+        print('Redis was detected as metadata store')
         clazz = redis.Redis
     else:
-        print('{} is not a supported metadata type'.format(type))
+        print('{} is not a supported metadata store'.format(type))
         clazz = None
         exit(1)
 
@@ -169,7 +164,7 @@ def fetch_meta_from_redis(clazz, message):
     port = cfg_meta('port', 6379)
     r = clazz(host=host, port=port)
 
-    return r.hgetall(message.get('uuid'))
+    return r.get(message.get('uuid_ref'))
 
 
 def process_content(meta, data):
