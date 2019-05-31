@@ -56,7 +56,7 @@ def populate_rabbit(file_location, uuid_ref):
                               'data_type': 'image/jpeg',
                               'data_location': file_location,
                               'meta_location': 'redis-ref',
-                              'uuid': uuid_ref,
+                              'uuid_ref': uuid_ref,
                           })
                           )
     print('Published message')
