@@ -120,10 +120,67 @@ docker run -d -p 5432:5432 postgres
 ```
 
 ### Docker Compose
-This is not tested yet,
-but is intended to spin up all PoC examples,
-within the same Docker network
+The Docker Compose solution will create a container
+for each active component in the PoC.
 
+#### Components
+##### sqAPI
+The sqAPI component is started as two individual services, to keep the logic separated:
+* Loader
+* API
+
+This will let the Loader being able to load data even though the API is down,
+as well as users are able to access data when the loader is down.
+
+###### sqAPI Loader
+```bash
+python3 start.py loader
+```
+
+###### sqAPI API
+```bash
+python3 start.py api
+```
+
+##### NiFi
+NiFi should be configured with the following processors
+
+###### GetFile
+Picks up files from the pickup place.
+This is the point of entry for the sqAPI-PoC flow.
+
+###### PutDistributedMapCache
+Used to push data to Redis and is configured with: 
+* `RedisDistributedMapCacheClientService`
+* `RedisConnectionPoolService`
+
+###### PutFile
+Used to push the file to disk, making it available for sqAPI.
+
+##### Redis
+```bash
+
+```
+
+##### RabbitMQ
+```bash
+
+```
+
+##### PostgreSQL
+```bash
+
+```
+
+##### Web
+```bash
+
+```
+
+
+
+#### Running
 ```bash
 docker-compose up -d
 ```
+
