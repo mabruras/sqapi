@@ -8,8 +8,11 @@ services:
     restart: unless-stopped
     command: ['python', 'start.py', 'loader']
     environment:
+    - 'PYTHONUNBUFFERED=1'
     - 'CFG_FILE=./conf/docker_sqapi.yml'
 
+    volumes:
+    - nifi-io:/opt/nifi/io
     depends_on:
     - mq
     - redis
@@ -23,14 +26,16 @@ services:
     restart: unless-stopped
     command: ['python', 'start.py', 'api']
     environment:
+    - 'PYTHONUNBUFFERED=1'
     - 'CFG_FILE=./conf/docker_sqapi.yml'
     # ports:
     # - '5000:5000'
 
+    volumes:
+    - nifi-io:/opt/nifi/io
     depends_on:
-      - mq
-      - redis
-      - db
+    - redis
+    - db
 
 
   nifi:
@@ -39,6 +44,9 @@ services:
     restart: unless-stopped
     ports:
     - '8080:8080'
+
+    volumes:
+    - nifi-io:/opt/nifi/io
 
 
   redis:
@@ -69,7 +77,6 @@ services:
       test: [ "CMD", "rabbitmqctl", "status" ]
 
 
-
   db:
     image: postgres:${DB_V:-latest}
     container_name: postgres
@@ -91,3 +98,6 @@ services:
   #   restart: unless-stopped
   #   ports:
   #   - '3000:3000'
+
+volumes:
+  nifi-io:
