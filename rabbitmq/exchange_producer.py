@@ -5,15 +5,18 @@ import uuid
 
 import pika
 
+
+EXCHANGE = 'x_sqapi'
+
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672))
 channel = connection.channel()
 print('Established connection')
 
 # Create a queue
-declared_queue = channel.exchange_declare(exchange='content', exchange_type='fanout')
+declared_queue = channel.exchange_declare(exchange=EXCHANGE, exchange_type='fanout')
 print('Exchange created')
 
-channel.basic_publish(exchange='content',
+channel.basic_publish(exchange=EXCHANGE,
                       routing_key='',
                       body=json.dumps({
                           'type': 'application/json',
