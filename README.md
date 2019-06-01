@@ -28,12 +28,53 @@ NiFi is used to move files into the message queue.
 * Notify RabbitMQ of received file
   * Message should contain Redis ref. and path to stored file
 
-### Tools
-* `GenerateFlowFile`: Creates dummy files
+### Preparation
+#### IO directories
+After NiFi has started,
+the following folders should be created to
+`docker exec -u 0 -it nifi bash -c "mkdir -p /io/{input,output}/ && chown nifi:nifi -R /io"`
+
+#### Flow
+When uploading a file into NiFi, the *Main*-flow is executed.
+
+After *Main*, the flow is forked into three:
+*Store File*, *Store Metadata*, *Publish Message*
+
+![NiFi Flow](./nifi-flow.png)
+
+##### Main
+* `GetFile`: Picks up files for processing
+  * `Input Directory`: `/io/input`
+  * Load custom files with `docker cp <file> nifi:/io/input/`
+* `IdentifyMimeType`: Sets `mime.type` as attribute
+* `UpdateAttribute`: Creates attributes for sqAPI message fields
+  * `data_location`: `/io/output/${uuid}`
+  * `data_type`: `${mime.type}`
+  * `filename`: `${uuid}`
+  * `meta_location`: `redis/${uuid}`
+  * `uuid_ref`: `${uuid}`
+
+##### Store file
 * `PutFile`: Stores files on disk
+  * `Directory`: `/io/output`
+
+##### Store metadata
 * `AttributesToJSON`: Extracts metadata from file, and creates new FlowFile with attributes as JSON content
-* `PutDistributedMapCache`: Store metadata in Redis
+  * `Destination`: `flowfile-content`
+* `PutDistributedMapCache`: Inserts attributes (metadata) as JSON, into Redis
+  * `Distributed Cache Service`: `RedisDistributedMapCacheClientService`
+    * `Redis Connection Pool`: `RedisConnectionPoolService`
+      * `Connection String`: `redis:6379`
+
+##### Publish Message
+* `AttributesToJSON`: Extracts metadata from file, and creates new FlowFile with attributes as JSON content
+  * `Destination`: `flowfile-content`
+  * `Attributes List`: `data_type, data_location, meta_location, uuid_ref`
 * `PublishAMQP`: Publish messages to RabbitMQ
+  * `Exchange Name`: `x_sqapi`
+  * `Routing Key`: `q_sqapi`
+  * `Host Name`: `mq`
+
 
 ## Redis
 Redis is used for key-value store/map cache,
@@ -81,9 +122,9 @@ or towards the storage for fetching data and metadata to return to the user.
 
 ### Incoming data
 * Register subscription to RabbitMQ
-* Query for file data when RaMQ notifies
-* Query for files on disk when RaMQ notifies
-* Store data in local storage (ES)
+* Query for file metadata when RabbitMQ notifies
+* Query for files on disk when RabbitMQ notifies
+* Store data in local storage (PostgreSQL)
 
 ### Incoming user request
 * Perform necessary searches in local database
@@ -94,7 +135,7 @@ or towards the storage for fetching data and metadata to return to the user.
 PostgreSQL is used to keep the data for the current PoC
 
 ## User Interface
-Curl/Kibana
+`Curl` will be used until a Web-frontend solution is in place
 
 
 # Testing

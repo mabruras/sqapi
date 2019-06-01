@@ -7,7 +7,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from core.processor import Processor
-from listeners.RabbitMQ import RabbitMQ
+from listeners import rabbitmq
 from util.cfg_util import Config
 
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
@@ -27,33 +27,30 @@ def start_subscription():
     ).start()
 
     # Setup sqAPI unique queue listener
-    routing_key = config.cfg_broker('routing', 'q_sqapi')
     threading.Thread(
         name='Queue Listener',
         target=listener.listen_queue,
-        args=[processor.process_message, routing_key]
+        args=[processor.process_message]
     ).start()
 
 
 def detect_listener():
     listener_type = config.cfg_broker('type', 'rabbitmq')
-    host = config.cfg_broker('host', 'localhost')
-    port = config.cfg_broker('port', 5672)
 
     # TODO: More generic selection of listener type?
     if not listener_type:
         # Default Listener is RabbitMQ
         print('Using default listener')
-        clazz = RabbitMQ
+        clazz = rabbitmq.RabbitMQ
     elif listener_type.lower() == 'rabbitmq':
         print('RabbitMQ detected as listener type')
-        clazz = RabbitMQ
+        clazz = rabbitmq.RabbitMQ
     else:
         print('{} is not a supported Listener type'.format(type))
         clazz = None
         exit(1)
 
-    return clazz(host, port)
+    return clazz(config.cfg('msg_broker', {}))
 
 
 def start_api():

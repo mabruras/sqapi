@@ -6,13 +6,15 @@ services:
     image: mabruras/sqapi:${SQAPI_V:-latest}
     container_name: sqapi-loader
     restart: unless-stopped
+    deploy:
+      replicas: 1
     command: ['python', 'start.py', 'loader']
     environment:
     - 'PYTHONUNBUFFERED=1'
-    - 'CFG_FILE=./conf/docker_sqapi.yml'
+    - 'CFG_FILE=./conf/sqapi.yml'
 
     volumes:
-    - nifi-io:/opt/nifi/io
+    - nifi-io:/io
     depends_on:
     - mq
     - redis
@@ -24,15 +26,17 @@ services:
     image: mabruras/sqapi:${SQAPI_V:-latest}
     container_name: sqapi-api
     restart: unless-stopped
+    deploy:
+      replicas: 2
     command: ['python', 'start.py', 'api']
     environment:
     - 'PYTHONUNBUFFERED=1'
-    - 'CFG_FILE=./conf/docker_sqapi.yml'
+    - 'CFG_FILE=./conf/sqapi.yml'
     # ports:
     # - '5000:5000'
 
     volumes:
-    - nifi-io:/opt/nifi/io
+    - nifi-io:/io
     depends_on:
     - redis
     - db
@@ -42,17 +46,21 @@ services:
     image: apache/nifi:${NIFI_V:-latest}
     container_name: nifi
     restart: unless-stopped
+    deploy:
+      replicas: 1
     ports:
     - '8080:8080'
 
     volumes:
-    - nifi-io:/opt/nifi/io
+    - nifi-io:/io
 
 
   redis:
     image: redis:${REDIS_V:-latest}
     container_name: redis
     restart: unless-stopped
+    deploy:
+      replicas: 1
     # ports:
     # - '6379:6379'
 
@@ -67,6 +75,8 @@ services:
     image: rabbitmq:${RABBIT_V:-latest}
     container_name: rabbit
     restart: unless-stopped
+    deploy:
+      replicas: 1
     # ports:
     # - '5672:5672'
 
@@ -81,14 +91,17 @@ services:
     image: postgres:${DB_V:-latest}
     container_name: postgres
     restart: unless-stopped
+    deploy:
+      replicas: 1
     # ports:
     # - '5432:5432'
+    user: "postgres:postgres"
 
     healthcheck:
       timeout: 5s
       interval: 5s
       retries: 5
-      test: ["CMD-SHELL", "pg_isread", "--dbname=postgres", "--host=localhost", "--username=postgres"]
+      test: ["CMD-SHELL", "pg_isready", "--dbname=postgres", "--host=localhost", "--username=postgres"]
 
 
   # web:

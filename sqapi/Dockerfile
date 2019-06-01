@@ -28,4 +28,3 @@ WORKDIR         ${WRK_DIR}
 COPY            ./          ${WRK_DIR}
 
 CMD             [ "python", "app.py" ]
-
