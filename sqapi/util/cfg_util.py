@@ -26,5 +26,8 @@ class Config:
     def cfg_meta(self, key, default=None):
         return self.cfg('meta_store', {}).get(key, default)
 
+    def cfg_data(self, key, default=None):
+        return self.cfg('data_store', {}).get(key, default)
+
     def cfg(self, key, default):
         return self.config.get(key, default)

@@ -5,8 +5,20 @@ msg_broker:
   routing_key: 'q_sqapi'
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
+  message_fields:
+    - 'data_type'
+    - 'data_location'
+    - 'meta_location'
+    - 'uuid_ref'
+  supported_mime:
+    - 'image/jpeg'
+    - 'image/png'
+    - 'image/gif'
 
 meta_store:
   type: 'redis'
   host: 'redis'
   port: 6379
+
+data_store:
+  type: 'disk'
