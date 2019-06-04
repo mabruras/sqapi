@@ -17,7 +17,10 @@ def fetch_data(config, message):
     elif data_store.lower() == 'disk':
         print('Disk was detected as data store')
         disk_loc = fetch_data_to_disk(loc)
-        return fetch_file_from_disk(disk_loc)
+        try:
+            return fetch_file_from_disk(disk_loc)
+        except FileNotFoundError as e:
+            raise LookupError('Data by reference {} was not available at this moment'.format(loc))
 
     else:
         print('{} is not a supported data store'.format(type))

@@ -13,6 +13,7 @@ DB_TYPE = 'postgres'
 
 
 class Postgres:
+
     def __init__(self, config):
         self.cfg = config
         self.cfg_con = config.get('connection')

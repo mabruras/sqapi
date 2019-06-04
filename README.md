@@ -151,10 +151,13 @@ and the *sqAPI* will perform necessary searches in its local database,
 and possibly queries towards `Data Store` and `Metadata Store` for fetching necessary supplements to return to the user.
 
 ### PoC
-The [sqAPI Proof of Concept](./sqapi) will receive data from `Message Broker`,
-store references for `Data Store`- and `Metadata Store`, generated _timestamp_,
-_file size_ generated of queried data from `Data Store`, _filename_ fetched from `Metadata Store`,
-and _mime type_ in `sqAPI Storage` as aggregated data.
+The [sqAPI Proof of Concept](./sqapi) will receive data from `Message Broker`, store the following as aggregated data.
+* Reference for `Data Store`
+* Reference for `Metadata Store`
+* Generated _timestamp_
+* _file size_ generated of queried data from `Data Store`
+* _filename_ fetched from `Metadata Store`
+* _mime type_ in `sqAPI Storage`
 The aggregated data will be made available for search on timestamp, file size, filename and mime type.
 
 The `Metadata Store` and `Data Store` should be queried when endpoints for fetching them is triggered.
