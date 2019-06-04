@@ -20,6 +20,9 @@ class Config:
                 print(exc)
                 self.config = dict()
 
+    def cfg_db(self, key, default=None):
+        return self.cfg('database', {}).get(key, default)
+
     def cfg_broker(self, key, default=None):
         return self.cfg('msg_broker', {}).get(key, default)
 

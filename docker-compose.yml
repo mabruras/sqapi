@@ -93,8 +93,8 @@ services:
     restart: unless-stopped
     deploy:
       replicas: 1
-    # ports:
-    # - '5432:5432'
+    ports:
+    - '5432:5432'
     user: "postgres:postgres"
 
     healthcheck:

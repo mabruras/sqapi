@@ -7,6 +7,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from core.processor import Processor
+from db import postgres
 from listeners import rabbitmq
 from util.cfg_util import Config
 
@@ -15,8 +16,8 @@ CONFIG_DIR = '{}{}conf'.format(PROJECT_DIR, os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
 
 
-def start_subscription():
-    processor = Processor(config)
+def start_loader():
+    processor = Processor(config, database)
     listener = detect_listener()
 
     # Setup sqAPI general exchange listener
@@ -32,6 +33,24 @@ def start_subscription():
         target=listener.listen_queue,
         args=[processor.process_message]
     ).start()
+
+
+def detect_database():
+    db_type = config.cfg_db('type', 'postgres')
+
+    if not db_type:
+        # Default database is PostgreSQL
+        print('Using default database')
+        clazz = postgres.Postgres
+    elif db_type.lower() == 'postgres':
+        print('PostgreSQL detected as database type')
+        clazz = postgres.Postgres
+    else:
+        print('{} is not a supported database type'.format(type))
+        clazz = None
+        exit(1)
+
+    return clazz(config.cfg('database', {}))
 
 
 def detect_listener():
@@ -58,6 +77,8 @@ def start_api():
     CORS(app)
     app.url_map.strict_slashes = False
     app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
+    app.config['database'] = database
+    app.config['cfg'] = config
 
     register_endpoints(app)
 
@@ -73,10 +94,13 @@ def register_endpoints(app):
 if __name__ == '__main__':
     config = Config(CONFIG_FILE)
 
+    database = detect_database()
+    database.initialize_database()
+
     if len(sys.argv) > 1 and sys.argv[1] == 'loader':
-        start_subscription()
+        start_loader()
     elif len(sys.argv) > 1 and sys.argv[1] == 'api':
         start_api()
     else:
-        start_subscription()
+        start_loader()
         start_api()

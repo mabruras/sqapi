@@ -10,10 +10,12 @@ MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 
 class Processor:
-    def __init__(self, config):
+    def __init__(self, config, database):
         self.config = config
         self.msg_fields = config.cfg_broker('message_fields', MSG_FIELDS)
         self.mime_types = config.cfg_broker('supported_mime', MIME_TYPES)
+
+        self.db = database
 
     def process_message(self, ch, method, properties, body):
         print('Received channel: {}'.format(ch))
