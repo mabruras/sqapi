@@ -2,6 +2,7 @@
 import time
 
 import pika
+from pika.exceptions import StreamLostError
 
 
 class RabbitMQ:
@@ -48,8 +49,16 @@ class RabbitMQ:
         channel.queue_declare(queue=self.routing_key)
         channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=callback)
 
-        print('Starting to consume from queue: {}'.format(self.routing_key))
-        channel.start_consuming()
+        while True:
+            try:
+                print('Starting to consume from queue: {}'.format(self.routing_key))
+                channel.start_consuming()
+            except StreamLostError as e:
+                print('Lost connection to broker: {}'.format(str(e)))
+                time.sleep(1)
+            except (InterruptedError, KeyboardInterrupt) as e:
+                print('Interrupted, exiting consumer: {}'.format(str(e)))
+                break
         print('Finished consuming from queue: {}'.format(self.routing_key))
 
     def listen_exchange(self, callback):
@@ -65,6 +74,14 @@ class RabbitMQ:
         channel.queue_bind(exchange=self.exchange_name, queue=queue_name)
         channel.basic_consume(queue=queue_name, auto_ack=True, on_message_callback=callback)
 
-        print('Starting to consume from exchange: {}'.format(self.exchange_name))
-        channel.start_consuming()
+        while True:
+            try:
+                print('Starting to consume from exchange: {}'.format(self.exchange_name))
+                channel.start_consuming()
+            except StreamLostError as e:
+                print('Lost connection to broker: {}'.format(str(e)))
+                time.sleep(1)
+            except (InterruptedError, KeyboardInterrupt) as e:
+                print('Interrupted, exiting consumer: {}'.format(str(e)))
+                break
         print('Finished consuming from exchange: {}'.format(self.exchange_name))
