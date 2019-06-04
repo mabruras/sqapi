@@ -4,5 +4,8 @@ CREATE TABLE IF NOT EXISTS messages (
     meta_location TEXT,
     data_location TEXT,
     data_type TEXT,
-    status TEXT
+    status TEXT,
+    info TEXT,
+    created_at TIMESTAMPTZ DEFAULT Now(),
+    updated_at TIMESTAMPTZ DEFAULT Now()
 );

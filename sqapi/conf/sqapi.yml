@@ -28,7 +28,8 @@ data_store:
 
 database:
   type: 'postgres'
-  init_script: './db/pg_script/init.sql'
+  scripts:
+    init: './db/pg_script/init.sql'
   connection:
     name: 'postgres'
     port: '5432'
