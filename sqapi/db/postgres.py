@@ -4,10 +4,10 @@ import time
 
 import psycopg2
 
-CREATE_MESSAGES_SCRIPT = './db/pg_script/create_messages.sql'
-INSERT_MESSAGE_SCRIPT = './db/pg_script/insert_message.sql'
-SELECT_MESSAGE_SCRIPT = './db/pg_script/select_message.sql'
-UPDATE_MESSAGE_SCRIPT = './db/pg_script/update_message.sql'
+CREATE_MESSAGES_SCRIPT = './db/pg_script/message/create_messages.sql'
+INSERT_MESSAGE_SCRIPT = './db/pg_script/message/insert_message.sql'
+SELECT_MESSAGE_SCRIPT = './db/pg_script/message/select_message.sql'
+UPDATE_MESSAGE_SCRIPT = './db/pg_script/message/update_message.sql'
 
 DB_TYPE = 'postgres'
 
