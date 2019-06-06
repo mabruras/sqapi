@@ -8,7 +8,7 @@ def fetch_data(config, message):
         raise AttributeError('Could not find "data_location" in message')
 
     # TODO: More generic selection of metadata store?
-    data_store = config.cfg_data('type', 'disk')
+    data_store = config.data_store.get('type', 'disk')
     if not data_store:
         print('Using default data store: disk')
         disk_loc = fetch_data_to_disk(loc)

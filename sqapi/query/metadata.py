@@ -35,8 +35,8 @@ def fetch_metadata(config, message):
 
 
 def fetch_meta_from_redis(clazz, config, reference):
-    host = config.cfg_meta('host', 'localhost')
-    port = config.cfg_meta('port', 6379)
+    host = config.meta_store.get('host', 'localhost')
+    port = config.meta_store.get('port', 6379)
     r = clazz(host=host, port=port)
 
     return r.get(reference)

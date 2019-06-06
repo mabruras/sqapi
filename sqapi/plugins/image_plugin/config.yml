@@ -1,0 +1,22 @@
+msg_broker:
+  supported_mime:
+  - 'image/jpeg'
+  - 'image/png'
+  - 'image/gif'
+
+data_store:
+  type: 'disk'
+
+database:
+  type: 'postgres'
+  init: 'scripts/init.sql'
+  connection:
+    name: 'postgres'
+    port: '5432'
+    user: 'postgres'
+    host: 'db'
+    password: 'postgres'
+    timeout: 2
+
+api:
+  blueprints_directory: 'blueprints'

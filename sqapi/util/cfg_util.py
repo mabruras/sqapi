@@ -6,31 +6,31 @@ CONFIG = dict()
 
 class Config:
     def __init__(self, config_file):
-        self.config = dict()
-        self.load_config(config_file)
+        cfg = load_config(config_file)
 
-    def load_config(self, config_file):
-        print('Loading configuration: {}'.format(config_file))
-        with open(config_file, 'r') as stream:
-            try:
-                global CONFIG
-                self.config = yaml.safe_load(stream) or dict()
-            except yaml.YAMLError as exc:
-                print('Failed parsing yaml config - continues with default configuration')
-                print(exc)
-                self.config = dict()
+        self.database = cfg.get('database', {})
+        self.msg_broker = cfg.get('msg_broker', {})
+        self.meta_store = cfg.get('meta_store', {})
+        self.data_store = cfg.get('data_store', {})
+        self.api = cfg.get('api', {})
 
-    def cfg_db(self, key, default=None):
-        return self.cfg('database', {}).get(key, default)
+    def merge_config(self, override):
+        self.database.update(override.database)
+        self.msg_broker.update(override.msg_broker)
+        self.meta_store.update(override.meta_store)
+        self.data_store.update(override.data_store)
+        self.api.update(override.api)
 
-    def cfg_broker(self, key, default=None):
-        return self.cfg('msg_broker', {}).get(key, default)
 
-    def cfg_meta(self, key, default=None):
-        return self.cfg('meta_store', {}).get(key, default)
+def load_config(config_file):
+    print('Loading configuration: {}'.format(config_file))
+    with open(config_file, 'r') as stream:
+        try:
+            global CONFIG
+            config = yaml.safe_load(stream) or dict()
+        except yaml.YAMLError as exc:
+            print('Failed parsing yaml config - continues with default configuration')
+            print(exc)
+            config = dict()
 
-    def cfg_data(self, key, default=None):
-        return self.cfg('data_store', {}).get(key, default)
-
-    def cfg(self, key, default):
-        return self.config.get(key, default)
+    return config

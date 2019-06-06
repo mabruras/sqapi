@@ -4,10 +4,10 @@ import time
 
 import psycopg2
 
-CREATE_MESSAGES_SCRIPT = './db/pg_script/message/create_messages.sql'
-INSERT_MESSAGE_SCRIPT = './db/pg_script/message/insert_message.sql'
-SELECT_MESSAGE_SCRIPT = './db/pg_script/message/select_message.sql'
-UPDATE_MESSAGE_SCRIPT = './db/pg_script/message/update_message.sql'
+CREATE_MESSAGES_SCRIPT = './db/pg_script/create_messages.sql'
+INSERT_MESSAGE_SCRIPT = './db/pg_script/insert_message.sql'
+SELECT_MESSAGE_SCRIPT = './db/pg_script/select_message.sql'
+UPDATE_MESSAGE_SCRIPT = './db/pg_script/update_message.sql'
 
 DB_TYPE = 'postgres'
 
@@ -17,7 +17,7 @@ class Postgres:
     def __init__(self, config):
         self.cfg = config
         self.cfg_con = config.get('connection')
-        self.cfg_scripts = config.get('scripts', dict())
+        self.init_script = config.get('init', None)
         db_type = config.get('type', 'UNKNOWN')
 
         if not db_type == DB_TYPE:
@@ -58,16 +58,14 @@ class Postgres:
             )
             raise ConnectionError('{}: {}'.format(err, str(e)))
 
-    def initialize_database(self, script: str = None):
-
+    def initialize_database(self):
         try:
             print('Creating messages table if it does not exist')
             out = self.execute_script(CREATE_MESSAGES_SCRIPT)
             print('Result of creating messages table: {}'.format(out))
 
-            init_script = script if script else self.cfg_scripts.get('init')
             print('Executes custom initialization script')
-            out = self.execute_script(init_script)
+            out = self.execute_script(self.init_script)
             print('Result of custom database initialization: {}'.format(out))
         except Exception as e:
             err = 'Could not execute database initialization: {}'.format(str(e))

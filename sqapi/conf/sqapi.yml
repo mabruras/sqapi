@@ -2,38 +2,22 @@ msg_broker:
   type: 'rabbitmq'
   host: 'mq'
   port: 5672
+
   routing_key: 'q_sqapi'
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
+  process_delay: 5
+
   message_fields:
   - 'data_type'
   - 'data_location'
   - 'meta_location'
   - 'uuid_ref'
-  supported_mime:
-  - 'image/jpeg'
-  - 'image/png'
-  - 'image/gif'
-
 
 meta_store:
   type: 'redis'
   host: 'redis'
   port: 6379
 
-
 data_store:
   type: 'disk'
-
-
-database:
-  type: 'postgres'
-  scripts:
-    init: './db/pg_script/init.sql'
-  connection:
-    name: 'postgres'
-    port: '5432'
-    user: 'postgres'
-    host: 'db'
-    password: 'postgres'
-    timeout: 2
