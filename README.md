@@ -1,10 +1,10 @@
 # sqAPI System
 
 ## About
-*sqAPI System* is a complete system for receive files and being able to
-make query towards aggregated data of these files.
+*sqAPI System* is a complete system for receiving files and being able to
+make query towards data- and metadata stores, to make aggregated data of these files.
 
-The system will receive files, store them in a object database (or disk in this _PoC_),
+The system will receive files, store them in an object database,
 the metadata of the files are stored in a key-value store,
 and a notification is published on the message broker.
 
@@ -19,12 +19,12 @@ they will through the web ui access all necessary *sqAPI*s exposed APIs.
 
 
 # Components
-This PoC consist of a set of components,
+This project consist of a set of components,
 all intended to populate a central storage unit,
 then execute specific logic on incoming data and expose the new data set to the users.
 
-The components are represented by specific technologies in this PoC,
-but should be possible to change with other similar alternatives.
+The components are represented by specific technologies in this project,
+but it is possible to change these with other similar alternatives.
 
 | Component | Technology | Description |
 | --------- | ---------- | ----------- |
@@ -32,10 +32,8 @@ but should be possible to change with other similar alternatives.
 | `Data Store` | `Xubuntu file system` | Keeping original incoming files |
 | `Metadata Store` | `Redis` | Holding metadata with ID reference to `Data Store` location |
 | `Message Broker` | `RabbitMQ` | Publishes messages to each active `sqAPI`-instance |
-| `Graphical User Interface` | `ReactJS` | Representation of aggregated data within one or multiple `sqAPI`'s |
 | `sqAPI` | `Python` | System for execute queries on subscribed data, based on specific subset, to make it available |
 | `sqAPI Storage` | `PostgreSQL` | Local storage for each `sqAPI`, keeps record of all messages and aggregated data |
-| `-` | `-` | `-` |
 
 
 ## Data Loader
@@ -58,7 +56,7 @@ When uploading a file into NiFi, the *Main*-flow is executed.
 After *Main*, the flow is forked into three:
 *Store File*, *Store Metadata*, *Publish Message*
 
-![NiFi Flow](./nifi-flow.png)
+![NiFi Flow](resources/nifi-flow.png)
 
 
 ##### Main
@@ -96,41 +94,8 @@ After *Main*, the flow is forked into three:
 
 
 ## Data Store
-For data store in this PoC, only local disk are used as storage for loaded files.
+Local disk is used as storage for the loaded files.
 Next step would probably be to use AWS S3 as object storage.
-
-
-## Metadata Store
-Redis is used for Metadata Store, to keep metadata about the loaded files.
-
-### PoC
-Within the [Redis directory](./redis) it exists two scripts,
-one for writing to Redis, and one to read out based on input arguments.
-
-### Preparation
-#### Prerequisites
-* Using _redis_ python client for communication with the Redis instance
-  * `pip3 install redis --upgrade`
-
-
-## Message Broker
-RabbitMQ is used as message broker, to publish messages.
-* Receive messages from `Data Loader`
-* Publish messages to all subscribed `sqAPI`-instances
-
-### PoC
-Within the [RabbitMQ directory](./rabbitmq) there is created four files:
-* [queue_producer](rabbitmq/queue_producer.py): publish single messages
-* [queue_consumer](rabbitmq/queue_consumer.py): fetch messages from single queue
-* [exchange_producer](rabbitmq/exchange_producer.py): publish messages to all queues
-* [exchange_consumer](rabbitmq/exchange_consumer.py): fetch messages from custom queue
-
-These files are only used as a PoC for this system.
-
-### Preparation
-#### Prerequisites
-* Using _Pika_ python client for AMQP protocol
-  * `pip3 install pika --upgrade`
 
 
 ## Graphical User Interface
@@ -139,8 +104,12 @@ Planned GUI will be developed in ReactJS.
 
 
 ## sqAPI
-_Subscription, Query, API_ is a component intended to subscribe to the `Message Broker`,
-query data from `Data Store` and metadata from `Metadata Store`.
+_Subscription, Query, API_ is a plugin-based component intended to:
+* Subscribe to the `Message Broker`
+* Query data from `Data Store`
+* Query metadata from `Metadata Store`
+* Aggregate and store custom data set in `sqAPI Storage`
+* Serve aggregated data and metadata through an API
 
 New data from the queue will trigger a query and aggregation of the newly incoming data.
 All aggregated data will be stored in a *sqAPI* specific storage solution (`sqAPI Storage`),
@@ -150,30 +119,10 @@ When a user wants to access the aggregated data, they will connect to the API di
 and the *sqAPI* will perform necessary searches in its local database,
 and possibly queries towards `Data Store` and `Metadata Store` for fetching necessary supplements to return to the user.
 
-### PoC
-The [sqAPI Proof of Concept](./sqapi) will receive data from `Message Broker`, store the following as aggregated data.
-* Reference for `Data Store`
-* Reference for `Metadata Store`
-* Generated _timestamp_
-* _file size_ generated of queried data from `Data Store`
-* _filename_ fetched from `Metadata Store`
-* _mime type_ in `sqAPI Storage`
-The aggregated data will be made available for search on timestamp, file size, filename and mime type.
-
-The `Metadata Store` and `Data Store` should be queried when endpoints for fetching them is triggered.
-
-#### Stages
-* Register subscription to RabbitMQ
-* Query for metadata and file, on message received
-* Aggregate data
-* Store aggregated data in local storage (PostgreSQL)
-* Perform necessary searches in local database
-* Fetch data/metadata based on local results
-* Return data/metadata to used based on request
-
 
 ## sqAPI Storage
-PostgreSQL is used as sqAPI Storage, to store all data aggregations locally, from queried data.
+The sqAPI storage is a chosen storage solution, based on the configuration.
+Each sqAPI plugin will have its own database connection, dependent on its custom data set structure.
 
 ### Preparation
 Independent of storage type, there should be a setup function made available,
@@ -234,3 +183,34 @@ python3 sqapi/start.py loader
 ```bash
 python3 sqapi/start.py api
 ```
+
+# Contribution
+There are multiple ways to contribute to *sqAPI*:
+* Adding plugins
+* Increased support
+* Core logic
+
+## Plugins
+sqAPI is based of having all of its business logic implemented in plugins.
+
+To contribute with a new plugin, please see
+[the plugin section](./sqapi/plugins/README.md)
+for information regarding structure, requirements and implementation details.
+
+## Support
+*sqAPI* supports a given set of external systems.
+If you have a system not supported, feel free to report an issue or create a pull request.
+
+#### External connections 
+* Database
+* Data Store
+* Metadata Store
+* Message Broker
+
+Each of these sections should support as many external systems as possible.
+The more, the merrier!
+
+## Core
+The core functionality should always be improved,
+so if you find a bug, an issue or some improvement potential -
+feel free to commit a fix or a feature. 

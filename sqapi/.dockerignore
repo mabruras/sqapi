@@ -1,3 +1,5 @@
+resources/
+
 *.log
 *.iml
 __pycache__/

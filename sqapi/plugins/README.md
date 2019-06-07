@@ -26,29 +26,57 @@ sqapi/plugins/                 # Parent Plugins collection directory
 ```
 
 #### Blueprints
-Within the blueprints directory,
-there should be created a file for each area of concern.
-If you want to keep logic for multiple data,
-you'll split them into two separate blueprints. 
+Blueprints are python modules containing a set of endpoints,
+where logic for fetching the plugins custom data set gets implemented.
+
+Within the blueprints directory, each API resource should exist in separate modules.
 
 Eg.:
-* `./blueprints/images.py` - (Serves `/images/*`)
-* `./blueprints/thumbnails.py` - (Serves `/thumbnails/*`)
+* `./blueprints/images.py` - (Serves all `/images/*` endpoints)
+* `./blueprints/thumbnails.py` - (Serves all `/thumbnails/*` endpoints)
 
-Each of the blueprints will be automatically picked up, and referenced to by `bp`.
+Each of the blueprints will be automatically picked up, and referenced to by a `bp`-variable.
 sqAPI will not register the blueprint if the variable name is incorrect.
 
-Remember `__init__.py`, to make the blueprints available for import to sqAPI.
+This means that every blueprint module must include the `bp`-variable, preferably like follows.
+
+_Example with `./blueprints/thumbnails.py`_:
+```python
+from flask import Blueprint
+bp = Blueprint(__name__, __name__, url_prefix='/thumbnails')
+```
+
+##### Extra
+Within the blueprints, there will be some extra object available as default.
+These objects are made available in each blueprint when starting up sqAPI.
+
+###### Config
+To get access to the configuration object for the plugin, just call for `flask.current_app.config.get('plugin_name')`.
+
+_Example with `./plugins/image_plugin`_:
+```python
+from flask import current_app
+cfg = current_app.config['image_plugin']
+```
+
+###### Database
+The database object is used equally as with the sqAPI loader, by calling for `flask.current_app.database.get('plugin_name')`.
+
+_Example with `./plugins/image_plugin`_:
+```python
+from flask import current_app
+db = current_app.database['image_plugin']
+```
 
 
 #### Configuration
-The configuration file: `config.yml`, it's name is not changeable.
+The configuration file: `config.yml`, this name is not changeable.
 
 The plugin-specific configuration is used to override default
 configuration from [sqAPI-config](../conf/sqapi.yml).
 
-The configuration can be extended to what ever
-you want to use within the business logic.
+The configuration can be extended with what ever fields
+you want to use within the business logic (both `execute` and blueprints).
 If a field already exists in the default configuration,
 it will be overwritten for each of the plugins overriding it.
 
@@ -60,6 +88,8 @@ as well as supported mime types.
 All business logic is defined within the `__init__.py`, for the specific plugin.
 When a plugin is triggered, sqAPI looks for a definition of `execute`.
 If the `execute` function is not available, it will not import the module.
+
+Within the `execute` function, you configure, structure and store the data in any way you want.
 
 ##### Minimum setup
 The only required setup, is that the following method is defined, within `__init__.py`.
@@ -121,7 +151,7 @@ def initialize_database(self): pass
 
 The execution is based on a script and a set of kwargs.
 The script or query is intended to execute your custom logic for storing a custom data set,
-while the kwargs are should replace defined variables within the script/query.
+while the kwargs should replace placeholder variables within the script/query.
 
 This depends on the database module implementation,
 and what kind of system is running as database.
@@ -138,7 +168,7 @@ and storage solution.
 
 ###### Data
 Data object fetched from the `data store`, in bytes.
-Access to this data object will in most cases be through use of a file handler,
+Access to this data object will in most cases be through the use of a file handler,
 and will typical have default IO methods available.
 
 #### Database Scripts

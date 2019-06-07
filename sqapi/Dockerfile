@@ -1,7 +1,10 @@
 FROM            python:3.7
 
 ENV             WRK_DIR /opt/app
+WORKDIR         ${WRK_DIR}
+EXPOSE          5000
 
+RUN             useradd -ms /bin/bash sqapi
 RUN             apt-get update && \
                   apt-get install -y --fix-missing \
                   python3-numpy \
@@ -12,19 +15,10 @@ RUN             apt-get clean && \
                   rm -rf /tmp/* /var/tmp/*
 
                 # PIP Requirements
-RUN             pip3 install \
-                  flask-cors \
-                  psycopg2 \
-                  requests \
-                  markdown \
-                  pyyaml \
-                  redis \
-                  Flask \
-                  pika
+COPY            requirements.txt        ${WRK_DIR}/
+RUN             pip3 install -r         ${WRK_DIR}/requirements.txt
 
-EXPOSE          5000
-WORKDIR         ${WRK_DIR}
-
-COPY            ./          ${WRK_DIR}
+COPY            ./                      ${WRK_DIR}/
+RUN             chown -R sqapi:sqapi    ${WRK_DIR}
 
 CMD             [ "python", "app.py" ]

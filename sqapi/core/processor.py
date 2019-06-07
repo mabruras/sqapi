@@ -31,11 +31,9 @@ class Processor:
         custom_config = cfg_util.Config(config_file)
         self.config.merge_config(custom_config)
 
-        self.execute = plugin.execute  # Actual business logic to create a data structure
-
-        # TODO: Handle import blueprints
-        # Maybe only: plugin.blueprints will be enough (if defined in __init__.py)
-        self.blueprints = plugin_util.load_blueprints(plugin_name, self.config.api.get('blueprints_directory', None))
+        self.execute = plugin.execute
+        blueprints_dir = self.config.api.get('blueprints_directory', None)
+        self.blueprints = plugin_util.load_blueprints(plugin_name, blueprints_dir)
 
         self.config.database['init'] = self.validate_db_init_script(self.config.database)
         self.database = detector.detect_database(self.config.database)

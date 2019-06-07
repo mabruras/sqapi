@@ -5,7 +5,7 @@ from flask_cors import cross_origin
 
 from api import responding as response
 
-bp = Blueprint(__name__, __name__, url_prefix='/thumb')
+bp = Blueprint(__name__, __name__, url_prefix='/thumbnails')
 
 
 @bp.route('/', methods=['GET'])

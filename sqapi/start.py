@@ -26,7 +26,6 @@ class SqapiApplication:
         self.processors = []
         for plugin_name, plugin in detector.detect_plugins('plugins').items():
             processor = Processor(self.config, plugin_name, plugin)
-            # TODO: prepare processor
             self.processors.append(processor)
 
     def start(self):
@@ -44,10 +43,6 @@ class SqapiApplication:
         self.app.url_map.strict_slashes = False
         self.app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
 
-        # TODO: how to refer to DB in blueprint..?
-        # app.config['database'] = database
-        self.app.config['cfg'] = self.config
-
         self.register_blueprints()
         self.app.run(host='0.0.0.0')
 
@@ -55,9 +50,15 @@ class SqapiApplication:
         self.app.register_blueprint(edge.bp)
 
         for p in self.processors:
+            self.app.config[p.name] = p.config
+            self.app.database = dict({p.name: p.database})
+
             for module in p.blueprints:
-                print('Registering Blueprint: {}'.format(module.bp.name))
-                self.app.register_blueprint(module.bp)
+                try:
+                    print('Registering Blueprint: {}'.format(module.bp.name))
+                    self.app.register_blueprint(module.bp)
+                except Exception as e:
+                    print('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
 
 
 if __name__ == '__main__':
