@@ -20,3 +20,6 @@ database:
 
 api:
   blueprints_directory: 'blueprints'
+
+custom:
+  thumb_dir: 'files/thumbnails'
