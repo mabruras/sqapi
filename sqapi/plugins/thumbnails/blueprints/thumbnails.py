@@ -15,4 +15,4 @@ def index(img_id):
 
 
 def get_config(key):
-    return current_app.config.get('image_plugin').custom.get(key, {})
+    return current_app.config.get('thumbnails').custom.get(key, {})
