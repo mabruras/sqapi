@@ -17,7 +17,7 @@ def detect_plugins(directory):
 
     print('Importing {} plugins'.format(len(plugin_list)))
     for plugin_name in plugin_list:
-        plugin = importlib.import_module(plugin_name, __package__)
+        plugin = importlib.import_module(plugin_name)
         plugins.update({plugin.__name__.split('.')[1]: plugin})
 
     return plugins

@@ -3,21 +3,25 @@ import importlib
 import os
 
 
-def load_blueprints(bp_dir):
+def load_blueprints(plugin_name, bp_dir):
     if not bp_dir:
         print('No blueprints directory was defined, no API exposed')
         return []
 
-    bp_dir = verify_directory(bp_dir)
+    # detect_plugins(bp_dir)
+    full_path = os.path.join('.'.join(['plugins', plugin_name, bp_dir]))
+
+    bp_dir = verify_directory(full_path.replace('.', os.sep))
     if not bp_dir:
         print('Blueprints directory was not an existing directory, no API exposed')
         return []
 
-    # detect_plugins(bp_dir)
-    plugin = importlib.import_module(plugin_name, __package__)
-    to_imp = {plugin_name.__name__.split('.')[2]: plugin}
+    blueprints = [
+        importlib.import_module('.'.join([full_path, p.strip('.py')]))
+        for p in os.listdir(bp_dir) if not p.startswith('__')
+    ]
 
-    return [script_dir]
+    return blueprints
 
 
 def verify_directory(directory):

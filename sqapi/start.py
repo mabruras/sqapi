@@ -43,6 +43,7 @@ class SqapiApplication:
         CORS(self.app)
         self.app.url_map.strict_slashes = False
         self.app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
+
         # TODO: how to refer to DB in blueprint..?
         # app.config['database'] = database
         self.app.config['cfg'] = self.config
@@ -54,8 +55,9 @@ class SqapiApplication:
         self.app.register_blueprint(edge.bp)
 
         for p in self.processors:
-            for bp in p.blueprints:
-                self.app.register_blueprint(bp)
+            for module in p.blueprints:
+                print('Registering Blueprint: {}'.format(module.bp.name))
+                self.app.register_blueprint(module.bp)
 
 
 if __name__ == '__main__':

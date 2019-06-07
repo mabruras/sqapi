@@ -7,7 +7,7 @@ import time
 
 from query import data as d_query
 from query import metadata as m_query
-from util import detector, cfg_util
+from util import detector, cfg_util, plugin_util
 
 STATUS_VALIDATING = 'VALIDATING'
 STATUS_QUERYING = 'QUERYING'
@@ -35,7 +35,7 @@ class Processor:
 
         # TODO: Handle import blueprints
         # Maybe only: plugin.blueprints will be enough (if defined in __init__.py)
-        # self.blueprints = plugin_util.load_blueprints(self.config.api.get('blueprints_directory', None))
+        self.blueprints = plugin_util.load_blueprints(plugin_name, self.config.api.get('blueprints_directory', None))
 
         self.config.database['init'] = self.validate_db_init_script(self.config.database)
         self.database = detector.detect_database(self.config.database)
