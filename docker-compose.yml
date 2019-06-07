@@ -15,6 +15,7 @@ services:
 
     volumes:
     - nifi-io:/io
+    - sqapi-files:/opt/app/files
     depends_on:
     - mq
     - redis
@@ -37,6 +38,7 @@ services:
 
     volumes:
     - nifi-io:/io
+    - sqapi-files:/opt/app/files
     depends_on:
     - redis
     - db
@@ -114,3 +116,4 @@ services:
 
 volumes:
   nifi-io:
+  sqapi-files:
