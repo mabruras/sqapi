@@ -1,0 +1,13 @@
+database:
+  type: 'postgres'
+  init: 'scripts/init.sql'
+  connection:
+    name: 'postgres'
+    port: '5432'
+    user: 'postgres'
+    host: 'db'
+    password: 'postgres'
+    timeout: 2
+
+api:
+  blueprints_directory: 'blueprints'
