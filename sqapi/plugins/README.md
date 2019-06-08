@@ -286,7 +286,8 @@ msg_broker:
 ```
 
 ##### Plugin Specific
-To overwrite and/or append:
+To overwrite and/or append, add specific mime types to support.
+To accept all mime-types sent, do *not* define any fields.
 ```yaml
 msg_broker:
   supported_mime:

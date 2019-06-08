@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import threading
 import time
 
@@ -108,7 +109,7 @@ class Processor:
         self.validate_fields(message)
 
         msg_type = message.get('data_type', 'UNKNOWN')
-        if msg_type not in self.mime_types:
+        if self.mime_types and msg_type not in self.mime_types:
             raise NotImplementedError('Mime-type "{}" is not supported by this sqAPI'.format(msg_type))
 
         return message
