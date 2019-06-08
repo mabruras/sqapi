@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 from flask import Response
 
@@ -39,7 +40,15 @@ def _create_response(data, code):
     print(f'Final response status code: {code}')
     print(f'Final response data: {data}')
     return Response(
-        response=json.dumps(data),
+        response=json.dumps(data, cls=DateEncoder),
         mimetype='application/json',
         status=code,
     )
+
+
+class DateEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, date):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)

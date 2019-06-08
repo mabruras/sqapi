@@ -4,6 +4,7 @@ import time
 import uuid
 
 import psycopg2
+import psycopg2.extras
 
 CREATE_MESSAGES_SCRIPT = './db/pg_script/create_messages.sql'
 INSERT_MESSAGE_SCRIPT = './db/pg_script/insert_message.sql'
@@ -101,11 +102,11 @@ class Postgres:
         try:
             with self.get_connection() as con:
                 try:
-                    with con.cursor() as cur:
+                    with con.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                         cur.execute(query, kwargs)
 
                         try:
-                            return cur.fetchall()
+                            return [dict(r) for r in cur.fetchall()]
                         except:
                             return None
                 except Exception as e:
