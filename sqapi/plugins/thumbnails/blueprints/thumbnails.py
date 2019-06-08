@@ -10,10 +10,10 @@ bp = Blueprint(__name__, __name__, url_prefix='/thumbnails')
 @cross_origin()
 def index(uuid_ref):
     # TODO: Validate uuid_ref against thumbnails db to fetch thumb_location
-    thumb_dir = get_config('thumb_dir')
+    thumb_dir = get_config().custom.get('thumb_dir', {})
 
     return send_from_directory(directory=thumb_dir, filename=uuid_ref)
 
 
-def get_config(key):
-    return current_app.config.get('thumbnails').custom.get(key, {})
+def get_config():
+    return current_app.config.get('thumbnails')
