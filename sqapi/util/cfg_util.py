@@ -14,6 +14,7 @@ class Config:
         self.data_store = cfg.get('data_store', {})
         self.api = cfg.get('api', {})
         self.custom = cfg.get('custom', {})
+        self.plugin = cfg.get('plugin', {})
 
     def merge_config(self, override):
         self.database.update(override.database)
@@ -22,6 +23,7 @@ class Config:
         self.data_store.update(override.data_store)
         self.api.update(override.api)
         self.custom.update(override.custom)
+        self.plugin.update(override.plugin)
 
 
 def load_config(config_file):

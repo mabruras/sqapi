@@ -2,7 +2,6 @@
 
 import json
 import os
-import re
 import threading
 import time
 
@@ -23,11 +22,13 @@ MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 class Processor:
     def __init__(self, config, plugin_name, plugin):
+        self.config = config
+
         self.plugin = plugin
         self.name = plugin_name
         self.plugin_dir = os.path.dirname(plugin.__file__)
+        self.config.plugin = {'name': self.name, 'directory': self.plugin_dir}
 
-        self.config = config
         config_file = os.path.join(self.plugin_dir, 'config.yml')
         custom_config = cfg_util.Config(config_file)
         self.config.merge_config(custom_config)

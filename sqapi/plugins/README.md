@@ -247,6 +247,7 @@ meta_store:
 data_store:
 database:
 api:
+plugin:
 custom:
 ``` 
 
@@ -258,6 +259,21 @@ and should be defined within each single plugin.
 
 It is important to note that you are able to overwrite configuration in each plugin.
 So if you need to append information to a topic, you do so by defining it in the plugin config.
+
+#### Plugin specific
+In addition to the default configuration,
+the sqAPI will append information about the plugin within the configuration.
+This information is possible to overwrite,
+but is not recommended since it's system generated.
+
+##### Example
+```yaml
+plugin:
+  name: 'duplicates'
+  directory: ''
+
+```
+
 
 #### Message Broker
 The message broker, usually defined in [sqAPI configuration](../conf/sqapi.yml),
