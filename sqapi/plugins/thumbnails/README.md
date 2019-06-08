@@ -1,10 +1,12 @@
-# Image Plugin
+# Thumbnails
 
 ## Intention
-This image plugin is intended to keep information about the images
-received by the system.
+This plugin is intended to create, store and serve thumbnails, for each incoming image file.
 
-By extracting EXIF data and serve thumbnails of incoming images.
+
+## Accepts
+Image types; `image/jpeg`, `image/png`, `image/gif`
+
 
 ## Storage
 ### Disk
@@ -19,4 +21,4 @@ Read the [init.sql](./scripts/init.sql) to see the stored data structure.
 
 ## Usage
 ### Endpoints
-TODO
+`/thumbnails/<uuid_ref>`: returns a thumbnail base on uuid_ref, it it exists

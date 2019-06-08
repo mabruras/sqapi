@@ -12,9 +12,9 @@ def execute(config, database, message: dict, metadata: dict, data: bytes):
     content_size = data.seek(0, 2)
     data.seek(0, 0)
 
-    create_thumbnail(config, message, data)
+    loc = create_thumbnail(config, message, data)
 
-    save_to_db(content_size, database, message, metadata)
+    save_to_db(content_size, database, message, metadata, loc)
 
 
 def create_thumbnail(config, message, data):
@@ -27,13 +27,15 @@ def create_thumbnail(config, message, data):
     try:
         im = Image.open(data)
         im.thumbnail((width, height))
-        im.save('{}'.format(os.sep).join([out, message.get('uuid_ref')]), im.format)
+        thumb_location = '{}'.format(os.sep).join([out, message.get('uuid_ref')])
+        im.save(thumb_location, im.format)
+        return thumb_location
     except IOError as e:
         err = 'Cannot create thumbnail for {}: {}'.format(data, str(e))
         raise Exception(err)
 
 
-def save_to_db(content_size, database, message, metadata):
+def save_to_db(content_size, database, message, metadata, location):
     # This defines the kwargs that are sent in as parameters to the SQL script
     output = {
         'uuid_ref': message.get('uuid_ref', None),
@@ -41,6 +43,7 @@ def save_to_db(content_size, database, message, metadata):
         'meta_location': message.get('meta_location', None),
         'data_location': message.get('data_location', None),
         'mime_type': metadata.get('mime.type', None),
+        'thumb_location': location,
         'file_size': content_size,
     }
 

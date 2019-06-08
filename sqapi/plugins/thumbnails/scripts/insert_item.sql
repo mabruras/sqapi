@@ -1,10 +1,11 @@
 -- Inserting values into custom table
-INSERT INTO items (
+INSERT INTO thumbnails (
   uuid_ref,
   received_date,
   meta_location,
   data_location,
   mime_type,
+  thumb_location,
   file_size
 ) VALUES (
   %(uuid_ref)s,
@@ -12,5 +13,6 @@ INSERT INTO items (
   %(meta_location)s,
   %(data_location)s,
   %(mime_type)s,
+  %(thumb_location)s,
   %(file_size)s
 )
