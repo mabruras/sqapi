@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import os
 import time
+import uuid
 
 import psycopg2
 
@@ -116,7 +117,7 @@ class Postgres:
 
     def update_message(self, message: dict, status: str, info: str = None):
         print('Updating message if it exists')
-        message.update({'status': status, 'info': info})
+        message.update({'status': status, 'info': info, 'id': str(uuid.uuid4())})
         script = UPDATE_MESSAGE_SCRIPT if self.get_message(**message) else INSERT_MESSAGE_SCRIPT
 
         try:
