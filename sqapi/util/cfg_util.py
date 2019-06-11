@@ -8,22 +8,24 @@ class Config:
     def __init__(self, config_file):
         cfg = load_config(config_file)
 
+        self.plugin = cfg.get('plugin', {})
         self.database = cfg.get('database', {})
         self.msg_broker = cfg.get('msg_broker', {})
         self.meta_store = cfg.get('meta_store', {})
         self.data_store = cfg.get('data_store', {})
+        self.active_plugins = cfg.get('active_plugins', [])
         self.api = cfg.get('api', {})
         self.custom = cfg.get('custom', {})
-        self.plugin = cfg.get('plugin', {})
 
     def merge_config(self, override):
+        self.plugin.update(override.plugin)
         self.database.update(override.database)
         self.msg_broker.update(override.msg_broker)
         self.meta_store.update(override.meta_store)
         self.data_store.update(override.data_store)
+        self.active_plugins.extend(override.active_plugins)
         self.api.update(override.api)
         self.custom.update(override.custom)
-        self.plugin.update(override.plugin)
 
 
 def load_config(config_file):

@@ -15,7 +15,7 @@ def detect_plugins(directory):
                    if path.isdir(path.join(directory, d))
                    and not d.startswith('__')]
 
-    print('Importing {} plugins'.format(len(plugin_list)))
+    print('Found {} available plugins'.format(len(plugin_list)))
     for plugin_name in plugin_list:
         plugin = importlib.import_module(plugin_name)
         plugins.update({plugin.__name__.split('.')[1]: plugin})

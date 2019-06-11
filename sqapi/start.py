@@ -25,6 +25,10 @@ class SqapiApplication:
 
         self.processors = []
         for plugin_name, plugin in detector.detect_plugins('plugins').items():
+            if not self.active_plugin(plugin_name):
+                print('Plugin "{}" is not listed as active'.format(plugin_name))
+                continue
+            print('Registering a processor for plugin "{}"'.format(plugin_name))
             processor = Processor(self.config, plugin_name, plugin)
             self.processors.append(processor)
 
@@ -59,6 +63,11 @@ class SqapiApplication:
                     self.app.register_blueprint(module.bp)
                 except Exception as e:
                     print('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
+
+    def active_plugin(self, plugin_name):
+        active_plugins = self.config.active_plugins
+
+        return not active_plugins or plugin_name in active_plugins
 
 
 if __name__ == '__main__':
