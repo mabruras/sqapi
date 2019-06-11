@@ -9,9 +9,10 @@ Receiving a message will make the system fetch referred data and metadata,
 and execute all active plugins for custom data aggregation.
 The aggregated data will be stored in a local database, and on disk if necessary.
 
-Each *sqAPI* plugin has its own responsibility area, and will query data and metadata
+Each *sqAPI* plugin has its own area of responsibility, and will query data and metadata
 independent of each other. The data aggregated within the plugin, will be stored in
-the *sqAPI*s local data storage, which kind depends up on what data it's intended for.
+the *sqAPI*s local data storage.
+The storage type depends up on what data it's intended for.
 
 When a user wants to search or in other ways access the data,
 they will through all necessary *sqAPI*s exposed APIs.
@@ -95,7 +96,7 @@ feel free to commit a fix or a feature.
 
 
 ## Plugins
-sqAPI is based of having all of its business logic implemented in plugins.
+sqAPI is based on having all of its business logic implemented as plugins.
 
 To contribute with a new plugin, please see
 [the plugin section](./sqapi/plugins/README.md)

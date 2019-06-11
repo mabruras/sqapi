@@ -17,7 +17,7 @@ sqapi/plugins/                 # Parent Plugins collection directory
 └── plugin_name                # Plugin directory
     ├── blueprints             # Directory for keeping blueprints
     │   ├── endpoints.py       # Blueprints for specific endpoints
-    │   └── __init__.py        # 
+    │   └── __init__.py        #
     ├── config.yml             # Plugin Specific configuration - overwrites sqAPI configuration
     ├── __init__.py            # Execution definition : See more below "Business logic"
     ├── scripts                # Normal directory for keeping SQL scripts
@@ -101,7 +101,7 @@ def execute(config, database, message: dict, metadata: dict, data: bytes):
 
 ##### Example usage
 This example tests each of the input arguments.
- 
+
 ```python
 def execute(config, database, message: dict, metadata: dict, data: bytes):
 
@@ -117,10 +117,10 @@ def execute(config, database, message: dict, metadata: dict, data: bytes):
 
     # Metadata
     print('Metadata: {}'.format(metadata))
-    
+
     # Data
     filesize = data.seek(0, 2)
-    print('Filesize: {}'.format(filesize)) 
+    print('Filesize: {}'.format(filesize))
 ```
 
 ##### Arguments
@@ -242,14 +242,14 @@ so we always ensure custom logic for each usage.
 
 Typically the configuration have the following top-level topics:
 ```yaml
+plugin:
 msg_broker:
 meta_store:
 data_store:
 database:
 api:
-plugin:
 custom:
-``` 
+```
 
 Example setup could have a single message broker, metadata store and data store.
 These connection details will then be defined in the top configuration for sqAPI.
@@ -260,6 +260,19 @@ and should be defined within each single plugin.
 It is important to note that you are able to overwrite configuration in each plugin.
 So if you need to append information to a topic, you do so by defining it in the plugin config.
 
+##### Example usage
+When accessing a topic of configuration, you will call it directly on the Config object.
+Each topic is a dictionary, created from the yaml configuration file, added to the Config object.
+
+```python
+def execute(config, database, message: dict, metadata: dict, data: bytes):
+    # Access a topic
+    meta_store = config.meta_store  # Returns a dictionary of meta_store, defined in the configuration file
+    
+    # Safely access a field within the topic
+    meta_store_host = meta_store.get('host', 'localhost')  # Defaults to localhost if not found in configuration
+```
+
 #### Plugin specific
 In addition to the default configuration,
 the sqAPI will append information about the plugin within the configuration.
@@ -269,9 +282,8 @@ but is not recommended since it's system generated.
 ##### Example
 ```yaml
 plugin:
-  name: 'duplicates'
-  directory: ''
-
+  name: 'duplicates'                        # Values set by core processor
+  directory: '/opt/app/plugins/duplicates'  # Values set by core processor
 ```
 
 
