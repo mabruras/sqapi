@@ -16,6 +16,21 @@ the *sqAPI*s local data storage, which kind depends up on what data it's intende
 When a user wants to search or in other ways access the data,
 they will through all necessary *sqAPI*s exposed APIs.
 
+## Graphic illustrations
+### Overview
+This figure gives an overview of *sqAPI*s position within a storage system.
+As indicated within the figure,
+there is intended to deploy multiple *sqAPI* instances within the complete system.
+Each deployed sqAPI will have its own responsibility area (_active plugin_).
+
+![sqAPI Overview](./resources/sqapi_overview.png)
+
+### Details
+The graphic below presents the flow and different components within the sqAPI solution.
+The orange areas (_Processor Execution_ and _Resources_) are custom logic for each of the plugins.
+
+![sqAPI Details](./resources/sqapi_details.png)
+
 
 # Getting Started
 ## sqAPI
