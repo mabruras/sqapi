@@ -24,13 +24,13 @@ As indicated within the figure,
 there is intended to deploy multiple *sqAPI* instances within the complete system.
 Each deployed sqAPI will have its own responsibility area (_active plugin_).
 
-![sqAPI Overview](./resources/sqapi_overview.png)
+![sqAPI Overview](resources/images/sqapi_overview.png)
 
 ### Details
 The graphic below presents the flow and different components within the sqAPI solution.
 The orange areas (_Processor Execution_ and _Resources_) are custom logic for each of the plugins.
 
-![sqAPI Details](./resources/sqapi_details.png)
+![sqAPI Details](resources/images/sqapi_details.png)
 
 
 # Getting Started
@@ -39,7 +39,7 @@ The orange areas (_Processor Execution_ and _Resources_) are custom logic for ea
 sqAPI is dependent on receiving messages, and being able to fetch elements from external systems.
 Use the following to start the external systems, the internal database and sqAPI.
 
-Use [data producer](./resources/data_producer.py) to insert test data.
+Use [data producer](resources/test/data_producer.py) to insert test data.
 ```bash
 # Start Redis, RabbitMQ and PostgreSQL
 docker run -d -p 6379:6379 redis:latest
@@ -55,7 +55,7 @@ docker run -d -p 5432:5432 postgres
 
 ## Docker Compose
 The Docker Compose solution will start several containers,
-based on the [example system](./resources/EXAMPLE_SYSTEM.md).
+based on the [example system](docs/EXAMPLE_SYSTEM.md).
 Each of the components are linked together in the same Docker Network.
 
 The Docker Compose solution is built and started with the following
@@ -98,8 +98,7 @@ feel free to commit a fix or a feature.
 ## Plugins
 sqAPI is based on having all of its business logic implemented as plugins.
 
-To contribute with a new plugin, please see
-[the plugin section](./sqapi/plugins/README.md)
+To contribute with a new plugin, please see [the plugin section](./docs/PLUGINS.md)
 for information regarding structure, requirements and implementation details.
 
 
