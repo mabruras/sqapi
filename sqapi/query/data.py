@@ -1,38 +1,31 @@
 #! /usr/bin/env python3
 import io
 
+from connectors import openstack_swift
+
 
 def fetch_data(config, message):
     loc = message.get('data_location', None)
     if not loc:
         raise AttributeError('Could not find "data_location" in message')
 
-    # TODO: More generic selection of metadata store?
-    data_store = config.data_store.get('type', 'disk')
-    if not data_store:
-        print('Using default data store: disk')
-        disk_loc = fetch_data_to_disk(loc)
-        return fetch_file_from_disk(disk_loc)
+    try:
+        # TODO: More generic selection of metadata store?
+        data_store = config.data_store.get('type', 'disk')
+        if not data_store or data_store.lower() == 'disk':
+            print('Disk (default) was detected as data store')
+            return fetch_file_from_disk(loc)
 
-    elif data_store.lower() == 'disk':
-        print('Disk was detected as data store')
-        disk_loc = fetch_data_to_disk(loc)
-        try:
+        elif data_store.lower() == 'swift':
+            print('OpenStack Swift was detected as data store')
+            disk_loc = openstack_swift.download_to_disk(config, loc)
             return fetch_file_from_disk(disk_loc)
-        except FileNotFoundError as e:
-            raise LookupError('Data by reference {} was not available at this moment'.format(loc))
 
-    else:
-        print('{} is not a supported data store'.format(type))
-        return io.BytesIO(bytes())
-
-
-def fetch_data_to_disk(location):
-    # TODO: this return should be from a specific/configurable module
-    # so it will download/get file data from all kinds of storage places
-
-    # TODO: Now location is returned since we know in this POC that the file is on disk
-    return location
+        else:
+            print('{} is not a supported data store'.format(type))
+            return io.BytesIO(bytes())
+    except FileNotFoundError as e:
+        raise LookupError('Data by reference {} was not available at this moment: {}'.format(loc, str(e)))
 
 
 def fetch_file_from_disk(file):

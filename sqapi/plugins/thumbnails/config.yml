@@ -4,9 +4,6 @@ msg_broker:
   - 'image/png'
   - 'image/gif'
 
-data_store:
-  type: 'disk'
-
 database:
   type: 'postgres'
   init: 'scripts/init.sql'

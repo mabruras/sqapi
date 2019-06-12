@@ -104,6 +104,7 @@ msg_broker:
 ### Metadata Store
 The metadata store is also defined by a type and connection details.
 
+#### Redis
 ##### Example
 ```yaml
 meta_store:
@@ -120,12 +121,32 @@ meta_store:
 
 ### Data Store
 The data store is defined by a type and connection details.
-Currently there is only support for `disk`, and do not require connection details.
+
+#### Disk
+Disk does not have a need for connection details or credentials.
 
 ##### Example
 ```yaml
 data_store:
   type: 'disk'
+```
+
+##### Plugin Specific
+```yaml
+# No need to overwrite, but still possible
+```
+
+
+#### Swift
+Uses `python3-swiftclient` to connect to a OpenStack Swift instance.
+
+##### Example
+```yaml
+data_store:
+  type: 'swift'
+  auth_url: 'http://localhost:8080/auth/v1.0'
+  access_key_id: 'test:tester'
+  secret_access_key: 'testing'
 ```
 
 ##### Plugin Specific
