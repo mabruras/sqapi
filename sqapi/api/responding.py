@@ -1,7 +1,11 @@
 import json
+import logging
+import uuid
 from datetime import date
 
 from flask import Response
+
+log = logging.getLogger(__name__)
 
 
 def ok(data):
@@ -9,36 +13,46 @@ def ok(data):
 
 
 def no_content(data):
-    print(data)
+    log.debug(data)
     data = {'error': 'Could not find any data', 'details': data}
 
     return _create_response(data, 204)
 
 
 def invalid_request(err):
-    print(err)
-    data = {'error': 'The request was not complete', 'details': err}
+    log.warning(err)
+    data = {
+        'error': 'The request was not complete',
+        'reference': str(uuid.uuid4()),
+        'details': err,
+    }
+    log.warning(data)
 
     return _create_response(data, 400)
 
 
 def server_failure(err):
-    print(err)
-    data = {'error': 'Something went wrong, we\'ve logged the issue, and will look into it', 'details': err}
+    log.warning(err)
+    data = {
+        'error': 'Something went wrong, we\'ve logged the issue, and will look into it',
+        'reference': str(uuid.uuid4()),
+        'details': err,
+    }
+    log.warning(data)
 
     return _create_response(data, 500)
 
 
 def not_impl(err):
-    print(err)
+    log.warning(err)
     data = {'error': 'Not implemented', 'details': err}
 
     return _create_response(data, 501)
 
 
 def _create_response(data, code):
-    print(f'Final response status code: {code}')
-    print(f'Final response data: {data}')
+    log.debug(f'Final response status code: {code}')
+    log.debug(f'Final response data: {data}')
     return Response(
         response=json.dumps(data, cls=DateEncoder),
         mimetype='application/json',

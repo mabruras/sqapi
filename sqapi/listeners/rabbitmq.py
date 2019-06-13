@@ -1,15 +1,18 @@
 #! /usr/bin/env python
+import logging
 import time
 
 import pika
 from pika.exceptions import StreamLostError
+
+log = logging.getLogger(__name__)
 
 
 class RabbitMQ:
 
     def __init__(self, config: dict = None):
         config = config if config else dict()
-        print('Loading RabbitMQ with config: {}'.format(config))
+        log.info('Loading RabbitMQ')
 
         self.retry_interval = float(config.get('retry_interval', 3))
 
@@ -23,24 +26,27 @@ class RabbitMQ:
         self.test_connection()
 
     def test_connection(self):
+        log.debug('Testing connection to RabbitMQ on {}:{}'.format(self.host, self.port))
         while True:
             try:
-                print('Testing connection to RabbitMQ on {}:{}'.format(self.host, self.port))
+                log.debug('Establishing connection through Pika module')
                 connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
 
                 if connection.is_open:
-                    print('Connection tested: OK')
+                    log.info('Connection tested: OK')
                     connection.close()
                     break
                 else:
+                    err = 'Could not connect to RabbitMQ'
+                    log.debug(err)
                     raise ConnectionError('Could not connect to RabbitMQ')
-            except Exception as error:
-                print('Connection tested: {}'.format(str(error)))
+            except Exception as e:
+                log.debug('Connection tested: {}'.format(str(e)))
                 time.sleep(self.retry_interval)
 
     def listen_queue(self, callback, routing_key=None):
         self.routing_key = routing_key if routing_key else self.routing_key
-        print('Starting Queue listener with routing key: {}'.format(self.routing_key))
+        log.info('Starting Queue listener with routing key: {}'.format(self.routing_key))
 
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
@@ -51,18 +57,18 @@ class RabbitMQ:
 
         while True:
             try:
-                print('Starting to consume from queue: {}'.format(self.routing_key))
+                log.info('Starting to consume from queue: {}'.format(self.routing_key))
                 channel.start_consuming()
             except StreamLostError as e:
-                print('Lost connection to broker: {}'.format(str(e)))
+                log.warning('Lost connection to broker: {}'.format(str(e)))
                 time.sleep(1)
             except (InterruptedError, KeyboardInterrupt) as e:
-                print('Interrupted, exiting consumer: {}'.format(str(e)))
+                log.error('Interrupted, exiting consumer: {}'.format(str(e)))
                 break
-        print('Finished consuming from queue: {}'.format(self.routing_key))
+        log.info('Finished consuming from queue: {}'.format(self.routing_key))
 
     def listen_exchange(self, callback):
-        print('Starting Exchange listener "{}" as type "{}"'.format(self.exchange_name, self.exchange_type))
+        log.info('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
 
@@ -76,12 +82,12 @@ class RabbitMQ:
 
         while True:
             try:
-                print('Starting to consume from exchange: {}'.format(self.exchange_name))
+                log.info('Starting to consume from exchange: {}'.format(self.exchange_name))
                 channel.start_consuming()
             except StreamLostError as e:
-                print('Lost connection to broker: {}'.format(str(e)))
+                log.warning('Lost connection to broker: {}'.format(str(e)))
                 time.sleep(1)
             except (InterruptedError, KeyboardInterrupt) as e:
-                print('Interrupted, exiting consumer: {}'.format(str(e)))
+                log.error('Interrupted, exiting consumer: {}'.format(str(e)))
                 break
-        print('Finished consuming from exchange: {}'.format(self.exchange_name))
+        log.info('Finished consuming from exchange: {}'.format(self.exchange_name))
