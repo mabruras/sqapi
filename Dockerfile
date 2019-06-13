@@ -1,6 +1,6 @@
 FROM            python:3.7
 
-ENV             WRK_DIR /opt/app
+ENV             WRK_DIR /opt/sqapi
 WORKDIR         ${WRK_DIR}
 EXPOSE          5000
 
@@ -19,7 +19,8 @@ COPY            requirements.txt        ${WRK_DIR}/
 RUN             pip3 install \
                   --no-cache-dir -r     ${WRK_DIR}/requirements.txt
 
-COPY            ./                      ${WRK_DIR}/
+COPY            sqapi                   ${WRK_DIR}/sqapi/
+COPY            start.py                ${WRK_DIR}/
 RUN             chown -R sqapi:sqapi    ${WRK_DIR}
 
 USER            sqapi:sqapi

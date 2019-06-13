@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import logging
 import os
 import time
 import uuid
@@ -6,12 +7,14 @@ import uuid
 import psycopg2
 import psycopg2.extras
 
-CREATE_MESSAGES_SCRIPT = './db/pg_script/create_messages.sql'
-INSERT_MESSAGE_SCRIPT = './db/pg_script/insert_message.sql'
-SELECT_MESSAGE_SCRIPT = './db/pg_script/select_message.sql'
-UPDATE_MESSAGE_SCRIPT = './db/pg_script/update_message.sql'
+CREATE_MESSAGES_SCRIPT = '{dir}{sep}pg_script{sep}create_messages.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
+INSERT_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}insert_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
+SELECT_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}select_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
+UPDATE_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}update_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
 
 DB_TYPE = 'postgres'
+
+log = logging.getLogger(__name__)
 
 
 class Postgres:
@@ -24,25 +27,31 @@ class Postgres:
 
         if not db_type == DB_TYPE:
             err = 'Attempt to establish connection with a Postgres DB, using "{}" configuration'.format(db_type)
+            log.warning(err)
             raise ConnectionError(err)
 
+        log.info('Testing database connection')
         while not self.active_connection():
-            print('Testing database connection again in 1 second..')
+            log.debug('Testing database connection again in 1 second..')
             time.sleep(1)
 
-        print('Initialized and tested connection OK, towards the {} database'.format(db_type))
+        log.info('Initialized and tested connection OK, towards the {} database'.format(db_type))
 
     def active_connection(self):
         try:
+            log.debug('Trying to open connection')
             self.get_connection().close()
             return True
         except Exception as e:
-            print('Failed testing database connection: {}'.format(str(e)))
+            log.debug('Failed to open database connection: {}'.format(str(e)))
             return False
 
     def get_connection(self):
         try:
-            print('Opening connection for {}'.format(self.cfg_con))
+            log.debug('Establishing connection towards {}:{}'.format(
+                self.cfg_con.get('host', 'localhost'),
+                self.cfg_con.get('port', '5432')
+            ))
             connection = psycopg2.connect(
                 dbname=self.cfg_con.get('name', 'postgres'),
                 port=self.cfg_con.get('port', '5432'),
@@ -55,39 +64,46 @@ class Postgres:
 
             return connection
         except ConnectionError as e:
-            err = 'Failed while opening connection to {}-database, please verify the configuration'.format(
-                self.cfg.get('type')
+            err = 'Failed to establish connection towards the database, please verify the configuration: {}'.format(
+                str(e)
             )
-            raise ConnectionError('{}: {}'.format(err, str(e)))
+            log.debug(err)
+            raise ConnectionError(err)
 
     def initialize_database(self):
         try:
-            print('Creating messages table if it does not exist')
+            log.info('Creating messages table if it does not exist')
             out = self.execute_script(CREATE_MESSAGES_SCRIPT)
-            print('Result of creating messages table: {}'.format(out))
+            log.debug('Result of creating messages table: {}'.format(out))
 
-            print('Executes custom initialization script')
+            log.info('Executes custom initialization script "{}"'.format(self.init_script))
             out = self.execute_script(self.init_script)
-            print('Result of custom database initialization: {}'.format(out))
+            log.debug('Result of custom database initialization: {}'.format(out))
         except Exception as e:
-            err = 'Could not execute database initialization: {}'.format(str(e))
-            print(err)
-            exit(1)
+            err = 'Could not initialize database: {}'.format(str(e))
+            log.warning(err)
+            raise type(e)(err)
 
     def execute_script(self, script_path: str, **kwargs):
+        log.info('Executing script "{}"'.format(script_path))
+
         if not script_path:
             err = 'Could not detect any script as argument to method'
+            log.warning(err)
             raise ConnectionError(err)
 
         if not os.path.exists(script_path):
             err = 'Initialization script path "{}" does not exists'.format(script_path)
+            log.warning(err)
             raise FileNotFoundError(err)
 
         try:
+            log.debug('Opening script file')
             with open(script_path, 'r') as f:
                 return self.execute_query(f.read(), **kwargs)
         except ConnectionError as e:
             err = 'Could not execute query: {}'.format(str(e))
+            log.warning(err)
             raise Exception(err)
 
     def execute_query(self, query: str, **kwargs):
@@ -99,9 +115,13 @@ class Postgres:
                         http://initd.org/psycopg/docs/usage.html#query-parameters
         :return: Result after execution, using psycopg2's cursor.fetchall()
         """
+        log.info('Preparing to execute query')
+        log.debug(query)
         try:
+            log.debug('Establishing database connection for query execution')
             with self.get_connection() as con:
                 try:
+                    log.info('Executing query')
                     with con.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                         cur.execute(query, kwargs)
 
@@ -111,27 +131,35 @@ class Postgres:
                             return None
                 except Exception as e:
                     err = 'Could not execute query "{}": {}'.format(query, str(e))
+                    log.warning(err)
                     raise ConnectionError(err)
         except ConnectionAbortedError as e:
             err = 'Could not connect to local database: {}'.format(str(e))
+            log.warning(err)
             raise ConnectionError(err)
 
     def update_message(self, message: dict, status: str, info: str = None):
-        print('Updating message if it exists')
+        log.debug('Updating message if it exists')
         message.update({'status': status, 'info': info, 'id': str(uuid.uuid4())})
         script = UPDATE_MESSAGE_SCRIPT if self.get_message(**message) else INSERT_MESSAGE_SCRIPT
+        log.debug('Message script decided')
+        log.debug(script)
 
         try:
             out = self.execute_script(script, **message)
-            print('Result of updating message: {}'.format(out))
+            log.debug('Result of updating message: {}'.format(out))
         except Exception as e:
-            print(str(e))
+            log.debug(str(e))
+
+        return out
 
     def get_message(self, **message):
+        log.debug('Selecting message from DB: {}'.format(message))
         try:
             out = self.execute_script(SELECT_MESSAGE_SCRIPT, **message)
-            print('Result of selected message: {}'.format(out))
+            log.debug('Result of selected message: {}'.format(out))
+
             return out
         except Exception as e:
-            print(str(e))
+            log.debug(str(e))
         return None

@@ -1,42 +1,50 @@
-#! /usr/bin/env python
+import logging.config
 import os
-import sys
 
 from flask import Flask
 from flask_cors import CORS
 
-from api import edge
-from core.processor import Processor
-from util import detector
-from util.cfg_util import Config
+from sqapi.api import edge
+from sqapi.core.processor import Processor
+from sqapi.util import detector
+from sqapi.util.cfg_util import Config
 
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
-CONFIG_DIR = '{}{}conf'.format(PROJECT_DIR, os.sep)
+CONFIG_DIR = '{pd}{sep}sqapi{sep}conf'.format(pd=PROJECT_DIR, sep=os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
+LOG_FILE = os.environ.get('LOG_FILE', '{}{}logging.conf'.format(CONFIG_DIR, os.sep))
+
+logging.config.fileConfig(LOG_FILE)
+log = logging.getLogger(__name__)
 
 
 class SqapiApplication:
 
     def __init__(self, sqapi_type=None):
+        log.info('Initializing application')
         self.sqapi_type = sqapi_type  # Loader / API
 
         self.app = Flask(__name__)
         self.config = Config(CONFIG_FILE)
 
         self.processors = []
-        for plugin_name, plugin in detector.detect_plugins('plugins').items():
+        log.info('Searching for available and active plugins')
+        for plugin_name, plugin in detector.detect_plugins().items():
             if not self.active_plugin(plugin_name):
-                print('Plugin "{}" is not listed as active'.format(plugin_name))
+                log.debug('Plugin "{}" is not listed as active'.format(plugin_name))
                 continue
-            print('Registering a processor for plugin "{}"'.format(plugin_name))
+            log.debug('Registering a processor for plugin "{}"'.format(plugin_name))
             processor = Processor(self.config, plugin_name, plugin)
             self.processors.append(processor)
 
+        log.info('{} plugin processors created'.format(len(self.processors)))
+        log.info('Initialization done')
+
     def start(self):
         for p in self.processors:
-            if sqapi_type == 'loader':
+            if self.sqapi_type == 'loader':
                 p.start_loader()
-            elif sqapi_type == 'api':
+            elif self.sqapi_type == 'api':
                 self.start_api()
             else:
                 p.start_loader()
@@ -59,19 +67,12 @@ class SqapiApplication:
 
             for module in p.blueprints:
                 try:
-                    print('Registering Blueprint: {}'.format(module.bp.name))
+                    log.debug('Registering Blueprint: {}'.format(module.bp.name))
                     self.app.register_blueprint(module.bp)
                 except Exception as e:
-                    print('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
+                    log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
 
     def active_plugin(self, plugin_name):
         active_plugins = self.config.active_plugins
 
         return not active_plugins or plugin_name in active_plugins
-
-
-if __name__ == '__main__':
-    sqapi_type = sys.argv[1] if len(sys.argv) > 1 else None
-
-    sqapi = SqapiApplication(sqapi_type)
-    sqapi.start()
