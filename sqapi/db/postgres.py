@@ -26,7 +26,7 @@ class Postgres:
         db_type = config.get('type', 'UNKNOWN')
 
         if not db_type == DB_TYPE:
-            err = 'Attempt to establish connection with a Postgres DB, using "{}" configuration'.format(db_type)
+            err = 'Attempt to establish connection with a Postgres DB, using {} configuration'.format(db_type)
             log.warning(err)
             raise ConnectionError(err)
 
@@ -71,12 +71,13 @@ class Postgres:
             raise ConnectionError(err)
 
     def initialize_database(self):
+        log.info('Initializing Postgres database')
         try:
-            log.info('Creating messages table if it does not exist')
+            log.debug('Creating messages table if it does not exist')
             out = self.execute_script(CREATE_MESSAGES_SCRIPT)
             log.debug('Result of creating messages table: {}'.format(out))
 
-            log.info('Executes custom initialization script "{}"'.format(self.init_script))
+            log.debug('Executes custom initialization script {}'.format(self.init_script))
             out = self.execute_script(self.init_script)
             log.debug('Result of custom database initialization: {}'.format(out))
         except Exception as e:
@@ -85,7 +86,7 @@ class Postgres:
             raise type(e)(err)
 
     def execute_script(self, script_path: str, **kwargs):
-        log.info('Executing script "{}"'.format(script_path))
+        log.info('Preparing script {}'.format(script_path))
 
         if not script_path:
             err = 'Could not detect any script as argument to method'
@@ -93,7 +94,7 @@ class Postgres:
             raise ConnectionError(err)
 
         if not os.path.exists(script_path):
-            err = 'Initialization script path "{}" does not exists'.format(script_path)
+            err = 'Initialization script path {} does not exists'.format(script_path)
             log.warning(err)
             raise FileNotFoundError(err)
 
@@ -115,22 +116,23 @@ class Postgres:
                         http://initd.org/psycopg/docs/usage.html#query-parameters
         :return: Result after execution, using psycopg2's cursor.fetchall()
         """
-        log.info('Preparing to execute query')
+        log.info('Preparing query')
         log.debug(query)
         try:
             log.debug('Establishing database connection for query execution')
             with self.get_connection() as con:
                 try:
-                    log.info('Executing query')
+                    log.debug('Executing query')
                     with con.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                         cur.execute(query, kwargs)
 
                         try:
+                            log.debug('Query executed')
                             return [dict(r) for r in cur.fetchall()]
                         except:
                             return None
                 except Exception as e:
-                    err = 'Could not execute query "{}": {}'.format(query, str(e))
+                    err = 'Could not execute query {}: {}'.format(query, str(e))
                     log.warning(err)
                     raise ConnectionError(err)
         except ConnectionAbortedError as e:

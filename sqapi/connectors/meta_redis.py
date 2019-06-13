@@ -16,7 +16,7 @@ def fetch_metadata_as_dict(config, reference):
     res = r.get(reference)
 
     if not res:
-        log.warning('Response from Redis, on key="{}" was empty'.format(reference))
-        raise LookupError('Metadata by reference "{}" was not available at this moment'.format(reference))
+        log.warning('Response from Redis, on key={} was empty'.format(reference))
+        raise LookupError('Metadata by reference {} was not available at this moment'.format(reference))
 
     return res

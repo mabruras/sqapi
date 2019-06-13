@@ -41,12 +41,12 @@ def _search_containers_for_object(config, connection, object_ref):
         log.debug('No container defined in config, searching all containers avilable')
         # Search for object in all containers
         for c in connection.get_account()[-1]:
-            log.debug('Looking for object "{}" in container "{}"'.format(object_ref, c.get('name')))
+            log.debug('Looking for object {} in container {}'.format(object_ref, c.get('name')))
             res = _get_object_from_container(connection, c.get('name'), object_ref)
             if res:
-                log.debug('Found object "{}" in container "{}"'.format(object_ref, c.get('name')))
+                log.debug('Found object {} in container {}'.format(object_ref, c.get('name')))
                 return res
-            log.warning('Could not find object "{}" in container "{}"'.format(object_ref, c.get('name')))
+            log.warning('Could not find object {} in container {}'.format(object_ref, c.get('name')))
     else:
         return _get_object_from_container(connection, container, object_ref)
 

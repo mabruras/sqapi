@@ -26,7 +26,7 @@ class RabbitMQ:
         self.test_connection()
 
     def test_connection(self):
-        log.info('Testing connection to RabbitMQ on {}:{}'.format(self.host, self.port))
+        log.debug('Testing connection to RabbitMQ on {}:{}'.format(self.host, self.port))
         while True:
             try:
                 log.debug('Establishing connection through Pika module')
@@ -68,7 +68,7 @@ class RabbitMQ:
         log.info('Finished consuming from queue: {}'.format(self.routing_key))
 
     def listen_exchange(self, callback):
-        log.info('Starting Exchange listener "{}" as type "{}"'.format(self.exchange_name, self.exchange_type))
+        log.info('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
 

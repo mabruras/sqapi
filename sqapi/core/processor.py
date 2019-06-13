@@ -50,8 +50,9 @@ class Processor:
         self.mime_types = config.msg_broker.get('supported_mime', MIME_TYPES)
 
     def start_loader(self):
+        log.info('{}: Starting listeners'.format(self.name))
         # Setup sqAPI general exchange listener
-        log.info('Starting Exchange Listener for {}'.format(self.name))
+        log.debug('Starting Exchange Listener for {}'.format(self.name))
         threading.Thread(
             name='{} Exchange Listener'.format(self.name),
             target=self.listener.listen_exchange,
@@ -59,7 +60,7 @@ class Processor:
         ).start()
 
         # Setup sqAPI unique queue listener
-        log.info('Starting Queue Listener for {}'.format(self.name))
+        log.debug('Starting Queue Listener for {}'.format(self.name))
         threading.Thread(
             name='{} Queue Listener'.format(self.name),
             target=self.listener.listen_queue,
@@ -85,7 +86,7 @@ class Processor:
 
             self.database.update_message(message, STATUS_PROCESSING)
 
-            log.info('Executing logic for "{}" plugin'.format(self.name))
+            log.info('Executing logic for {} plugin'.format(self.name))
             self.execute(self.config, self.database, message, meta, data)
             self.database.update_message(message, STATUS_DONE)
             log.info('Processing completed')
@@ -123,7 +124,7 @@ class Processor:
         log.debug('Validating message mime type')
         msg_type = message.get('data_type', 'UNKNOWN')
         if self.mime_types and msg_type not in self.mime_types:
-            err = 'Mime type "{}" is not supported by this sqAPI'.format(msg_type)
+            err = 'Mime type {} is not supported by this sqAPI'.format(msg_type)
             log.debug(err)
             raise NotImplementedError(err)
 
@@ -141,7 +142,7 @@ class Processor:
                 missing_fields.append(f)
 
         if missing_fields:
-            err = 'The field(/s) "{}" are missing in the message'.format('", "'.join(missing_fields))
+            err = 'The field(/s) {} are missing in the message'.format('", "'.join(missing_fields))
             log.debug(err)
             raise AttributeError(err)
 
@@ -149,7 +150,7 @@ class Processor:
         init_path = config.get('init', None)
 
         if not init_path:
-            err = 'Missing configuration for database initialization script in plugin "{}"'.format(self.name)
+            err = 'Missing configuration for database initialization script in plugin {}'.format(self.name)
             log.warning(err)
             raise AttributeError('Missing configuration for database initialization script')
 

@@ -31,9 +31,9 @@ class SqapiApplication:
         log.info('Searching for available and active plugins')
         for plugin_name, plugin in detector.detect_plugins().items():
             if not self.active_plugin(plugin_name):
-                log.debug('Plugin "{}" is not listed as active'.format(plugin_name))
+                log.debug('Plugin {} is not listed as active'.format(plugin_name))
                 continue
-            log.debug('Registering a processor for plugin "{}"'.format(plugin_name))
+            log.debug('Registering a processor for plugin {}'.format(plugin_name))
             processor = Processor(self.config, plugin_name, plugin)
             self.processors.append(processor)
 
@@ -42,6 +42,7 @@ class SqapiApplication:
 
     def start(self):
         for p in self.processors:
+            log.debug('Starting processor for plugin {}'.format(p.name))
             if self.sqapi_type == 'loader':
                 p.start_loader()
             elif self.sqapi_type == 'api':
@@ -49,6 +50,7 @@ class SqapiApplication:
             else:
                 p.start_loader()
                 self.start_api()
+            log.info('Processor started for plugin {}'.format(p.name))
 
     def start_api(self):
         CORS(self.app)
@@ -59,15 +61,17 @@ class SqapiApplication:
         self.app.run(host='0.0.0.0')
 
     def register_blueprints(self):
+        log.info('Registering blueprints for {} plugins'.format(len(self.processors)))
         self.app.register_blueprint(edge.bp)
 
         for p in self.processors:
+            log.debug('Registering {} blueprints for plugin {}'.format(len(p.blueprints), p.name))
             self.app.config[p.name] = p.config
             self.app.database = dict({p.name: p.database})
 
             for module in p.blueprints:
                 try:
-                    log.debug('Registering Blueprint: {}'.format(module.bp.name))
+                    log.debug('Registering blueprint {} for plugin {}'.format(module.bp.name, p.name))
                     self.app.register_blueprint(module.bp)
                 except Exception as e:
                     log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))

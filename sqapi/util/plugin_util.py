@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 def load_blueprints(plugin_name, bp_dir):
-    log.info('Loading blueprints from "{}", for plugin "{}"'.format(bp_dir, plugin_name))
+    log.debug('Loading blueprints from {}, for plugin {}'.format(bp_dir, plugin_name))
 
     if not bp_dir:
         log.warning('No blueprints directory was defined, no API exposed')
@@ -30,7 +30,7 @@ def load_blueprints(plugin_name, bp_dir):
 
 
 def _verify_directory(directory):
-    log.info('Verifying directory: {}'.format(directory))
+    log.debug('Verifying directory: {}'.format(directory))
 
     # Verify if canonical path
     if os.path.exists(directory) and os.path.isdir(directory):
@@ -46,5 +46,5 @@ def _verify_directory(directory):
         log.debug('Relative path exists and is a directory')
         return concat_path
 
-    log.warning('Could not verify existence of directory "{}"'.format(directory))
+    log.warning('Could not verify existence of directory {}'.format(directory))
     return None
