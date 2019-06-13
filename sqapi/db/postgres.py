@@ -35,7 +35,7 @@ class Postgres:
             log.debug('Testing database connection again in 1 second..')
             time.sleep(1)
 
-        log.info('Initialized and tested connection OK, towards the {} database'.format(db_type))
+        log.debug('Initialized and tested connection OK, towards the {} database'.format(db_type))
 
     def active_connection(self):
         try:
@@ -86,7 +86,7 @@ class Postgres:
             raise type(e)(err)
 
     def execute_script(self, script_path: str, **kwargs):
-        log.info('Preparing script {}'.format(script_path))
+        log.debug('Preparing script {}'.format(script_path))
 
         if not script_path:
             err = 'Could not detect any script as argument to method'
@@ -116,7 +116,7 @@ class Postgres:
                         http://initd.org/psycopg/docs/usage.html#query-parameters
         :return: Result after execution, using psycopg2's cursor.fetchall()
         """
-        log.info('Preparing query')
+        log.debug('Preparing query')
         log.debug(query)
         try:
             log.debug('Establishing database connection for query execution')
