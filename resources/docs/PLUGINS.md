@@ -240,7 +240,7 @@ sqAPI has its own configuration, defined at the system level.
 This should always be overwritten for each plugin,
 so we always ensure custom logic for each usage.
 For more about the configuration,
-read the [Configuration document](RATION.md).
+read the [Configuration document](CONFIGURATION.md).
 
 ##### Example usage
 When accessing a topic of configuration, you will call it directly on the Config object.

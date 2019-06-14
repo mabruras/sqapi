@@ -64,17 +64,32 @@ class SqapiApplication:
         log.info('Registering blueprints for {} plugins'.format(len(self.processors)))
         self.app.register_blueprint(edge.bp)
 
+        self.app.plugins = []
         for p in self.processors:
             log.debug('Registering {} blueprints for plugin {}'.format(len(p.blueprints), p.name))
             self.app.config[p.name] = p.config
             self.app.database = dict({p.name: p.database})
+            self.append_plugin_blueprints(p)
+            self.register_plugin_blueprints(p)
 
-            for module in p.blueprints:
-                try:
-                    log.debug('Registering blueprint {} for plugin {}'.format(module.bp.name, p.name))
-                    self.app.register_blueprint(module.bp)
-                except Exception as e:
-                    log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
+    def append_plugin_blueprints(self, p):
+        self.app.plugins.append({
+            'name': p.name,
+            'blueprints': [{
+                'package': module.bp.name,
+                'url_prefix': module.bp.url_prefix,
+                'url_values_defaults': module.bp.url_values_defaults
+            } for module in p.blueprints
+            ],
+        })
+
+    def register_plugin_blueprints(self, p):
+        for module in p.blueprints:
+            try:
+                log.debug('Registering blueprint {} for plugin {}'.format(module.bp.name, p.name))
+                self.app.register_blueprint(module.bp)
+            except Exception as e:
+                log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
 
     def active_plugin(self, plugin_name):
         active_plugins = self.config.active_plugins
