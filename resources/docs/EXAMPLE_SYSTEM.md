@@ -40,7 +40,7 @@ When uploading a file into NiFi, the *Main*-flow is executed.
 After *Main*, the flow is forked into three:
 *Store File*, *Store Metadata*, *Publish Message*
 
-![NiFi Flow](../resources/images/nifi-flow.png)
+![NiFi Flow](../images/nifi-flow.png)
 
 
 ##### Main

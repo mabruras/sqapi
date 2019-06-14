@@ -73,7 +73,7 @@ db = current_app.database['image_plugin']
 The configuration file: `config.yml`, this name is not changeable.
 
 The plugin-specific configuration is used to override default
-configuration from [sqAPI-config](../sqapi/conf/sqapi.yml).
+configuration from [sqAPI-config](../../sqapi/conf/sqapi.yml).
 
 The configuration can be extended with what ever fields
 you want to use within the business logic (both `execute` and blueprints).
@@ -240,7 +240,7 @@ sqAPI has its own configuration, defined at the system level.
 This should always be overwritten for each plugin,
 so we always ensure custom logic for each usage.
 For more about the configuration,
-read the [Configuration document](../docs/CONFIGURATION.md).
+read the [Configuration document](RATION.md).
 
 ##### Example usage
 When accessing a topic of configuration, you will call it directly on the Config object.

@@ -55,7 +55,7 @@ docker run -d -p 5432:5432 postgres
 
 ## Docker Compose
 The Docker Compose solution will start several containers,
-based on the [example system](docs/EXAMPLE_SYSTEM.md).
+based on the [example system](resources/docs/EXAMPLE_SYSTEM.md).
 Each of the components are linked together in the same Docker Network.
 
 The Docker Compose solution is built and started with the following
@@ -98,7 +98,7 @@ feel free to commit a fix or a feature.
 ## Plugins
 sqAPI is based on having all of its business logic implemented as plugins.
 
-To contribute with a new plugin, please see [the plugin section](./docs/PLUGINS.md)
+To contribute with a new plugin, please see [the plugin section](resources/docs/PLUGINS.md)
 for information regarding structure, requirements and implementation details.
 
 
