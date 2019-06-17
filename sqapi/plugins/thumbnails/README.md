@@ -21,4 +21,4 @@ Read the [init.sql](./scripts/init.sql) to see the stored data structure.
 
 ## Usage
 ### Endpoints
-`/thumbnails/<uuid_ref>`: returns a thumbnail base on uuid_ref, it it exists
+* `/thumbnails/<uuid_ref>`: returns a thumbnail base on uuid_ref, it it exists

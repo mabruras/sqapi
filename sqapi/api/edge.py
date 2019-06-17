@@ -67,12 +67,21 @@ def get_rules():
         options = {}
         for arg in rule.arguments:
             options[arg] = "<{}>".format(arg)
-        out.append(dict({
-            'function': rule.endpoint,
-            'endpoint': url_for(rule.endpoint, **options),
-            'arguments': list(rule.arguments),
-            'methods': list(rule.methods),
-        }))
+        try:
+            out.append(dict({
+                'function': rule.endpoint,
+                'endpoint': url_for(rule.endpoint, **options),
+                'arguments': list(rule.arguments),
+                'methods': list(rule.methods),
+            }))
+        except Exception as e:
+            log.warning('Could not parse rule for {}: {}'.format(rule.endpoint, str(e)))
+            out.append(dict({
+                'function': rule.endpoint,
+                'endpoint': 'error',
+                'arguments': 'error',
+                'methods': 'error',
+            }))
 
     return out
 
