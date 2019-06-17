@@ -1,4 +1,5 @@
 import hashlib
+import io
 import logging
 import os
 
@@ -8,7 +9,7 @@ INSERT_ITEM = 'insert_dup.sql'
 log = logging.getLogger(__name__)
 
 
-def execute(config, database, message: dict, metadata: dict, data: bytes):
+def execute(config, database, message: dict, metadata: dict, data: io.BufferedReader):
     sha_256 = calculate_sha256(metadata, data)
 
     save_to_db(database, message, sha_256)

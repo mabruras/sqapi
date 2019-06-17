@@ -22,7 +22,7 @@ they will through all necessary *sqAPI*s exposed APIs.
 This figure gives an overview of *sqAPI*s position within a storage system.
 As indicated within the figure,
 there is intended to deploy multiple *sqAPI* instances within the complete system.
-Each deployed sqAPI will have its own responsibility area (_active plugin_).
+Each deployed sqAPI will have its own area of responsibility (_active plugin_).
 
 ![sqAPI Overview](resources/images/sqapi_overview.png)
 

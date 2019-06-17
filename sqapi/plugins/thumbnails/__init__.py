@@ -1,3 +1,4 @@
+import io
 import logging
 import os
 import pathlib
@@ -11,7 +12,7 @@ INSERT_ITEM = 'insert_item.sql'
 log = logging.getLogger(__name__)
 
 
-def execute(config, database, message: dict, metadata: dict, data: bytes):
+def execute(config, database, message: dict, metadata: dict, data: io.BufferedReader):
     loc = create_thumbnail(config, message, data)
 
     save_to_db(database, message, metadata, loc)
