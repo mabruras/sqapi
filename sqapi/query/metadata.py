@@ -2,7 +2,7 @@
 import json
 import logging
 
-from sqapi.connectors import meta_redis
+from sqapi.connectors.meta import redis
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ def fetch_metadata(config, message):
 
     if not meta_store or meta_store.lower() == 'redis':
         log.info('Redis (default) was detected as metadata store')
-        out = meta_redis.fetch_metadata_as_dict(config, uuid_ref)
+        out = redis.fetch_metadata_as_dict(config, uuid_ref)
 
         return json.loads(out)
     else:

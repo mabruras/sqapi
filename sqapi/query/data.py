@@ -2,7 +2,7 @@
 import io
 import logging
 
-from sqapi.connectors import openstack_swift
+from sqapi.connectors.data import swift
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def fetch_data(config, message):
 
         elif data_store.lower() == 'swift':
             log.info('OpenStack Swift was detected as data store')
-            disk_loc = openstack_swift.download_to_disk(config, loc)
+            disk_loc = swift.download_to_disk(config, loc)
             return fetch_file_from_disk(disk_loc)
 
         else:

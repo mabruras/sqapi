@@ -5,7 +5,7 @@ import os
 from os import path
 
 from sqapi.db import postgres
-from sqapi.listeners import rabbitmq
+from sqapi.connectors.listeners import rabbitmq
 
 log = logging.getLogger(__name__)
 
