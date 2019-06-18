@@ -25,7 +25,7 @@ def index(path):
 
         return send_from_directory(os.path.join('..', os.path.dirname(path)), path.split(os.sep)[-1])
     except Exception as e:
-        err = 'Could not open readme: {}'.format(str(e))
+        err = 'Could not open file: {}'.format(str(e))
         log.warning(err)
 
         return response.server_failure(err)
