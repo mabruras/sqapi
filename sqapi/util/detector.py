@@ -4,26 +4,22 @@ import logging
 import os
 from os import path
 
-from sqapi.db import postgres
 from sqapi.connectors.listeners import rabbitmq
+from sqapi.db import postgres
 
 log = logging.getLogger(__name__)
 
 
 def detect_plugins():
     directory = os.sep.join(['sqapi', 'plugins'])
-    package = '.'.join(directory.split(os.sep))
-    plugins = {}
 
-    log.debug('Detecting plugins in dir {}, importing as package {}'.format(directory, package))
-    plugin_list = ['.'.join([package, d]) for d
-                   in os.listdir(directory)
-                   if path.isdir(path.join(directory, d))
-                   and not d.startswith('__')]
+    log.debug('Detecting plugins in dir {}'.format(directory))
+    plugin_list = detect_modules(directory, True)
 
     log.info('Found {} available plugins'.format(len(plugin_list)))
     log.debug(plugin_list)
 
+    plugins = {}
     for plugin_name in plugin_list:
         log.debug('Importing plugin: {}'.format(plugin_name))
         plugin = importlib.import_module(plugin_name)
@@ -54,7 +50,7 @@ def detect_listener(config):
     listener_type = config.get('type', 'rabbitmq')
 
     # TODO: More generic selection of listener type?
-    # Eg.: 
+    # Eg.:
     # listeners = { 'listener-name': listener_module }
     # clazz = listeners.get(listener_type, None)
     # if not clazz: raise Error(err) else return clazz(config)
@@ -68,3 +64,19 @@ def detect_listener(config):
         raise AttributeError(err)
 
     return clazz(config)
+
+
+def detect_modules(directory, res_as_dir=False):
+    package = '.'.join(directory.split(os.sep))
+
+    return [
+        '.'.join([package, e]) for e in os.listdir(directory)
+
+        if not e.startswith('__') and (
+                (
+                        res_as_dir and path.isdir(path.join(directory, e))
+                ) or (
+                        not res_as_dir and path.isfile(path.join(directory, e))
+                )
+        )
+    ]
