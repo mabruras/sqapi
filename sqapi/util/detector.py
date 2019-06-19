@@ -59,6 +59,23 @@ def detect_listener(config):
         raise AttributeError(err)
 
 
+def detect_data_connectors(config):
+    log.debug('Looking up data store connector type in configuration')
+    log.debug(config)
+
+    target_module = config.get('type', 'disk')
+    directory = os.sep.join(['sqapi', 'connectors', 'data'])
+
+    try:
+        module = find_module(target_module, directory)
+
+        return module
+    except Exception as e:
+        err = '{} is not a supported Database type: '.format(target_module, str(e))
+        log.warning(err)
+        raise AttributeError(err)
+
+
 def find_module(target_module, directory):
     module_dict = detect_modules(directory)
 

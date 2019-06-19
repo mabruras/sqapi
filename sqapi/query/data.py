@@ -1,8 +1,7 @@
 #! /usr/bin/env python3
-import io
 import logging
 
-from sqapi.connectors.data import swift
+from sqapi.util import detector
 
 log = logging.getLogger(__name__)
 
@@ -15,20 +14,11 @@ def fetch_data(config, message):
         raise AttributeError(err)
 
     try:
-        # TODO: More generic selection of metadata store?
-        data_store = config.data_store.get('type', 'disk')
-        if not data_store or data_store.lower() == 'disk':
-            log.info('Disk (default) was detected as data store')
-            return fetch_file_from_disk(loc)
+        data_store = detector.detect_data_connectors(config.data_store)
 
-        elif data_store.lower() == 'swift':
-            log.info('OpenStack Swift was detected as data store')
-            disk_loc = swift.download_to_disk(config, loc)
-            return fetch_file_from_disk(disk_loc)
+        disk_loc = data_store.download_to_disk(config, loc)
 
-        else:
-            log.warning('{} is not a supported data store'.format(type))
-            return io.BytesIO(bytes())
+        return fetch_file_from_disk(disk_loc)
     except FileNotFoundError as e:
         err = 'Data by reference {} was not available at this moment: {}'.format(loc, str(e))
         log.warning(err)
