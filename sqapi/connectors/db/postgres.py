@@ -17,7 +17,7 @@ DB_TYPE = 'postgres'
 log = logging.getLogger(__name__)
 
 
-class Postgres:
+class Database:
 
     def __init__(self, config):
         self.cfg = config
