@@ -6,7 +6,7 @@ import redis
 log = logging.getLogger(__name__)
 
 
-def fetch_metadata_as_dict(config, reference):
+def fetch_metadata(config, reference):
     log.debug('Fetching metadata from Redis')
     host = config.meta_store.get('host', 'localhost')
     port = config.meta_store.get('port', 6379)

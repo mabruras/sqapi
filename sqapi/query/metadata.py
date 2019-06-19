@@ -2,7 +2,7 @@
 import json
 import logging
 
-from sqapi.connectors.meta import redis
+from sqapi.util import detector
 
 log = logging.getLogger(__name__)
 
@@ -14,15 +14,13 @@ def fetch_metadata(config, message):
         log.warning(err)
         raise AttributeError(err)
 
-    # TODO: More generic selection of metadata store?
-    # meta_store = config.cfg_meta('type', 'redis')
-    meta_store, uuid_ref = loc.split('/')
+    try:
+        meta_store = detector.detect_meta_connectors(config.meta_store)
 
-    if not meta_store or meta_store.lower() == 'redis':
-        log.info('Redis (default) was detected as metadata store')
-        out = redis.fetch_metadata_as_dict(config, uuid_ref)
+        out = meta_store.fetch_metadata(config, loc)
 
         return json.loads(out)
-    else:
-        log.warning('{} is not a supported metadata store'.format(type))
-        return dict()
+    except FileNotFoundError as e:
+        err = 'Metadata by reference {} was not available at this moment: {}'.format(loc, str(e))
+        log.warning(err)
+        raise LookupError(err)

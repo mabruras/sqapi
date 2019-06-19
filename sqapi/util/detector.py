@@ -33,7 +33,7 @@ def detect_database(config):
     directory = os.sep.join(['sqapi', 'connectors', 'db'])
 
     try:
-        module = find_module(target_module, directory)
+        module = import_module(target_module, directory)
 
         return module.Database(config)
     except Exception as e:
@@ -50,7 +50,7 @@ def detect_listener(config):
     directory = os.sep.join(['sqapi', 'connectors', 'listeners'])
 
     try:
-        module = find_module(target_module, directory)
+        module = import_module(target_module, directory)
 
         return module.Listener(config)
     except Exception as e:
@@ -67,16 +67,29 @@ def detect_data_connectors(config):
     directory = os.sep.join(['sqapi', 'connectors', 'data'])
 
     try:
-        module = find_module(target_module, directory)
-
-        return module
+        return import_module(target_module, directory)
     except Exception as e:
-        err = '{} is not a supported Database type: '.format(target_module, str(e))
+        err = '{} is not a supported Data Store type: '.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
 
-def find_module(target_module, directory):
+def detect_meta_connectors(config):
+    log.debug('Looking up metadata store connector type in configuration')
+    log.debug(config)
+
+    target_module = config.get('type', 'redis')
+    directory = os.sep.join(['sqapi', 'connectors', 'meta'])
+
+    try:
+        return import_module(target_module, directory)
+    except Exception as e:
+        err = '{} is not a supported Metadata Store type: '.format(target_module, str(e))
+        log.warning(err)
+        raise AttributeError(err)
+
+
+def import_module(target_module, directory):
     module_dict = detect_modules(directory)
 
     log.debug('Found {} available modules'.format(len(module_dict)))
