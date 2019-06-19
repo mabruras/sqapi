@@ -178,15 +178,17 @@ sqAPI is based on having all of its business logic implemented as plugins.
 To contribute with a new plugin, please see [the plugin section](resources/docs/PLUGINS.md)
 for information regarding structure, requirements and implementation details.
 
-## Support
-*sqAPI* supports a given set of external systems.
+## Connectors
+*sqAPI* supports a given set of connectors for external systems.
 If you have a system not supported, feel free to report an issue or create a pull request.
 
-Each of these external connections should support as many external systems as possible.
+Each of these external connection Topics should support as many external systems as possible.
 The more, the merrier!
 
-#### External connections
-* Database
-* Data Store
-* Metadata Store
-* Message Broker
+For detailed information, see [the Connectors section](resources/docs/CONNECTORS.md)
+
+#### Connection Topics
+* [Database](resources/docs/CONNECTORS.md#database)
+* [Data Store](resources/docs/CONNECTORS.md#data-store)
+* [Metadata Store](resources/docs/CONNECTORS.md#metadata-store)
+* [Message Broker](resources/docs/CONNECTORS.md#message-broker)

@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 class Database:
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         self.cfg = config
         self.cfg_con = config.get('connection')
         self.init_script = config.get('init', None)

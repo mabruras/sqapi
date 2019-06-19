@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class Listener:
 
-    def __init__(self, config: dict = None):
+    def __init__(self, config: dict):
         config = config if config else dict()
         log.info('Loading RabbitMQ')
 
