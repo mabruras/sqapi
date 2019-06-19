@@ -8,7 +8,7 @@ from pika.exceptions import StreamLostError
 log = logging.getLogger(__name__)
 
 
-class RabbitMQ:
+class Listener:
 
     def __init__(self, config: dict = None):
         config = config if config else dict()

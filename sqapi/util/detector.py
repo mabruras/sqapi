@@ -4,7 +4,6 @@ import logging
 import os
 from os import path
 
-from sqapi.connectors.listeners import rabbitmq
 from sqapi.db import postgres
 
 log = logging.getLogger(__name__)
@@ -14,15 +13,15 @@ def detect_plugins():
     directory = os.sep.join(['sqapi', 'plugins'])
 
     log.debug('Detecting plugins in dir {}'.format(directory))
-    plugin_list = detect_modules(directory, True)
+    plugin_dict = detect_modules(directory, True)
 
-    log.info('Found {} available plugins'.format(len(plugin_list)))
-    log.debug(plugin_list)
+    log.info('Found {} available plugins'.format(len(plugin_dict)))
+    log.debug(plugin_dict)
 
     plugins = {}
-    for plugin_name in plugin_list:
+    for plugin_name in plugin_dict:
         log.debug('Importing plugin: {}'.format(plugin_name))
-        plugin = importlib.import_module(plugin_name)
+        plugin = importlib.import_module(plugin_dict.get(plugin_name))
         plugins.update({plugin.__name__.split('.')[-1]: plugin})
 
     return plugins
@@ -47,36 +46,34 @@ def detect_database(config):
 def detect_listener(config):
     log.debug('Looking up listener type in configuration')
     log.debug(config)
+
     listener_type = config.get('type', 'rabbitmq')
+    directory = os.sep.join(['sqapi', 'connectors', 'listeners'])
 
-    # TODO: More generic selection of listener type?
-    # Eg.:
-    # listeners = { 'listener-name': listener_module }
-    # clazz = listeners.get(listener_type, None)
-    # if not clazz: raise Error(err) else return clazz(config)
+    try:
+        listener_dict = detect_modules(directory, False)
 
-    if not listener_type or listener_type.lower() == 'rabbitmq':
-        log.info('RabbitMQ (default) detected as listener type')
-        clazz = rabbitmq.RabbitMQ
-    else:
-        err = '{} is not a supported Listener type'.format(type)
+        log.debug('Found {} available listeners'.format(len(listener_dict)))
+        log.debug(listener_dict)
+
+        module = importlib.import_module(listener_dict.get(listener_type))
+
+        return module.Listener(config)
+    except Exception as e:
+        err = '{} is not a supported Listener type: '.format(listener_type, str(e))
         log.warning(err)
         raise AttributeError(err)
 
-    return clazz(config)
 
-
-def detect_modules(directory, res_as_dir=False):
+def detect_modules(directory, res_as_dir=False) -> dict:
     package = '.'.join(directory.split(os.sep))
 
-    return [
-        '.'.join([package, e]) for e in os.listdir(directory)
+    return dict({
+        e.strip('.py'): '.'.join([package, e]).strip('.py')
+        for e in os.listdir(directory)
 
         if not e.startswith('__') and (
-                (
-                        res_as_dir and path.isdir(path.join(directory, e))
-                ) or (
-                        not res_as_dir and path.isfile(path.join(directory, e))
-                )
-        )
-    ]
+            (res_as_dir and path.isdir(path.join(directory, e)))
+            or
+            (not res_as_dir and path.isfile(path.join(directory, e))))
+    })
