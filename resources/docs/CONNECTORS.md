@@ -173,11 +173,15 @@ not used as a static module.
 The module must implement a class: `Listener`, like follows.
 ```python
 class Listener:
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, process_message):
         pass
 ```
 The configuration sent to the init method will contain
 the dictionary with all `msg_broker` configuration defined.
+
+After parsing the message received,
+the result dictionary should be forwarded to `process_message`,
+so the `core.processor` are able to process the message as intended.
 
 ##### Methods
 ###### Listeners

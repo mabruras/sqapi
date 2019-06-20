@@ -42,7 +42,7 @@ def detect_database(config):
         raise AttributeError(err)
 
 
-def detect_listener(config):
+def detect_listener(config, processor_callback):
     log.debug('Looking up listener type in configuration')
     log.debug(config)
 
@@ -52,7 +52,7 @@ def detect_listener(config):
     try:
         module = import_module(target_module, directory)
 
-        return module.Listener(config)
+        return module.Listener(config, processor_callback)
     except Exception as e:
         err = '{} is not a supported Listener type: '.format(target_module, str(e))
         log.warning(err)
