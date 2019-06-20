@@ -49,11 +49,14 @@ After *Main*, the flow is forked into three:
   * Load custom files with `docker cp <file> nifi:/io/input/`
 * `IdentifyMimeType`: Sets `mime.type` as attribute
 * `UpdateAttribute`: Creates attributes for sqAPI message fields
-  * `data_type`: `${mime.type}`
-  * `data_location`: `/io/output/${uuid}`
-  * `meta_location`: `redis/${uuid}`
-  * `uuid_ref`: `${uuid}`
-  * `filename`: `${uuid}`
+
+|     |     |     |
+| --- | --- | --- |
+| `data_type` | `${mime.type}` | Used to define type of data sent to sqAPI |
+| `data_location` | `/io/output/${uuid}` | Reference in the data store system |
+| `meta_location` | `${uuid}` | Reference in the metadata store system |
+| `uuid_ref` | `${uuid}` | Unique ID, kept in `uuid_ref` due to NiFi fork creates new UUIDs |
+| `filename` | `${uuid}` | Overwritten to avoid collision in `PutFile`-processor |
 
 ##### Store file
 * `PutFile`: Stores files on disk
@@ -65,16 +68,22 @@ After *Main*, the flow is forked into three:
 * `PutDistributedMapCache`: Inserts attributes (metadata) as JSON, into Redis
   * `Distributed Cache Service`: `RedisDistributedMapCacheClientService`
     * `Redis Connection Pool`: `RedisConnectionPoolService`
-      * `Connection String`: `redis:6379`
+
+|     |     |     |
+| --- | --- | --- |
+| `Connection String` | `redis:6379` | Host and port number for running Redis instance |
 
 ##### Publish Message
 * `AttributesToJSON`: Extracts metadata from file, and creates new FlowFile with attributes as JSON content
   * `Destination`: `flowfile-content`
   * `Attributes List`: `data_type, data_location, meta_location, uuid_ref`
 * `PublishAMQP`: Publish messages to RabbitMQ
-  * `Exchange Name`: `x_sqapi`
-  * `Routing Key`: `q_sqapi`
-  * `Host Name`: `mq`
+
+|     |     |     |
+| --- | --- | --- |
+| `Exchange Name` | `x_sqapi` | Name of exchange the message should be pushed towards |
+| `Routing Key` | `q_sqapi` | Name of the queue to push towards. Is required, but will be ignored by RabbitMQ |
+| `Host Name` | `mq` | Host of the running RabbitMQ instance |
 
 
 ## Data Store
