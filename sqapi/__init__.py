@@ -41,16 +41,14 @@ class SqapiApplication:
         log.info('Initialization done')
 
     def start(self):
-        for p in self.processors:
-            log.debug('Starting processor for plugin {}'.format(p.name))
-            if self.sqapi_type == 'loader':
+        if not self.sqapi_type or self.sqapi_type == 'loader':
+            for p in self.processors:
+                log.debug('Starting processor for plugin {}'.format(p.name))
                 p.start_loader()
-            elif self.sqapi_type == 'api':
-                self.start_api()
-            else:
-                p.start_loader()
-                self.start_api()
-            log.info('Processor started for plugin {}'.format(p.name))
+                log.info('Processor started for plugin {}'.format(p.name))
+
+        if not self.sqapi_type or self.sqapi_type == 'api':
+            self.start_api()
 
     def start_api(self):
         CORS(self.app)

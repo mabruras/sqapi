@@ -53,6 +53,17 @@ docker run -d -p 5432:5432 postgres
 ./resources/data_producer.py
 ```
 
+### Docker
+To load a set of plugins, it should be mounted as follows.
+The example is taken with usage of the
+[sqAPI Plugins Repository](https://github.com/mabruras/sqapi-plugins).
+```bash
+docker run -d \
+  -p 5000:5000 \
+  -v "${PWD}/../sqapi-plugins":/opt/sqapi/sqapi/plugins \
+  mabruras/sqapi
+```
+
 ## Docker Compose
 The Docker Compose solution will start several containers,
 based on the [example system](resources/docs/EXAMPLE_SYSTEM.md).
