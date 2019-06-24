@@ -175,7 +175,8 @@ feel free to commit a fix or a feature.
 ## Plugins
 sqAPI is based on having all of its business logic implemented as plugins.
 
-To contribute with a new plugin, please see [the plugin section](resources/docs/PLUGINS.md)
+To contribute with a new plugin, please see
+[the plugin repository](https://github.com/mabruras/sqapi-plugins/blob/master/README.md)
 for information regarding structure, requirements and implementation details.
 
 ## Connectors

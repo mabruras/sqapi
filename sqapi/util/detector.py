@@ -107,7 +107,7 @@ def detect_modules(directory, res_as_dir=False) -> dict:
         e.rstrip('.py'): '.'.join([package, e]).strip('.py')
         for e in os.listdir(directory)
 
-        if not e.startswith('__') and (
+        if not e.startswith('__') and not e.startswith('.') and (
             (res_as_dir and path.isdir(path.join(directory, e)))
             or
             (not res_as_dir and path.isfile(path.join(directory, e))))

@@ -1,5 +1,6 @@
 # Template Plugin
-This template plugin is based on the [Sizes plugin](../../../sqapi/plugins/sizes/README.md)
+This template plugin is based on the
+[Sizes plugin](https://github.com/mabruras/sqapi-plugins/blob/master/sizes/README.md),
 extended with more code comments and explanation for the developers.
 
 ## Intention
