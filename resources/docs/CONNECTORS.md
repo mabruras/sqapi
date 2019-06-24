@@ -108,6 +108,12 @@ data_store:
   secret_access_key: 'myS3cr3tK3y'
   auth_url: 'http://localhost:8080/auth/v1.0'
   container: 'testcontainer'
+  auth_version: '3'
+  insecure: 'true'
+  os_options:
+    user_domain_name: 'Default'
+    project_domain_name: 'Default'
+    project_name: 'Default'
 ```
 
 When accessing data, the connector will search for available containers

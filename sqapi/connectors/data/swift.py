@@ -14,7 +14,10 @@ def download_to_disk(config, object_ref):
         connection = swiftclient.Connection(
             user=config.data_store.get('access_key_id'),
             key=config.data_store.get('secret_access_key'),
+            auth_version=config.data_store.get('auth_version'),
+            os_options=config.data_store.get('os_options', dict()),
             authurl=config.data_store.get('auth_url', 'http://localhost:8080/auth/v1.0'),
+            insecure=True if config.data_store.get('insecure').lower() == 'true' else False,
         )
     except Exception as e:
         err = 'Failed establish connection with OpenStack Swift: {}'.format(str(e))
