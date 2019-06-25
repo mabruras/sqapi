@@ -66,6 +66,7 @@ After *Main*, the flow is forked into three:
 * `AttributesToJSON`: Extracts metadata from file, and creates new FlowFile with attributes as JSON content
   * `Destination`: `flowfile-content`
 * `PutDistributedMapCache`: Inserts attributes (metadata) as JSON, into Redis
+  * `Cache Entry Identifier`: `${uuid_ref}`
   * `Distributed Cache Service`: `RedisDistributedMapCacheClientService`
     * `Redis Connection Pool`: `RedisConnectionPoolService`
 

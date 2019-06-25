@@ -142,7 +142,7 @@ class Database:
 
     def update_message(self, message: dict, status: str, info: str = None):
         log.debug('Updating message if it exists')
-        message.update({'status': status, 'info': info, 'id': str(uuid.uuid4())})
+        message.update({'status': status, 'info': info, 'id': message.get('id', str(uuid.uuid4()))})
         script = UPDATE_MESSAGE_SCRIPT if self.get_message(**message) else INSERT_MESSAGE_SCRIPT
         log.debug('Message script decided')
         log.debug(script)
@@ -152,6 +152,7 @@ class Database:
             log.debug('Result of updating message: {}'.format(out))
         except Exception as e:
             log.debug(str(e))
+            out = None
 
         return out
 
