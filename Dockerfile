@@ -16,7 +16,8 @@ RUN             apt-get update \
 
                 # PIP Requirements
 COPY            requirements.txt        ${WRK_DIR}/
-RUN             pip3 install \
+RUN             pip3 install --upgrade pip \
+                && pip3 install \
                   --no-cache-dir -r     ${WRK_DIR}/requirements.txt
 
 COPY            sqapi                   ${WRK_DIR}/sqapi/
