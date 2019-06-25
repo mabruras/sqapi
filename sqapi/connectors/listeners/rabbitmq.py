@@ -6,7 +6,6 @@ import time
 import pika
 from pika.exceptions import StreamLostError
 
-MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 log = logging.getLogger(__name__)
@@ -30,7 +29,7 @@ class Listener:
         self.port = config.get('port', 5672)
 
         self.msg_fields = config.get('message_fields', MSG_FIELDS)
-        self.mime_types = config.get('supported_mime', MIME_TYPES)
+        self.mime_types = config.get('supported_mime', None)
 
         self.test_connection()
 
