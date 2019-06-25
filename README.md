@@ -47,7 +47,7 @@ docker run -d -p 5672:5672 rabbitmq:latest
 docker run -d -p 5432:5432 postgres
 
 # Start sqAPI
-./sqapi/start.py
+./start.py
 
 # Produce test data
 ./resources/data_producer.py
@@ -85,12 +85,12 @@ as well as users are able to access data when the loader is down.
 
 ### sqAPI Loader
 ```bash
-python3 sqapi/start.py loader
+python3 start.py loader
 ```
 
 ### sqAPI API
 ```bash
-python3 sqapi/start.py api
+python3 start.py api
 ```
 
 ## Endpoints
@@ -101,7 +101,7 @@ in addition to the active plugins that is running.
 _TODO: Not implemented yet_
 
 ### Plugins
-A complete list of the active plugins are available at `/plugins`,
+A complete list of the active plugins are available at URI `/plugins`,
 where each plugin contains the following.
 
 #### Output
@@ -144,7 +144,7 @@ where each plugin contains the following.
 
 ### Rules
 List all active and available endpoints for the running instance,
-available at `/rules`.
+available at URI `/rules`.
 
 #### Output
 ##### Field Description

@@ -6,7 +6,6 @@ import time
 import pika
 from pika.exceptions import StreamLostError
 
-MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 log = logging.getLogger(__name__)
@@ -30,7 +29,7 @@ class Listener:
         self.port = config.get('port', 5672)
 
         self.msg_fields = config.get('message_fields', MSG_FIELDS)
-        self.mime_types = config.get('supported_mime', MIME_TYPES)
+        self.mime_types = config.get('supported_mime', None)
 
         self.test_connection()
 
@@ -128,6 +127,8 @@ class Listener:
 
         log.debug('Validating message mime type')
         msg_type = message.get('data_type', 'UNKNOWN')
+        log.debug('Message Mime type: {}'.format(msg_type))
+        log.debug('Accepted Mime types: {}'.format(self.mime_types))
         if self.mime_types and msg_type not in self.mime_types:
             err = 'Mime type {} is not supported by this sqAPI'.format(msg_type)
             log.debug(err)
