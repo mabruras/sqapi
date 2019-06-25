@@ -34,7 +34,7 @@ class SqapiApplication:
                 log.debug('Plugin {} is not listed as active'.format(plugin_name))
                 continue
             log.debug('Registering a processor for plugin {}'.format(plugin_name))
-            processor = Processor(self.config, plugin_name, plugin)
+            processor = Processor(Config(CONFIG_FILE), plugin_name, plugin)
             self.processors.append(processor)
 
         log.info('{} plugin processors created'.format(len(self.processors)))
@@ -90,6 +90,4 @@ class SqapiApplication:
                 log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
 
     def active_plugin(self, plugin_name):
-        active_plugins = self.config.active_plugins
-
-        return not active_plugins or plugin_name in active_plugins
+        return not self.config.active_plugins or plugin_name in self.config.active_plugins
