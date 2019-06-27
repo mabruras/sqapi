@@ -63,12 +63,17 @@ class SqapiApplication:
         self.app.register_blueprint(edge.bp)
 
         self.app.plugins = []
+        self.app.database = dict()
         for p in self.processors:
             log.debug('Registering {} blueprints for plugin {}'.format(len(p.blueprints), p.name))
+            log.debug('Processor configuration: {}'.format(p.config))
+            log.debug('Processor database: {}'.format(p.database))
+
             self.app.config[p.name] = p.config
-            self.app.database = dict({p.name: p.database})
+            self.app.database.update(({p.name: p.database}))
             self.append_plugin_blueprints(p)
             self.register_plugin_blueprints(p)
+            log.debug('Processor information: {}'.format(p.__dict__))
 
     def append_plugin_blueprints(self, p):
         self.app.plugins.append({
