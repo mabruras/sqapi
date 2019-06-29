@@ -1,12 +1,12 @@
 #! /usr/bin/env python
-
+import importlib
 import logging
 import os
 import threading
 
 from sqapi.query import data as d_query
 from sqapi.query import metadata as m_query
-from sqapi.util import detector, cfg_util, plugin_util
+from sqapi.util import detector, cfg_util, plugin_util, packager
 
 STATUS_VALIDATING = 'VALIDATING'
 STATUS_QUERYING = 'QUERYING'
@@ -22,14 +22,22 @@ class Processor:
     def __init__(self, config, plugin_name, plugin):
         self.config = config
 
-        self.plugin = plugin
         self.name = plugin_name
-        self.plugin_dir = os.path.dirname(plugin.__file__)
+        log.info('PLUGIN = {}'.format(plugin))
+        log.info('TEST = {}'.format(__file__))
+        self.plugin_dir = plugin.replace('.', os.sep)
+        log.info('PLUGIN DIR = {}'.format(self.plugin_dir))
         self.config.plugin = {'name': self.name, 'directory': self.plugin_dir}
 
         config_file = os.path.join(self.plugin_dir, 'config.yml')
         custom_config = cfg_util.Config(config_file)
         self.config.merge_config(custom_config)
+
+        if config.packages.get('install', True):
+            log.info('Installing necessary packages for {}'.format(plugin_name))
+            packager.install_packages(self.config.packages)
+
+        plugin = importlib.import_module(plugin)
 
         self.execute = plugin.execute
         blueprints_dir = self.config.api.get('blueprints_directory', None)

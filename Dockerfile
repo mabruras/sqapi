@@ -8,11 +8,16 @@ RUN             useradd -ms /bin/bash sqapi
 RUN             apt-get update \
                 && apt-get install \
                   -y --fix-missing \
+                    python3-virtualenv \
                     python3-numpy \
                     python3-dev \
                     python3-pip \
                 && apt-get clean \
                 && rm -rf /tmp/* /var/tmp/*
+
+ENV             VIRTUAL_ENV=${WRK_DIR}
+RUN             python3 -m venv ${VIRTUAL_ENV}
+ENV             PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
                 # PIP Requirements
 COPY            requirements.txt        ${WRK_DIR}/

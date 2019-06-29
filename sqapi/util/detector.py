@@ -19,8 +19,7 @@ def detect_plugins():
     plugins = {}
     for plugin_name in plugin_dict:
         log.debug('Importing plugin: {}'.format(plugin_name))
-        plugin = importlib.import_module(plugin_dict.get(plugin_name))
-        plugins.update({plugin.__name__.split('.')[-1]: plugin})
+        plugins.update({plugin_name: plugin_dict.get(plugin_name)})
 
     return plugins
 
