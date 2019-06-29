@@ -1,5 +1,8 @@
 # sqAPI
 
+_Are you actually looking for the
+[sqAPI Plugins Repository](https://github.com/mabruras/sqapi-plugins)?_
+
 ## About
 *sqAPI* is a plugin based system for subscribing to messages,
 query towards data- and metadata stores,

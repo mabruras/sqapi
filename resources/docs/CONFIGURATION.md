@@ -91,13 +91,23 @@ msg_broker:
 
 ##### Plugin Specific
 To overwrite and/or append, add specific mime types to support.
-To accept all mime-types sent, do *not* define any fields.
 ```yaml
 msg_broker:
   supported_mime:
   - 'image/jpeg'
   - 'image/png'
   - 'image/gif'
+```
+To accept all mime-types sent, do *not* define any fields.
+```yaml
+# Empty list
+msg_broker:
+  supported_mime:
+```
+or
+```yaml
+# Left out field
+msg_broker:
 ```
 
 
