@@ -1,5 +1,8 @@
 # sqAPI
 
+_Are you actually looking for the
+[sqAPI Plugins Repository](https://github.com/mabruras/sqapi-plugins)?_
+
 ## About
 *sqAPI* is a plugin based system for subscribing to messages,
 query towards data- and metadata stores,
@@ -34,10 +37,30 @@ The orange areas (_Processor Execution_ and _Resources_) are custom logic for ea
 
 
 # Getting Started
+## Docker Compose
+The Docker Compose solution will start several containers,
+based on the [example system](resources/docs/EXAMPLE_SYSTEM.md),
+where you can follow a guide to set up a complete working solution.
+
+With this Docker Compose file,
+each of the components are linked together in the same Docker Network.
+
+The Docker Compose solution is built and started with the following
+```bash
+docker-compose build
+docker-compose up -d
+```
+
 ## sqAPI
 ### Prerequisites
-sqAPI is dependent on receiving messages, and being able to fetch elements from external systems.
-Use the following to start the external systems, the internal database and sqAPI.
+sqAPI is dependent on receiving messages,
+and being able to fetch elements from external systems.
+Use the following to start the external systems;
+a Redis as metadata store, a RabbitMQ as message broker,
+a PostgreSQL as the internal database and sqAPI itself.
+
+In this example, the data store is represented by `disk`
+at the host running the solution.
 
 Use [data producer](resources/test/data_producer.py) to insert test data.
 ```bash
@@ -62,17 +85,6 @@ docker run -d \
   -p 5000:5000 \
   -v "${PWD}/../sqapi-plugins":/opt/sqapi/sqapi/plugins \
   mabruras/sqapi
-```
-
-## Docker Compose
-The Docker Compose solution will start several containers,
-based on the [example system](resources/docs/EXAMPLE_SYSTEM.md).
-Each of the components are linked together in the same Docker Network.
-
-The Docker Compose solution is built and started with the following
-```bash
-docker-compose build
-docker-compose up -d
 ```
 
 ## sq & API

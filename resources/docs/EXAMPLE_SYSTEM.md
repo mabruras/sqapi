@@ -3,6 +3,8 @@ This is a document describing how an example system can be created,
 where you have the whole flow from the Data Loader,
 through the data aggregation and exposing the data to the end user.
 
+**Note: this is a guide to setup your own example system!**
+
 ## Components
 This example consist of a set of components, all intended to populate a central storage unit,
 execute specific logic on receive message and expose the aggregated data to the users.
