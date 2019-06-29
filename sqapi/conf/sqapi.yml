@@ -1,3 +1,6 @@
+packages:
+  install: True
+
 msg_broker:
   type: 'rabbitmq'
   host: 'mq'

@@ -20,6 +20,7 @@ class Config:
         self.active_plugins = cfg.get('active_plugins', [])
         self.api = cfg.get('api', {})
         self.custom = cfg.get('custom', {})
+        self.packages = cfg.get('packages', {})
 
     def merge_config(self, override):
         self.plugin.update(override.plugin)
@@ -30,6 +31,7 @@ class Config:
         self.active_plugins.extend(override.active_plugins)
         self.api.update(override.api)
         self.custom.update(override.custom)
+        self.packages.update(override.packages)
 
 
 def load_config(config_file):

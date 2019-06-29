@@ -22,6 +22,7 @@ where each topic is a dictionary consistent of the defined fields with values.
 
 Typically the configuration exposes the following topics:
 ```yaml
+packages:
 plugin:
 msg_broker:
 meta_store:
@@ -48,6 +49,30 @@ dependent on where the fields are intended to be used.
 
 It is important to note that you are able to overwrite configuration in each plugin.
 So if you need to append information to a topic, you do so by defining it in the plugin config.
+
+
+### Packages
+It is possible to specify PIP packages to install for each custom sqAPI Plugin.
+In the main configuration, it should be defined
+if custom packages are to be installed or not - default is `True`.
+
+The `install` field is possible to overwrite in the plugin config files,
+to avoid the packages of a plugin to be installed.
+
+##### Example
+```yaml
+packages:
+  install: True # Default is True, if not defined
+```
+
+##### Plugin Specific
+In each plugin, the PIP packages should be defined.
+```yaml
+packages:
+  install: True # Optional in plugin specific config
+  pip:
+  - 'Pillow'
+```
 
 
 ### Plugin Details
