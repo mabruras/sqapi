@@ -12,6 +12,7 @@ RUN             apt-get update \
                     python3-numpy \
                     python3-dev \
                     python3-pip \
+                    cmake \
                 && apt-get clean \
                 && rm -rf /tmp/* /var/tmp/*
 
