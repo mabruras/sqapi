@@ -23,10 +23,7 @@ class Processor:
         self.config = config
 
         self.name = plugin_name
-        log.info('PLUGIN = {}'.format(plugin))
-        log.info('TEST = {}'.format(__file__))
         self.plugin_dir = plugin.replace('.', os.sep)
-        log.info('PLUGIN DIR = {}'.format(self.plugin_dir))
         self.config.plugin = {'name': self.name, 'directory': self.plugin_dir}
 
         config_file = os.path.join(self.plugin_dir, 'config.yml')

@@ -94,7 +94,7 @@ class Database:
             raise ConnectionError(err)
 
         if not os.path.exists(script_path):
-            err = 'Initialization script path {} does not exists'.format(script_path)
+            err = 'Script path "{}" does not exists'.format(script_path)
             log.warning(err)
             raise FileNotFoundError(err)
 
