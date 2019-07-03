@@ -28,24 +28,32 @@ class SqapiApplication:
         self.config = Config(CONFIG_FILE)
 
         self.processors = []
-        log.info('Searching for available and active plugins')
+        self.failed_processors = []
+        log.debug('Searching for available and active plugins')
         for plugin_name, plugin in detector.detect_plugins().items():
             if not self.active_plugin(plugin_name):
                 log.debug('Plugin {} is not listed as active'.format(plugin_name))
                 continue
-            log.debug('Registering a processor for plugin {}'.format(plugin_name))
-            processor = Processor(Config(CONFIG_FILE), plugin_name, plugin)
-            self.processors.append(processor)
+            try:
+                log.debug('Registering a processor for plugin {}'.format(plugin_name))
+                processor = Processor(Config(CONFIG_FILE), plugin_name, plugin)
+                self.processors.append(processor)
+            except Exception as e:
+                err = 'Could not register plugin {} ({}): {}'.format(plugin_name, plugin, str(e))
+                log.warning(err)
+                self.failed_processors.append({
+                    plugin_name: err
+                })
 
-        log.info('{} plugin processors created'.format(len(self.processors)))
-        log.info('Initialization done')
+        log.info('{} plugin processor(/s) registered'.format(len(self.processors)))
+        log.info('{} plugin processor(/s) failed at registering'.format(len(self.failed_processors)))
 
     def start(self):
         if not self.sqapi_type or self.sqapi_type == 'loader':
             for p in self.processors:
                 log.debug('Starting processor for plugin {}'.format(p.name))
                 p.start_loader()
-                log.info('Processor started for plugin {}'.format(p.name))
+                log.debug('Processor started for plugin {}'.format(p.name))
 
         if not self.sqapi_type or self.sqapi_type == 'api':
             self.start_api()
