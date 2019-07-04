@@ -107,7 +107,8 @@ data_store:
   access_key_id: 'group:user'
   secret_access_key: 'myS3cr3tK3y'
   auth_url: 'http://localhost:8080/auth/v1.0'
-  container: 'testcontainer'
+  containers:
+  - 'testcontainer'
   auth_version: '3'
   insecure: 'true'
   os_options:
@@ -118,7 +119,7 @@ data_store:
 
 When accessing data, the connector will search for available containers
 and try to retrieve the object from it, until it finds it.
-This is possible to avoid by specify a specific container in the configuration.
+This is possible to avoid by specify a specific a list of containers in the configuration.
 
 
 ### Metadata Store

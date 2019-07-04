@@ -39,25 +39,24 @@ def download_to_disk(config, object_ref):
 
 
 def _search_containers_for_object(config, connection, object_ref):
-    container = config.data_store.get('container')
-    if not container:
-        log.debug('No container defined in config, searching all containers avilable')
-        # Search for object in all containers
-        for c in connection.get_account()[-1]:
-            log.debug('Looking for object {} in container {}'.format(object_ref, c.get('name')))
-            res = _get_object_from_container(connection, c.get('name'), object_ref)
-            if res:
-                log.debug('Found object {} in container {}'.format(object_ref, c.get('name')))
-                return res
-            log.warning('Could not find object {} in container {}'.format(object_ref, c.get('name')))
-    else:
-        return _get_object_from_container(connection, container, object_ref)
+    containers = config.data_store.get('containers')
+    if not containers:
+        log.debug('No container defined in config, searching all containers available')
+        containers = connection.get_account()[-1]
+
+    for c in containers:
+        log.debug('Looking for object {} in container {}'.format(object_ref, c.get('name')))
+        res = _get_object_from_container(connection, c.get('name'), object_ref)
+
+        if res:
+            log.debug('Found object {} in container {}'.format(object_ref, c.get('name')))
+            return res
+
+        log.debug('Could not find object {} in container {}'.format(object_ref, c.get('name')))
 
 
 def _get_object_from_container(connection, container, object_ref):
     try:
         return connection.get_object(container, object_ref)
     except swiftclient.ClientException as e:
-        err = 'Failed while getting object {} from container {}: {}'.format(object_ref, container, str(e))
-        log.warning(err)
-        raise FileNotFoundError(err)
+        log.debug('Failed while getting object {} from container {}: {}'.format(object_ref, container, str(e)))
