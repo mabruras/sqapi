@@ -1,4 +1,4 @@
-FROM            python:3.7
+FROM            python:3.7-slim
 
 ENV             WRK_DIR /opt/sqapi
 WORKDIR         ${WRK_DIR}
@@ -12,6 +12,7 @@ RUN             apt-get update \
                     python3-numpy \
                     python3-dev \
                     python3-pip \
+                    libpq-dev \
                     cmake \
                 && apt-get clean \
                 && rm -rf /tmp/* /var/tmp/*
