@@ -229,6 +229,9 @@ active_plugins:
 - thumbnails
 ```
 This will make sqAPI start a loader and/or blueprints, only for each of the plugins listed.
+Not that this is possible to overwrite with `PLUGIN`-environment variable.
+The `PLUGIN`-environment variable is intended to create a sqAPI instance with a single plugin running.
+
 
 ### API
 There isn't much configuration for the API,

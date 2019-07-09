@@ -149,6 +149,17 @@ python3 start.py api
 them in [the endpoint section](resources/docs/ENDPOINTS.md).
 
 
+## Environment Variables
+There are some environment variables, that could be set to overwrite specific default values.
+
+| VARIABLE | EXAMPLE | DESCRIPTION | DEFAULT |
+| :------- | :-----: | :---------- | :-----: |
+| `WRK_DIR`| /opt/sqapi | Directory where sqAPI is located | current directory/`.` |
+| `CFG_FILE`| /opt/sqapi/conf/sqapi.yml | sqAPI main configuration file | `${WRK_DIR}/conf/sqapi.yml` |
+| `LOG_FILE`| /opt/sqapi/conf/logging.conf | sqAPI log configuration file | `${WRK_DIR}/conf/logging.conf` |
+| `PLUGIN`| faces | Specifies a single plugin - disables all other | Empty/`None` |
+
+
 # Contribution
 There are multiple ways to contribute to *sqAPI*:
 * Core logic

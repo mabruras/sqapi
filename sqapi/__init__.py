@@ -13,6 +13,7 @@ PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 CONFIG_DIR = '{pd}{sep}sqapi{sep}conf'.format(pd=PROJECT_DIR, sep=os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
 LOG_FILE = os.environ.get('LOG_FILE', '{}{}logging.conf'.format(CONFIG_DIR, os.sep))
+SINGLE_PLUGIN = os.environ.get('PLUGIN', None)
 
 logging.config.fileConfig(LOG_FILE)
 log = logging.getLogger(__name__)
@@ -103,4 +104,7 @@ class SqapiApplication:
                 log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
 
     def active_plugin(self, plugin_name):
+        if SINGLE_PLUGIN:
+            return SINGLE_PLUGIN == plugin_name
+
         return not self.config.active_plugins or plugin_name in self.config.active_plugins
