@@ -130,7 +130,7 @@ class Listener:
         log.debug('Message Mime type: {}'.format(msg_type))
         log.debug('Accepted Mime types: {}'.format(self.mime_types))
         if self.mime_types and msg_type not in self.mime_types:
-            err = 'Mime type {} is not supported by this sqAPI'.format(msg_type)
+            err = 'Mime type {} is not supported by this sqAPI plugin'.format(msg_type)
             log.debug(err)
             raise NotImplementedError(err)
 
