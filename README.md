@@ -1,5 +1,5 @@
 # sqAPI
-[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENCE)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](resources/docs/LICENCE 'MIT Licence')
 [![](https://img.shields.io/docker/automated/mabruras/sqapi.svg)](https://hub.docker.com/r/mabruras/sqapi 'DockerHub')
 [![](https://img.shields.io/docker/stars/mabruras/sqapi.svg)](https://hub.docker.com/r/mabruras/sqapi 'DockerHub')
 [![](https://img.shields.io/docker/pulls/mabruras/sqapi.svg)](https://hub.docker.com/r/mabruras/sqapi 'DockerHub')

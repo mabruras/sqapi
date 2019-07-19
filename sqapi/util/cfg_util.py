@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 import logging
+import os
+import re
 
 import yaml
 
@@ -36,10 +38,22 @@ class Config:
 
 def load_config(config_file):
     log.info('Loading configuration: {}'.format(config_file))
+    path_matcher = re.compile(r'.*\$\{([^}^{]+)\}.*')
+
+    def path_constructor(loader, node):
+        return os.path.expandvars(node.value)
+
+    class EnvVarLoader(yaml.SafeLoader):
+        def __init__(self, stream):
+            super().__init__(stream)
+
+    EnvVarLoader.add_implicit_resolver('!path', path_matcher, None)
+    EnvVarLoader.add_constructor('!path', path_constructor)
+
     with open(config_file, 'r') as stream:
         try:
             global CONFIG
-            config = yaml.safe_load(stream) or dict()
+            config = yaml.load(stream, Loader=EnvVarLoader) or dict()
         except yaml.YAMLError as e:
             log.warning('Failed parsing yaml config - continues with default configuration')
             log.debug(e)

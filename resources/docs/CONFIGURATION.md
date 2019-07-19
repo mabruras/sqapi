@@ -7,13 +7,28 @@ sqAPI consist of two types of configuration:
 * `sqAPI config`: instance specific
 * `plugin config`: plugin specific
 
-The sqAPI config file, is default located in [sqAPI > conf > sqapi.yml](sqapi/conf/sqapi.yml),
+The sqAPI config file, is default located in [sqAPI > conf > sqapi.yml](../../sqapi/conf/sqapi.yml),
 but can be overwritten with the `CFG_FILE` environment variable.
 
-The plugin config is located in the plugin root directory, named `config.yml` (_not editable_).
+The plugin config is located in the root directory of each plugin, named `config.yml` (_not editable_).
 
 When accessing the `config` object from a plugin,
 it will be accessible as a single set of configuration.
+
+### Environment Variables
+It is supported to use environment variables in the yaml configuration files.
+Each of the configuration files can have custom values for a specific environment.
+
+This could be useful when deploying to multiple environments,
+which uses different external systems based on the environment type; `dev`, `test` etc.
+
+##### Example
+```yaml
+msg_broker:
+  type: ${MSG_BROKER_TYPE}
+  host: ${MSG_BROKER_HOST}
+  port: ${MSG_BROKER_PORT}
+```
 
 
 ## Topics
@@ -89,7 +104,7 @@ plugin:
 
 
 ### Message Broker
-The message broker, usually defined in [sqAPI configuration](../conf/sqapi.yml),
+The message broker, usually defined in [sqAPI configuration](../../sqapi/conf/sqapi.yml),
 must contain a reference to the type of broker and connection details.
 
 Remember to list up minimum required fields of the message (`message_fields`)
