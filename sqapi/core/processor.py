@@ -81,7 +81,8 @@ class Processor:
         except Exception as e:
             try:
                 self.database.update_message(body, STATUS_FAILED, str(e))
-            except:
+            except Exception as _:
+                log.debug('Could not update message status in database: {}'.format(str(_)))
                 pass
             log.warning('{} could not process message'.format(self.name))
             log.warning(str(e))
