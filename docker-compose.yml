@@ -16,8 +16,6 @@ services:
           memory: 20M
       replicas: 1
     command: ['python', 'start.py', 'loader']
-    environment:
-    - 'PYTHONUNBUFFERED=1'
 
     volumes:
     - nifi-io:/io
@@ -44,11 +42,9 @@ services:
           memory: 20M
       replicas: 2
     command: ['python', 'start.py', 'api']
-    environment:
-    - 'PYTHONUNBUFFERED=1'
+
     ports:
     - '5000:5000'
-
     volumes:
     - nifi-io:/io
     - sqapi-files:/opt/app/files
@@ -64,9 +60,9 @@ services:
     restart: unless-stopped
     deploy:
       replicas: 1
+
     ports:
     - '8080:8080'
-
     volumes:
     - nifi-io:/io
     - nifi-conf:/opt/nifi/nifi-current/conf
@@ -78,9 +74,9 @@ services:
     restart: unless-stopped
     deploy:
       replicas: 1
+
     ports:
     - '6379:6379'
-
     healthcheck:
       timeout: 5s
       interval: 5s
@@ -94,9 +90,9 @@ services:
     restart: unless-stopped
     deploy:
       replicas: 1
+
     ports:
     - '5672:5672'
-
     healthcheck:
       timeout: 5s
       interval: 5s
@@ -108,12 +104,12 @@ services:
     image: postgres:${DB_V:-latest}
     container_name: postgres
     restart: unless-stopped
+    user: "postgres:postgres"
     deploy:
       replicas: 1
+
     ports:
     - '5432:5432'
-    user: "postgres:postgres"
-
     healthcheck:
       timeout: 5s
       interval: 5s

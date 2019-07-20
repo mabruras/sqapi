@@ -129,7 +129,8 @@ class Database:
                         try:
                             log.debug('Query executed')
                             return [dict(r) for r in cur.fetchall()]
-                        except:
+                        except Exception as e:
+                            log.debug('No result after query: {}'.format(str(e)))
                             return None
                 except Exception as e:
                     err = 'Could not execute query {}: {}'.format(query, str(e))
