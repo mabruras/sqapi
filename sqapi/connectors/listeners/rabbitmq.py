@@ -15,7 +15,7 @@ class Listener:
 
     def __init__(self, config: dict, process_message):
         config = config if config else dict()
-        self.processor = process_message
+        self.pm_callback = process_message
         log.info('Loading RabbitMQ')
 
         self.retry_interval = float(config.get('retry_interval', 3))
@@ -29,7 +29,6 @@ class Listener:
         self.port = config.get('port', 5672)
 
         self.msg_fields = config.get('message_fields', MSG_FIELDS)
-        self.mime_types = config.get('supported_mime', None)
 
         self.test_connection()
 
@@ -112,7 +111,7 @@ class Listener:
 
             body = self.validate_message(body)
 
-            self.processor(body)
+            self.pm_callback(body)
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
             log.warning(err)
@@ -124,15 +123,6 @@ class Listener:
 
         # Validate fields
         self.validate_fields(message)
-
-        log.debug('Validating message mime type')
-        msg_type = message.get('data_type', 'UNKNOWN')
-        log.debug('Message Mime type: {}'.format(msg_type))
-        log.debug('Accepted Mime types: {}'.format(self.mime_types))
-        if self.mime_types and msg_type not in self.mime_types:
-            err = 'Mime type {} is not supported by this sqAPI plugin'.format(msg_type)
-            log.debug(err)
-            raise NotImplementedError(err)
 
         log.debug('Message validated successfully')
         return message

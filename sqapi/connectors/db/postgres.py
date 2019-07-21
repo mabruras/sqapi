@@ -73,9 +73,7 @@ class Database:
     def initialize_database(self):
         log.info('Initializing Postgres database')
         try:
-            log.debug('Creating messages table if it does not exist')
-            out = self.execute_script(CREATE_MESSAGES_SCRIPT)
-            log.debug('Result of creating messages table: {}'.format(out))
+            self.initialize_message_table()
 
             log.debug('Executes custom initialization script {}'.format(self.init_script))
             out = self.execute_script(self.init_script)
@@ -84,6 +82,11 @@ class Database:
             err = 'Could not initialize database: {}'.format(str(e))
             log.warning(err)
             raise type(e)(err)
+
+    def initialize_message_table(self):
+        log.debug('Creating messages table if it does not exist')
+        out = self.execute_script(CREATE_MESSAGES_SCRIPT)
+        log.debug('Result of creating messages table: {}'.format(out))
 
     def execute_script(self, script_path: str, **kwargs):
         log.debug('Preparing script {}'.format(script_path))

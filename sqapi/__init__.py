@@ -1,10 +1,12 @@
 import logging.config
 import os
+import threading
 
 from flask import Flask
 from flask_cors import CORS
 
 from sqapi.api import edge
+from sqapi.core.process_manager import ProcessManager
 from sqapi.core.processor import Processor
 from sqapi.util import detector
 from sqapi.util.cfg_util import Config
@@ -13,7 +15,6 @@ PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 CONFIG_DIR = '{pd}{sep}sqapi{sep}conf'.format(pd=PROJECT_DIR, sep=os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
 LOG_FILE = os.environ.get('LOG_FILE', '{}{}logging.conf'.format(CONFIG_DIR, os.sep))
-SINGLE_PLUGIN = os.environ.get('PLUGIN', None)
 
 logging.config.fileConfig(LOG_FILE)
 log = logging.getLogger(__name__)
@@ -24,37 +25,15 @@ class SqapiApplication:
     def __init__(self, sqapi_type=None):
         log.info('Initializing application')
         self.sqapi_type = sqapi_type  # Loader / API
-
-        self.app = Flask(__name__)
         self.config = Config(CONFIG_FILE)
 
-        self.processors = []
-        self.failed_processors = []
-        log.debug('Searching for available and active plugins')
-        for plugin_name, plugin in detector.detect_plugins().items():
-            if not self.active_plugin(plugin_name):
-                log.debug('Plugin {} is not listed as active'.format(plugin_name))
-                continue
-            try:
-                log.debug('Registering a processor for plugin {}'.format(plugin_name))
-                processor = Processor(Config(CONFIG_FILE), plugin_name, plugin)
-                self.processors.append(processor)
-            except Exception as e:
-                err = 'Could not register plugin {} ({}): {}'.format(plugin_name, plugin, str(e))
-                log.warning(err)
-                self.failed_processors.append({
-                    plugin_name: err
-                })
-
-        log.info('{} plugin processor(/s) registered'.format(len(self.processors)))
-        log.info('{} plugin processor(/s) failed at registering'.format(len(self.failed_processors)))
+        # TODO: Extract Flask server and API setup to wrapper module
+        self.app = Flask(__name__)
+        self.pm = ProcessManager(self.config)
 
     def start(self):
         if not self.sqapi_type or self.sqapi_type == 'loader':
-            for p in self.processors:
-                log.debug('Starting processor for plugin {}'.format(p.name))
-                p.start_loader()
-                log.debug('Processor started for plugin {}'.format(p.name))
+            self.pm.start_subscribing()
 
         if not self.sqapi_type or self.sqapi_type == 'api':
             self.start_api()
@@ -68,12 +47,12 @@ class SqapiApplication:
         self.app.run(host='0.0.0.0')
 
     def register_blueprints(self):
-        log.info('Registering blueprints for {} plugins'.format(len(self.processors)))
+        log.info('Registering blueprints for {} plugins'.format(len(self.plugins)))
         self.app.register_blueprint(edge.bp)
 
         self.app.plugins = []
         self.app.database = dict()
-        for p in self.processors:
+        for p in self.plugins:
             log.debug('Registering {} blueprints for plugin {}'.format(len(p.blueprints), p.name))
             log.debug('Processor configuration: {}'.format(p.config))
             log.debug('Processor database: {}'.format(p.database))
@@ -102,9 +81,3 @@ class SqapiApplication:
                 self.app.register_blueprint(module.bp)
             except Exception as e:
                 log.warning('Failed when registering blueprint {} for plugin {}: {}'.format(module, p.name, str(e)))
-
-    def active_plugin(self, plugin_name):
-        if SINGLE_PLUGIN:
-            return SINGLE_PLUGIN == plugin_name
-
-        return not self.config.active_plugins or plugin_name in self.config.active_plugins

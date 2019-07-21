@@ -2,18 +2,8 @@
 import importlib
 import logging
 import os
-import threading
 
-from sqapi.query import data as d_query
-from sqapi.query import metadata as m_query
 from sqapi.util import detector, cfg_util, plugin_util, packager
-
-STATUS_VALIDATING = 'VALIDATING'
-STATUS_QUERYING = 'QUERYING'
-STATUS_PROCESSING = 'PROCESSING'
-STATUS_DONE = 'DONE'
-STATUS_RETRY = 'RETRY'
-STATUS_FAILED = 'FAILED'
 
 log = logging.getLogger(__name__)
 
@@ -43,60 +33,6 @@ class Processor:
         self.config.database['init'] = self.validate_db_init_script(self.config.database)
         self.database = detector.detect_database(self.config.database)
         self.database.initialize_database()
-
-        self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
-
-    def start_loader(self):
-        log.info('{}: Starting listeners'.format(self.name))
-        # Setup sqAPI general exchange listener
-        log.debug('Starting Exchange Listener for {}'.format(self.name))
-        threading.Thread(
-            name='{} Exchange Listener'.format(self.name),
-            target=self.listener.listen_exchange
-        ).start()
-
-        # Setup sqAPI unique queue listener
-        log.debug('Starting Queue Listener for {}'.format(self.name))
-        threading.Thread(
-            name='{} Queue Listener'.format(self.name),
-            target=self.listener.listen_queue
-        ).start()
-
-    def process_message(self, body: dict):
-
-        try:
-            log.info('Processing started')
-            # Query
-            data, meta = self.query(body)
-
-            self.database.update_message(body, STATUS_PROCESSING)
-
-            log.info('Executing logic for {} plugin'.format(self.name))
-            self.execute(self.config, self.database, body, meta, data)
-            self.database.update_message(body, STATUS_DONE)
-            log.info('Processing completed')
-        except LookupError as e:
-            self.database.update_message(body, STATUS_RETRY, str(e))
-            log.warning('Could not fetch data and/or metadata at this point: {}'.format(str(e)))
-        except Exception as e:
-            try:
-                self.database.update_message(body, STATUS_FAILED, str(e))
-            except Exception as _:
-                log.debug('Could not update message status in database: {}'.format(str(_)))
-                pass
-            log.warning('{} could not process message'.format(self.name))
-            log.warning(str(e))
-            log.debug(body)
-
-    def query(self, message):
-        log.info('Querying metadata and data stores')
-        self.database.update_message(message, STATUS_QUERYING)
-
-        data = d_query.fetch_data(self.config, message)
-        meta = m_query.fetch_metadata(self.config, message)
-
-        log.debug('Queries completed')
-        return data, meta
 
     def validate_db_init_script(self, config):
         init_path = config.get('init', None)
