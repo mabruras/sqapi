@@ -35,5 +35,3 @@ meta_store:
 
 data_store:
   type: 'disk'
-
-active_plugins:
