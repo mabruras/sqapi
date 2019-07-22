@@ -17,6 +17,17 @@ msg_broker:
   - 'meta_location'
   - 'uuid_ref'
 
+database:
+  type: 'postgres'
+  init: 'scripts/init.sql'
+  connection:
+    name: 'postgres'
+    port: '5432'
+    user: 'postgres'
+    host: 'db'
+    password: 'postgres'
+    timeout: 2
+
 meta_store:
   type: 'redis'
   host: 'redis'
@@ -24,3 +35,5 @@ meta_store:
 
 data_store:
   type: 'disk'
+
+active_plugins:

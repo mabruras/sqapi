@@ -6,6 +6,8 @@ import time
 import pika
 from pika.exceptions import StreamLostError
 
+from sqapi.core.message import Message
+
 MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 log = logging.getLogger(__name__)
@@ -111,7 +113,7 @@ class Listener:
 
             body = self.validate_message(body)
 
-            self.pm_callback(body)
+            self.pm_callback(Message(body))
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
             log.warning(err)

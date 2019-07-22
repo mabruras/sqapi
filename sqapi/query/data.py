@@ -6,7 +6,7 @@ from sqapi.util import detector
 log = logging.getLogger(__name__)
 
 
-def fetch_data(config, message):
+def download_data(config, message: dict):
     loc = message.get('data_location', None)
     if not loc:
         err = 'Could not find "data_location" in message'
@@ -18,7 +18,7 @@ def fetch_data(config, message):
 
         disk_loc = data_store.download_to_disk(config, loc)
 
-        return fetch_file_from_disk(disk_loc)
+        return disk_loc
     except FileNotFoundError as e:
         err = 'Data by reference {} was not available at this moment: {}'.format(loc, str(e))
         log.warning(err)

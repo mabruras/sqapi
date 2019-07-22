@@ -20,7 +20,7 @@ class Processor:
         custom_config = cfg_util.Config(config_file)
         self.config.merge_config(custom_config)
 
-        if config.packages.get('install', True):
+        if self.config.packages.get('install', True):
             log.info('Installing necessary packages for {}'.format(plugin_name))
             packager.install_packages(self.config.packages)
 

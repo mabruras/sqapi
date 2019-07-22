@@ -7,7 +7,7 @@ from sqapi.util import detector
 log = logging.getLogger(__name__)
 
 
-def fetch_metadata(config, message):
+def fetch_metadata(config, message: dict):
     loc = message.get('meta_location', None)
     if not loc:
         err = 'Could not find "meta_location" in message'

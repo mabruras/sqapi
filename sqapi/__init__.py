@@ -1,13 +1,11 @@
 import logging.config
 import os
-import threading
 
 from flask import Flask
 from flask_cors import CORS
 
 from sqapi.api import edge
 from sqapi.core.process_manager import ProcessManager
-from sqapi.core.processor import Processor
 from sqapi.util import detector
 from sqapi.util.cfg_util import Config
 
@@ -47,15 +45,14 @@ class SqapiApplication:
         self.app.run(host='0.0.0.0')
 
     def register_blueprints(self):
-        log.info('Registering blueprints for {} plugins'.format(len(self.plugins)))
+        log.info('Registering blueprints for {} plugins'.format(len(self.pm.plugins)))
         self.app.register_blueprint(edge.bp)
 
         self.app.plugins = []
         self.app.database = dict()
-        for p in self.plugins:
+        for p in self.pm.plugins:
             log.debug('Registering {} blueprints for plugin {}'.format(len(p.blueprints), p.name))
             log.debug('Processor configuration: {}'.format(p.config))
-            log.debug('Processor database: {}'.format(p.database))
 
             self.app.config[p.name] = p.config
             self.app.database.update(({p.name: p.database}))
