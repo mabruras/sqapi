@@ -7,20 +7,23 @@ sqAPI consist of two types of configuration:
 * `sqAPI config`: instance specific
 * `plugin config`: plugin specific
 
-The sqAPI config file, is default located in [sqAPI > conf > sqapi.yml](../../sqapi/conf/sqapi.yml),
+The sqAPI config file, is default located in
+[sqAPI > conf > sqapi.yml](https://github.com/mabruras/sqapi/blob/master/sqapi/conf/sqapi.yml),
 but can be overwritten with the `CFG_FILE` environment variable.
 
-The plugin config is located in the root directory of each plugin, named `config.yml` (_not editable_).
+The plugin configuration is located in the root directory
+of each plugin, named `config.yml` (_not editable_).
 
 When accessing the `config` object from a plugin,
 it will be accessible as a single set of configuration.
+This means that the configuration defined in sqAPI-config
+will be overwritten by the plugin-config.
 
 ### Environment Variables
-It is supported to use environment variables in the yaml configuration files.
+It is supported to use environment variable substitution in the configuration files.
 Each of the configuration files can have custom values for a specific environment.
-
-This could be useful when deploying to multiple environments,
-which uses different external systems based on the environment type; `dev`, `test` etc.
+This could be useful when deploying to multiple environments, which then
+could use different external systems based on the environment type; `dev`, `test` etc.
 
 ##### Example
 ```yaml
@@ -35,7 +38,7 @@ msg_broker:
 The config object will be populated as a set of topics,
 where each topic is a dictionary consistent of the defined fields with values.
 
-Typically the configuration exposes the following topics:
+The configuration will expose the following topics:
 ```yaml
 packages:
 plugin:
@@ -48,8 +51,7 @@ api:
 custom:
 ```
 
-The `plugin` topic is defined for each plugin,
-and is not intended used outside the defined plugin.
+The `plugin` topic is defined for each plugin, and is not intended used outside the defined plugin.
 
 #### sqAPI vs. plugin
 What should be defined in which config?
@@ -64,6 +66,13 @@ dependent on where the fields are intended to be used.
 
 It is important to note that you are able to overwrite configuration in each plugin.
 So if you need to append information to a topic, you do so by defining it in the plugin config.
+
+##### Duplicate Topic
+The `database`-topic is quite unique, since sqAPI needs
+a place to store the status of each received message.
+
+sqAPI needs a database configuration to store messages,
+this does not need to be any of the databases used by the plugins.
 
 
 ### Packages
@@ -82,6 +91,7 @@ packages:
 
 ##### Plugin Specific
 In each plugin, the PIP packages should be defined.
+This ensures documentation in addition to the README of each plugin.
 ```yaml
 packages:
   install: True # Optional in plugin specific config
@@ -104,7 +114,8 @@ plugin:
 
 
 ### Message Broker
-The message broker, usually defined in [sqAPI configuration](../../sqapi/conf/sqapi.yml),
+The message broker, usually defined in
+[sqAPI configuration](https://github.com/mabruras/sqapi/blob/master/sqapi/conf/sqapi.yml),
 must contain a reference to the type of broker and connection details.
 
 Remember to list up minimum required fields of the message (`message_fields`)
@@ -209,12 +220,13 @@ data_store:
 The database is usually specific for each sqAPI plugin,
 but can be general as well - dependent on your system setup.
 
-##### Example
-```yaml
-# It isn't recommended to define this at sqAPI top-level configuration
-```
+Have in mind that there always need to be defined a database connection
+in the sqAPI configuration - to be able to handle received messages.
 
-##### Plugin Specific
+#### Postgres
+Uses `psycopg2` to connect towards a PostgreSQL instance.
+
+##### Example
 ```yaml
 database:
   type: 'postgres'
@@ -228,6 +240,12 @@ database:
     timeout: 2
 ```
 
+##### Plugin Specific
+```yaml
+# In cases where reuse of the sqAPI-database is intended,
+# do not define any in the plugin configuration.
+```
+
 
 ### Active Plugins
 One of the intentions behind sqAPI is to be able activating only specific plugins,
@@ -237,6 +255,12 @@ So when using sqAPI, there should explicitly be defined which plugins are intend
 If none is listed, all will be activated.
 This is in case the sqAPI should run all plugins, to avoid forgetting to list some of them.
 
+**Pro tip**:
+The `PLUGIN`-environment variable is intended to create a sqAPI instance with a single plugin running.
+This is useful when deploying containers on specific nodes on an orchestrator like Docker Swarm.
+
+_Eg. some logic runs better on a GPU, it might be better to tag some plugins to specific hardware._
+
 ##### Example
 ```yaml
 active_plugins:
@@ -245,7 +269,6 @@ active_plugins:
 ```
 This will make sqAPI start a loader and/or blueprints, only for each of the plugins listed.
 Not that this is possible to overwrite with `PLUGIN`-environment variable.
-The `PLUGIN`-environment variable is intended to create a sqAPI instance with a single plugin running.
 
 
 ### API
