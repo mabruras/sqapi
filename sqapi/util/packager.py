@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def install_packages(packages):
-    for pkg in packages.get('pip', []):
+    for pkg in packages.get('pip') or []:
         log.debug('Installing PIP package "{}"'.format(pkg))
         install_pip_package(pkg)
 

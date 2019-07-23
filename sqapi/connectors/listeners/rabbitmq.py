@@ -30,7 +30,7 @@ class Listener:
         self.host = config.get('host', 'localhost')
         self.port = config.get('port', 5672)
 
-        self.msg_fields = config.get('message_fields', MSG_FIELDS)
+        self.msg_fields = config.get('message_fields') or MSG_FIELDS
 
         self.test_connection()
 
@@ -120,13 +120,10 @@ class Listener:
 
     def validate_message(self, body):
         log.debug('Validating message')
-        # Format
         message = json.loads(body)
-
-        # Validate fields
         self.validate_fields(message)
-
         log.debug('Message validated successfully')
+
         return message
 
     def validate_fields(self, message):

@@ -14,15 +14,15 @@ class Config:
     def __init__(self, config_file):
         cfg = load_config(config_file)
 
-        self.plugin = cfg.get('plugin', {})
-        self.database = cfg.get('database', {})
-        self.msg_broker = cfg.get('msg_broker', {})
-        self.meta_store = cfg.get('meta_store', {})
-        self.data_store = cfg.get('data_store', {})
-        self.active_plugins = cfg.get('active_plugins', {})
-        self.api = cfg.get('api', {})
-        self.custom = cfg.get('custom', {})
-        self.packages = cfg.get('packages', {})
+        self.plugin = cfg.get('plugin') or {}
+        self.database = cfg.get('database') or {}
+        self.msg_broker = cfg.get('msg_broker') or {}
+        self.meta_store = cfg.get('meta_store') or {}
+        self.data_store = cfg.get('data_store') or {}
+        self.active_plugins = cfg.get('active_plugins') or {}
+        self.api = cfg.get('api') or {}
+        self.custom = cfg.get('custom') or {}
+        self.packages = cfg.get('packages') or {}
 
     def merge_config(self, override):
         self.plugin.update(override.plugin)

@@ -1,5 +1,6 @@
 import copy
 import logging
+import multiprocessing
 import os
 import threading
 
@@ -33,8 +34,11 @@ class ProcessManager:
         self.register_plugins()
 
         self.accepted_types = set()
-        for data_types in [p.config.msg_broker.get('supported_mime', []) for p in self.plugins]:
-            self.accepted_types.update(data_types)
+        for plugin in self.plugins:
+            supported_types = plugin.config.msg_broker.get('supported_mime') or ['*']
+            log.debug('Plugin {} accepts data types: {}'.format(plugin.name, supported_types))
+            log.debug('{} msg_broker config: {}'.format(plugin.name, plugin.config.msg_broker))
+            self.accepted_types.update(supported_types)
 
         self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
 
@@ -48,7 +52,7 @@ class ProcessManager:
 
             try:
                 log.debug('Registering a processor for plugin {}'.format(plugin_name))
-                processor = Processor(copy.copy(self.config), plugin_name, plugin)
+                processor = Processor(copy.deepcopy(self.config), plugin_name, plugin)
                 self.plugins.append(processor)
 
             except Exception as e:
@@ -74,14 +78,14 @@ class ProcessManager:
         # Setup sqAPI general exchange listener
         log.debug('Starting Exchange Listener')
         threading.Thread(
-            name='Exchange Listener',
+            name='ExchangeListener',
             target=self.listener.listen_exchange
         ).start()
 
         # Setup sqAPI unique queue listener
         log.debug('Starting Queue Listener')
         threading.Thread(
-            name='Queue Listener',
+            name='QueueListener',
             target=self.listener.listen_queue
         ).start()
 
@@ -96,15 +100,16 @@ class ProcessManager:
             data_path, metadata = self.query(message)
             self.database.update_message(message, STATUS_PROCESSING)
 
-            thread_pool = [
-                threading.Thread(target=plugin.execute, args=[
+            process_pool = [
+                multiprocessing.Process(target=plugin.execute, args=[
                     plugin.config, plugin.database, message.body, metadata, open(data_path, 'rb')
                 ]) for plugin in self.plugins
                 if valid_data_type(message, plugin)
             ]
 
-            [t.start() for t in thread_pool]
-            [t.join() for t in thread_pool]
+            log.debug('Starting pool')
+            [t.start() for t in process_pool]
+            [t.join() for t in process_pool]
 
             self.database.update_message(message, STATUS_DONE)
             log.info('Processing completed')
@@ -131,7 +136,7 @@ class ProcessManager:
         log.debug('Message Mime type: {}'.format(msg_type))
         log.debug('Accepted Mime types: {}'.format(self.accepted_types))
 
-        if self.accepted_types and msg_type not in self.accepted_types:
+        if self.accepted_types and (msg_type not in self.accepted_types and '*' not in self.accepted_types):
             err = 'Mime type {} is not supported by any of the active sqAPI plugins'.format(msg_type)
             log.debug(err)
             raise NotImplementedError(err)
@@ -148,7 +153,7 @@ class ProcessManager:
 
 
 def valid_data_type(message: Message, plugin):
-    accepted_types = plugin.config.msg_broker.get('supported_mime', [])
+    accepted_types = plugin.config.msg_broker.get('supported_mime') or []
     data_type = message.body.get('data_type')
 
     return data_type in accepted_types or not accepted_types
