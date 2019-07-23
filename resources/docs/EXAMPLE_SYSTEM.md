@@ -3,7 +3,7 @@ This is a document describing how an example system can be created,
 where you have the whole flow from the Data Loader,
 through the data aggregation and exposing the data to the end user.
 
-**Note: this is a guide to setup your own example system!**
+**Note: This is a guide to setup your own example system!**
 
 ## Components
 This example consist of a set of components, all intended to populate a central storage unit,
@@ -42,7 +42,7 @@ When uploading a file into NiFi, the *Main*-flow is executed.
 After *Main*, the flow is forked into three:
 *Store File*, *Store Metadata*, *Publish Message*
 
-![NiFi Flow](../images/nifi-flow.png)
+![NiFi Flow](https://github.com/mabruras/sqapi/raw/master/resources/images/nifi-flow.png)
 
 
 ##### Main
@@ -52,6 +52,7 @@ After *Main*, the flow is forked into three:
 * `IdentifyMimeType`: Sets `mime.type` as attribute
 * `UpdateAttribute`: Creates attributes for sqAPI message fields
 
+###### UpdateAttribute properties
 |     |     |     |
 | --- | --- | --- |
 | `data_type` | `${mime.type}` | Used to define type of data sent to sqAPI |
@@ -72,6 +73,7 @@ After *Main*, the flow is forked into three:
   * `Distributed Cache Service`: `RedisDistributedMapCacheClientService`
     * `Redis Connection Pool`: `RedisConnectionPoolService`
 
+###### Redis Connection Pool properties
 |     |     |     |
 | --- | --- | --- |
 | `Connection String` | `redis:6379` | Host and port number for running Redis instance |
@@ -82,6 +84,7 @@ After *Main*, the flow is forked into three:
   * `Attributes List`: `data_type, data_location, meta_location, uuid_ref`
 * `PublishAMQP`: Publish messages to RabbitMQ
 
+###### PublishAMQP properties
 |     |     |     |
 | --- | --- | --- |
 | `Exchange Name` | `x_sqapi` | Name of exchange the message should be pushed towards |
@@ -103,18 +106,18 @@ _Subscription, Query, API_ is a plugin-based component intended to:
 * Serve aggregated data and metadata through the API
 
 New data from the queue will trigger a query and aggregation of the newly incoming data.
-All aggregated data will be stored in a *sqAPI* specific storage solution (`sqAPI Storage`).
-Which database used is dependent on the intentions of the current *sqAPI* and the custom data set.
+All aggregated data will be stored in a sqAPI specific storage solution (`sqAPI Storage`).
+Which database used is dependent on the intentions of the current sqAPI and the custom data set.
 
 When a user wants to access the aggregated data, they will connect to the API,
-and the *sqAPI* will perform necessary searches in its local database.
-If needed, the sqAPI also have access to execute queries towards the `Data Store`
+and the sqAPI will perform necessary searches in its local database.
+If needed, sqAPI also have access to execute queries towards the `Data Store`
 and `Metadata Store` for fetching necessary supplements to return to the user.
 
 
 ## sqAPI Storage
 The sqAPI storage is a chosen storage solution, based on the configuration.
-Each sqAPI plugin will have its own database connection, dependent on its custom data set structure.
+Each sqAPI plugin could have its own database connection, dependent on its custom data set structure.
 
 ### Preparation
 Independent of storage type, there should be a setup function made available,

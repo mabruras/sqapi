@@ -7,17 +7,20 @@ that sqAPI uses to connect towards external systems.
 There are different type of external systems used in sqAPI,
 where there is a Connector Topic for each one.
 
-Within each Topic, there are different connector Types for different system setups/technologies.
+Within each Topic, there are different connector types for different system setups/technologies.
 
-This README defines how to develop new connector Types,
+This README defines how to develop new connector _types_,
 what is required and recommended when developing connectors for sqAPI.
 
-The different Types of connectors are all configurable and replaceable.
+The different types of connectors are all configurable and replaceable.
 Within each of the Connector Topic, there are potentially multiple connector types.
 Each type could have different configuration,
 so make sure to read on before setting up the specific types for the different Topics.
 
 #### Overview
+The following external systems has its own Connector Topic,
+located within the specific topics package.
+
 | External System | Topic | Package | Default Type |
 | --------------- | ----- | ------- | ------------ |
 | `Data Store` | `data` | `sqapi.connectors.data` | `disk` |
@@ -28,17 +31,17 @@ so make sure to read on before setting up the specific types for the different T
 
 ## General
 The general structure of the connectors, is the naming.
-Each module is a `py`-file, where the name of the file represents the connector topic type.
+Each module is a `py`-file, where the name of the file represents the connector Topic type.
 
 Eg.: 
 _Swift_ is a _Connector Type_ of _Data Store_,
 where the _Data Store_ is a _Connector Topic_.
 
-This means that the Connector Type (Swift) should be located as follows:
+This means that the Connector type (Swift) should be located as follows:
 * Directory: `./sqapi/connectors/data/swift.py`
 * Package: `sqapi.connectors.data.swift`
-* x: `y`
-* Configuration:
+
+**Configuration:**
 ```yaml
 data_store:
   type: 'swift'
@@ -49,15 +52,18 @@ or else it will not be loaded in as a connector runtime.
 
 
 ## Topics
-Topics are the different set of Connector Types, which defines an external system - independent of technology.
-Within each Topic, there are multiple Connector Types - which is technology dependent.
+Topics are the different set of Connector types, which defines an external system - independent of technology.
+Within each Topic, there are multiple Connector types - which is technology specific.
+
+This section lists all the Connector topics with complete set of their Connector types,
+thus creating this the main documentation for the Connector topics and -types.
 
 ### Data Store
 Data Store is a Topic for connecting towards a object storage solution.
 The object storage could be everything from a disk storage, to a Amazon S3 bucket.
 
 ###### Structure
-The Data Store Types are not instantiated as objects,
+The Data Store types are not instantiated as objects,
 but used directly as static modules.
 
 
@@ -65,7 +71,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `download_to_disk`.
 See a more detailed example within one of
-[the actual modules](../../sqapi/connectors/data).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/sqapi/connectors/data).
 ```python
 import os
 
@@ -123,19 +129,19 @@ This is possible to avoid by specify a specific a list of containers in the conf
 
 
 ### Metadata Store
-Metadata Store is a Topic for connectors towards where metadata is stored,
-usually stored as key-value pairs.
+Metadata Store is a Topic for connectors querying towards where metadata is located,
+typically the metadata will be stored as key-value pairs.
 A Metadata Store could be a Redis instance, or other key-value based systems.
 
 #### Structure
-The Metadata Store Types are not instantiated as objects,
+The Metadata Store types are not instantiated as objects,
 but used directly as static modules.
 
 #### Requirements
 ##### Functions
 Only required function is `fetch_metadata`.
 See a more detailed example within one of
-[the actual modules](../../sqapi/connectors/meta).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/sqapi/connectors/meta).
 ```python
 def fetch_metadata(config, reference):
     ## 1. Connect to the metadata store
@@ -166,8 +172,8 @@ meta_store:
 
 
 ### Message Broker
-Connector towards the Message Broker is responsible for subscribing
-to a message broker for receiving messages to each plugin to process.
+Connector towards the Message Broker is responsible for subscribing to a
+message broker or -bus for receiving messages to each plugin to process.
 This is the main trigger for loading data into sqAPI,
 and execute the plugins custom logic.
 
@@ -186,9 +192,10 @@ class Listener:
 The configuration sent to the init method will contain
 the dictionary with all `msg_broker` configuration defined.
 
-After parsing the message received,
-the result dictionary should be forwarded to `process_message`,
+After parsing the received message,
+the resulting dictionary should be forwarded to `process_message`,
 so the `core.processor` are able to process the message as intended.
+Definition of `process_message` below.
 
 ##### Methods
 ###### Listeners
@@ -202,14 +209,18 @@ def listen_exchange(self, callback):
 def listen_queue(self, callback, routing_key=None):
     pass
 ```
-The callback sent in looks as follows,
-where the `body` is a dictionary containing the body as key-values.
-This dictionary is to be sent along to the query section for both
-`data` and `metadata` connectors, ending up as argument in each plugin.
+The callback sent looks as follows,
+where the `Message` is a wrapper object containing among others; a `body` attribute.
+The `body` is a dictionary containing the message as key-values.
+The Message object is to be sent along to the query section for both
+`data` and `metadata` connectors.
+The `body` attribute will ending up as argument the execute function in each plugin.
 
 ```python
+from sqapi.core.message import Message
+
 # Callback method located in the core.processor:
-def process_message(self, body: dict):
+def process_message(self, message: Message):
     pass
 ```
 
@@ -246,9 +257,12 @@ msg_broker:
 
 
 ### Database
-The Database Types are dependent on each plugin and their data structure.
-It is possible to create a default connection for the sqAPI instance,
-where each plugin are able to overwrite if necessary, but this is not recommended.
+The sqAPI configuration must have a database connector defined,
+so the process manager are able to store messages received.
+
+The Database types are also dependent on each plugin and their data structure.
+It is possible to reuse the default connection from the sqAPI configuration,
+where each plugin are able to overwrite if necessary.
 
 #### Structure
 The Database connector is an instantiated object,
@@ -271,8 +285,8 @@ the dictionary with all `database` configuration defined.
 
 ##### Methods
 ###### Init
-The database connector needs a initialization method,
-where all the setup is prepared and tested.
+The database connector needs an initialization method,
+where all the setup is prepared and connection is tested.
 ```python
 def initialize_database(self):
     pass
@@ -297,12 +311,14 @@ all the plugins are able to register their status of processing.
 The `core.processor` will call upon this method as a small log,
 in case something breaks while processing the message.
 ```python
-def update_message(self, message: dict, status: str, info: str = None):
+from sqapi.core.message import Message
+
+def update_message(self, message: Message, status: str, info: str = None):
     pass
 ```
 
 ##### Files
-For each of the Database Connector Types, there must be an initialization script,
+For each of the Database Connector types, there must be an initialization script,
 which area of responsibility is to setup necessary adjustments of the database.
 If the `init` fields is missing from the configuration,
 or not an existing file, the sqAPI will not start.

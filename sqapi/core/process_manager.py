@@ -140,8 +140,8 @@ class ProcessManager:
         log.info('Querying metadata and data stores')
         self.database.update_message(message, STATUS_QUERYING)
 
-        data_path = q_data.download_data(self.config, message.body)
-        metadata = q_meta.fetch_metadata(self.config, message.body)
+        data_path = q_data.download_data(self.config, message)
+        metadata = q_meta.fetch_metadata(self.config, message)
 
         log.debug('Queries completed')
         return data_path, metadata
