@@ -55,7 +55,7 @@ class Listener:
 
     def listen_queue(self, routing_key=None):
         self.routing_key = routing_key if routing_key else self.routing_key
-        log.info('Starting Queue listener with routing key: {}'.format(self.routing_key))
+        log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
 
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
@@ -66,7 +66,7 @@ class Listener:
 
         while True:
             try:
-                log.info('Starting to consume from queue: {}'.format(self.routing_key))
+                log.debug('Starting to consume from queue: {}'.format(self.routing_key))
                 channel.start_consuming()
             except StreamLostError as e:
                 log.warning('Lost connection to broker: {}'.format(str(e)))
@@ -77,7 +77,7 @@ class Listener:
         log.info('Finished consuming from queue: {}'.format(self.routing_key))
 
     def listen_exchange(self):
-        log.info('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
+        log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
 
@@ -91,7 +91,7 @@ class Listener:
 
         while True:
             try:
-                log.info('Starting to consume from exchange: {}'.format(self.exchange_name))
+                log.debug('Starting to consume from exchange: {}'.format(self.exchange_name))
                 channel.start_consuming()
             except StreamLostError as e:
                 log.warning('Lost connection to broker: {}'.format(str(e)))
