@@ -6,6 +6,8 @@ import time
 import pika
 from pika.exceptions import StreamLostError
 
+from sqapi.core.message import Message
+
 MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
 
 log = logging.getLogger(__name__)
@@ -15,7 +17,7 @@ class Listener:
 
     def __init__(self, config: dict, process_message):
         config = config if config else dict()
-        self.processor = process_message
+        self.pm_callback = process_message
         log.info('Loading RabbitMQ')
 
         self.retry_interval = float(config.get('retry_interval', 3))
@@ -28,8 +30,7 @@ class Listener:
         self.host = config.get('host', 'localhost')
         self.port = config.get('port', 5672)
 
-        self.msg_fields = config.get('message_fields', MSG_FIELDS)
-        self.mime_types = config.get('supported_mime', None)
+        self.msg_fields = config.get('message_fields') or MSG_FIELDS
 
         self.test_connection()
 
@@ -54,7 +55,7 @@ class Listener:
 
     def listen_queue(self, routing_key=None):
         self.routing_key = routing_key if routing_key else self.routing_key
-        log.info('Starting Queue listener with routing key: {}'.format(self.routing_key))
+        log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
 
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
@@ -65,7 +66,7 @@ class Listener:
 
         while True:
             try:
-                log.info('Starting to consume from queue: {}'.format(self.routing_key))
+                log.debug('Starting to consume from queue: {}'.format(self.routing_key))
                 channel.start_consuming()
             except StreamLostError as e:
                 log.warning('Lost connection to broker: {}'.format(str(e)))
@@ -76,7 +77,7 @@ class Listener:
         log.info('Finished consuming from queue: {}'.format(self.routing_key))
 
     def listen_exchange(self):
-        log.info('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
+        log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = connection.channel()
 
@@ -90,7 +91,7 @@ class Listener:
 
         while True:
             try:
-                log.info('Starting to consume from exchange: {}'.format(self.exchange_name))
+                log.debug('Starting to consume from exchange: {}'.format(self.exchange_name))
                 channel.start_consuming()
             except StreamLostError as e:
                 log.warning('Lost connection to broker: {}'.format(str(e)))
@@ -112,29 +113,17 @@ class Listener:
 
             body = self.validate_message(body)
 
-            self.processor(body)
+            self.pm_callback(Message(body))
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
             log.warning(err)
 
     def validate_message(self, body):
         log.debug('Validating message')
-        # Format
         message = json.loads(body)
-
-        # Validate fields
         self.validate_fields(message)
-
-        log.debug('Validating message mime type')
-        msg_type = message.get('data_type', 'UNKNOWN')
-        log.debug('Message Mime type: {}'.format(msg_type))
-        log.debug('Accepted Mime types: {}'.format(self.mime_types))
-        if self.mime_types and msg_type not in self.mime_types:
-            err = 'Mime type {} is not supported by this sqAPI plugin'.format(msg_type)
-            log.debug(err)
-            raise NotImplementedError(err)
-
         log.debug('Message validated successfully')
+
         return message
 
     def validate_fields(self, message):

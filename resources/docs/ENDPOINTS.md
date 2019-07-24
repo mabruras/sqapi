@@ -1,8 +1,9 @@
 ## Endpoints
 *sqAPI* has some default endpoints activated,
-in addition to the active plugins that is running.
+in addition to the active plugins that are running.
 
-These endpoints will be accessible even if there are no active plugins.
+These endpoints will be accessible even if there are no active plugins,
+even if the sqAPI instance is started as a `loader`.
 
 ### Health Check
 _TODO: Not implemented yet_
@@ -50,15 +51,14 @@ where each plugin contains the following.
 ```
 
 ### Rules
-List all active and available endpoints for the running instance,
-available at URI `/rules`.
+List all active and available endpoints for the running instance, available at URI `/rules`.
 
 #### Output
 ##### Field Description
 * `function`: Function name prefixed with package
 * `endpoint`: Endpoint for specific function
 * `arguments`: List of arguments to the mentioned function
-* `Methods`: Supported HTTP methods for the specific endpoint
+* `methods`: Supported HTTP methods for the specific endpoint
 
 ###### Example
 ```json

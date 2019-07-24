@@ -9,49 +9,51 @@ _Are you actually looking for the
 [sqAPI Plugins Repository](https://github.com/mabruras/sqapi-plugins)?_
 
 ## About
-*sqAPI* is a plugin based system for subscribing to messages,
-query towards data- and metadata stores,
+sqAPI is a plugin based data aggregation system,
+for subscribing to messages, query towards data- and metadata stores,
 aggregate and expose data to the users.
 
 Receiving a message will make the system fetch referred data and metadata,
 and execute all active plugins for custom data aggregation.
-The aggregated data will be stored in a local database, and on disk if necessary.
+The aggregated data will be stored in a local database,
+and on disk if necessary - dependent on the plugin implementations.
 
-Each *sqAPI* plugin has its own area of responsibility, and will query data and metadata
-independent of each other. The data aggregated within the plugin, will be stored in
-the *sqAPI*s local data storage.
+Each sqAPI plugin has its own area of responsibility, and will receive its own
+copy of the queried data and metadata independent of each other.
+The data being aggregated within the plugin, will be stored in
+the sqAPIs local data storage.
 The storage type depends up on what data it's intended for.
 
-When a user wants to search or in other ways access the data,
-they will through all necessary *sqAPI*s exposed APIs.
+When a user wants to search, or in other ways access the data,
+they will do so through all of sqAPIs exposed API resources.
+
 
 ## Graphic illustrations
 ### Overview
-This figure gives an overview of *sqAPI*s position within a storage system.
+The following figure gives an overview of sqAPIs position within a storage system.
 As indicated within the figure,
-there is intended to deploy multiple *sqAPI* instances within the complete system.
-Each deployed sqAPI will have its own area of responsibility (_active plugin_).
+there is intended to be deployed multiple sqAPI instances within the complete system.
+A sqAPI instance could be deployed with a single, multiple or full set of plugins,
+dependent on the environment setup and usage.
 
-![sqAPI Overview](resources/images/sqapi_overview.png)
+![sqAPI Overview](https://github.com/mabruras/sqapi/raw/master/resources/images/sqapi_overview.png)
 
 ### Details
 The graphic below presents the flow and different components within the sqAPI solution.
 The orange areas (_Processor Execution_ and _Resources_) are custom logic for each of the plugins.
 
-![sqAPI Details](resources/images/sqapi_details.png)
+![sqAPI Details](https://github.com/mabruras/sqapi/raw/master/resources/images/sqapi_details.png)
 
 
 # Getting Started
 ## Quick Start
 ### Docker Compose
-The Docker Compose solution will start several containers,
-based on the [example system](resources/docs/EXAMPLE_SYSTEM.md),
+The Docker Compose solution will start several containers, based on the
+[example system](https://github.com/mabruras/sqapi/blob/master/resources/docs/EXAMPLE_SYSTEM.md),
 where you can follow a guide to set up a complete working solution.
 
-With this Docker Compose file,
-each of the components are linked together in the same Docker Network.
-
-The Docker Compose solution is built and started with the following
+With the Docker Compose file, each of the components are linked together in the same Docker Network.
+It is built and started with the following
 ```bash
 docker-compose build
 docker-compose up -d
@@ -65,7 +67,7 @@ could be based on logic which require custom dependencies, not covered in the or
 
 #### PIP Packages
 Each plugin are able to install their own PIP packages, by just listing them in
-[their configuration](resources/docs/CONFIGURATION.md#packages).
+[their configuration](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONFIGURATION.md#packages).
 The packages will be installed runtime, and might drastically increase the first time startup.
 
 #### APT Packages and custom installations
@@ -93,7 +95,9 @@ a PostgreSQL as the internal database and sqAPI itself.
 In this example, the data store is represented by `disk`
 at the host running the solution.
 
-Use [data producer](resources/test/data_producer.py) to insert test data.
+Use
+[data producer](https://github.com/mabruras/sqapi/blob/master/resources/test/data_producer.py)
+to insert test data.
 ```bash
 # Start Redis, RabbitMQ and PostgreSQL
 docker run -d -p 6379:6379 redis:latest
@@ -145,8 +149,8 @@ python3 start.py api
 ```
 
 ### Internal API
-*sqAPI* has some default endpoints activated, read more about
-them in [the endpoint section](resources/docs/ENDPOINTS.md).
+sqAPI has some default endpoints activated, read more about them in
+[the endpoint section](https://github.com/mabruras/sqapi/blob/master/resources/docs/ENDPOINTS.md).
 
 
 ## Environment Variables
@@ -161,10 +165,10 @@ There are some environment variables, that could be set to overwrite specific de
 
 
 # Contribution
-There are multiple ways to contribute to *sqAPI*:
+There are multiple ways to contribute to sqAPI:
 * Core logic
 * Adding plugins
-* Increased support
+* Connector support
 
 ## Core
 The core functionality should always be improved,
@@ -179,16 +183,17 @@ To contribute with a new plugin, please see
 for information regarding structure, requirements and implementation details.
 
 ## Connectors
-*sqAPI* supports a given set of connectors for external systems.
+sqAPI supports a given set of connectors for external systems.
 If you have a system not supported, feel free to report an issue or create a pull request.
 
 Each of these external connection Topics should support as many external systems as possible.
 The more, the merrier!
 
-For detailed information, see [the Connectors section](resources/docs/CONNECTORS.md)
+For detailed information, see
+[the Connectors section](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md)
 
 #### Connection Topics
-* [Database](resources/docs/CONNECTORS.md#database)
-* [Data Store](resources/docs/CONNECTORS.md#data-store)
-* [Metadata Store](resources/docs/CONNECTORS.md#metadata-store)
-* [Message Broker](resources/docs/CONNECTORS.md#message-broker)
+* [Database](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#database)
+* [Data Store](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#data-store)
+* [Metadata Store](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#metadata-store)
+* [Message Broker](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#message-broker)

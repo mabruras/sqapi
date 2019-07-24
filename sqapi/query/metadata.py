@@ -2,13 +2,14 @@
 import json
 import logging
 
+from sqapi.core.message import Message
 from sqapi.util import detector
 
 log = logging.getLogger(__name__)
 
 
-def fetch_metadata(config, message):
-    loc = message.get('meta_location', None)
+def fetch_metadata(config, message: Message):
+    loc = message.body.get('meta_location', None)
     if not loc:
         err = 'Could not find "meta_location" in message'
         log.warning(err)

@@ -7,6 +7,8 @@ import uuid
 import psycopg2
 import psycopg2.extras
 
+from sqapi.core.message import Message
+
 CREATE_MESSAGES_SCRIPT = '{dir}{sep}pg_script{sep}create_messages.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
 INSERT_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}insert_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
 SELECT_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}select_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
@@ -73,9 +75,7 @@ class Database:
     def initialize_database(self):
         log.info('Initializing Postgres database')
         try:
-            log.debug('Creating messages table if it does not exist')
-            out = self.execute_script(CREATE_MESSAGES_SCRIPT)
-            log.debug('Result of creating messages table: {}'.format(out))
+            self.initialize_message_table()
 
             log.debug('Executes custom initialization script {}'.format(self.init_script))
             out = self.execute_script(self.init_script)
@@ -84,6 +84,11 @@ class Database:
             err = 'Could not initialize database: {}'.format(str(e))
             log.warning(err)
             raise type(e)(err)
+
+    def initialize_message_table(self):
+        log.debug('Creating messages table if it does not exist')
+        out = self.execute_script(CREATE_MESSAGES_SCRIPT)
+        log.debug('Result of creating messages table: {}'.format(out))
 
     def execute_script(self, script_path: str, **kwargs):
         log.debug('Preparing script {}'.format(script_path))
@@ -141,15 +146,17 @@ class Database:
             log.warning(err)
             raise ConnectionError(err)
 
-    def update_message(self, message: dict, status: str, info: str = None):
+    def update_message(self, message: Message, status: str, info: str = None):
+        msg_body = message.body
+
         log.debug('Updating message if it exists')
-        message.update({'status': status, 'info': info, 'id': message.get('id', str(uuid.uuid4()))})
-        script = UPDATE_MESSAGE_SCRIPT if self.get_message(**message) else INSERT_MESSAGE_SCRIPT
+        msg_body.update({'status': status, 'info': info, 'id': msg_body.get('id', str(uuid.uuid4()))})
+        script = UPDATE_MESSAGE_SCRIPT if self.get_message(**msg_body) else INSERT_MESSAGE_SCRIPT
         log.debug('Message script decided')
         log.debug(script)
 
         try:
-            out = self.execute_script(script, **message)
+            out = self.execute_script(script, **msg_body)
             log.debug('Result of updating message: {}'.format(out))
         except Exception as e:
             log.debug(str(e))
