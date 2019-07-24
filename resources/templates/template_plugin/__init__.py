@@ -1,7 +1,6 @@
 import io
 import logging
 import os
-from datetime import datetime
 
 SQL_SCRIPT_DIR = '{}/scripts'.format(os.path.dirname(__file__))
 INSERT_ITEM = 'insert_item.sql'

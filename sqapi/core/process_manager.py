@@ -2,8 +2,8 @@ import logging
 import multiprocessing
 import threading
 
-from sqapi.core.plugin_manager import PluginManager
 from sqapi.core.message import Message
+from sqapi.core.plugin_manager import PluginManager
 from sqapi.query import data as q_data, metadata as q_meta
 from sqapi.util import detector
 from sqapi.util.cfg_util import Config
