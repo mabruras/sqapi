@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 def fetch_metadata(config, message: Message):
-    loc = message.body.get('meta_location', None)
+    loc = message.meta_location
     if not loc:
         err = 'Could not find "meta_location" in message'
         log.warning(err)

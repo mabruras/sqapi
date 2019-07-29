@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def download_data(config, message: Message):
-    loc = message.body.get('data_location', None)
+    loc = message.data_location
     if not loc:
         err = 'Could not find "data_location" in message'
         log.warning(err)
