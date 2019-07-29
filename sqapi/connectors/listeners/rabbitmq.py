@@ -39,7 +39,7 @@ class Listener:
         while True:
             try:
                 log.debug('Establishing connection through Pika module')
-                connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
+                connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
 
                 if connection.is_open:
                     log.info('Connection tested: OK')
