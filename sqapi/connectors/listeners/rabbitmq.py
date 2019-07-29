@@ -57,7 +57,7 @@ class Listener:
         self.routing_key = routing_key if routing_key else self.routing_key
         log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
 
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
         channel = connection.channel()
 
         # Create a queue
@@ -78,7 +78,7 @@ class Listener:
 
     def listen_exchange(self):
         log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
         channel = connection.channel()
 
         channel.exchange_declare(exchange=self.exchange_name, exchange_type=self.exchange_type)
