@@ -121,6 +121,9 @@ must contain a reference to the type of broker and connection details.
 Remember to list up minimum required fields of the message (`message_fields`)
 as these will be validated upon received message.
 
+The `key`-field, of each field in `message_fields`, is the representation of the field-name within the message.
+This means that a message defining `type` by `mime.type`, should change `key: 'data_type'` to `key: 'mime.type'`.
+
 ##### Example
 ```yaml
 msg_broker:
@@ -134,10 +137,21 @@ msg_broker:
   process_delay: 5
 
   message_fields:
-  - 'data_type'
-  - 'data_location'
-  - 'meta_location'
-  - 'uuid_ref'
+    type:
+      key: 'data_type'
+      required: True
+    data_location:
+      key: 'data_location'
+      required: True
+    meta_location:
+      key: 'meta_location'
+      required: True
+    uuid:
+      key: 'uuid_ref'
+      required: True
+    metadata:
+      key: 'metadata'
+      required: False
 ```
 
 ##### Plugin Specific

@@ -242,10 +242,21 @@ msg_broker:
   process_delay: 5
 
   message_fields:
-  - 'data_type'
-  - 'data_location'
-  - 'meta_location'
-  - 'uuid_ref'
+    type:
+      key: 'data_type'
+      required: True
+    data_location:
+      key: 'data_location'
+      required: True
+    meta_location:
+      key: 'meta_location'
+      required: True
+    uuid:
+      key: 'uuid_ref'
+      required: True
+    metadata:
+      key: 'metadata'
+      required: False
 
   # Supported Mime should be custom for each sqAPI Plugin,
   # not necessarily defined in the parent configuration
