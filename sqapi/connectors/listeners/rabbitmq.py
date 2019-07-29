@@ -8,7 +8,13 @@ from pika.exceptions import StreamLostError
 
 from sqapi.core.message import Message
 
-MSG_FIELDS = ['data_type', 'data_location', 'meta_location', 'uuid_ref']
+MSG_FIELDS = {
+    'data_type': {'key': 'data_type', 'required': True},
+    'data_location': {'key': 'data_location', 'required': True},
+    'meta_location': {'key': 'meta_location', 'required': True},
+    'uuid_ref': {'key': 'uuid_ref', 'required': True},
+    'metadata': {'key': 'metadata', 'required': False},
+}
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +22,7 @@ log = logging.getLogger(__name__)
 class Listener:
 
     def __init__(self, config: dict, process_message):
-        config = config if config else dict()
+        self.config = config if config else dict()
         self.pm_callback = process_message
         log.info('Loading RabbitMQ')
 
@@ -113,7 +119,7 @@ class Listener:
 
             body = self.validate_message(body)
 
-            self.pm_callback(Message(body))
+            self.pm_callback(Message(body, self.config))
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
             log.warning(err)
@@ -127,16 +133,20 @@ class Listener:
         return message
 
     def validate_fields(self, message):
-        log.debug('Validating required fields')
-        log.debug('Required fields: {}'.format(self.msg_fields))
+        log.debug('Validating required fields of set: {}'.format(self.msg_fields))
+        required_fields = {
+            self.msg_fields.get(f).get('key') for f in self.msg_fields
+            if self.msg_fields.get(f).get('required')
+        }
+        log.debug('Required fields: {}'.format(required_fields))
         missing_fields = []
 
-        for f in self.msg_fields:
+        for f in required_fields:
             if f not in dict(message.items()):
                 log.debug('Field {} is missing'.format(f))
                 missing_fields.append(f)
 
         if missing_fields:
-            err = 'The field(/s) {} are missing in the message'.format('", "'.join(missing_fields))
+            err = 'The field(/s) "{}" are missing in the message'.format('", "'.join(missing_fields))
             log.debug(err)
             raise AttributeError(err)

@@ -1,3 +1,4 @@
+import json
 import logging
 import multiprocessing
 import threading
@@ -49,13 +50,14 @@ class ProcessManager:
 
     def process_message(self, message: Message):
         log.info('Message processing started')
-        self.check_mime_type(message.body)
+        self.check_mime_type(message)
 
         try:
             # Query
             data_path, metadata = self.query(message)
             self.database.update_message(message, STATUS_PROCESSING)
 
+            log.debug('Creating processor pool of plugin executions')
             process_pool = [
                 multiprocessing.Process(target=plugin.execute, args=[
                     plugin.config, plugin.database, message.body, metadata, open(data_path, 'rb')
@@ -63,7 +65,7 @@ class ProcessManager:
                 if valid_data_type(message, plugin)
             ]
 
-            log.debug('Starting pool')
+            log.debug('Starting processor pool')
             [t.start() for t in process_pool]
             [t.join() for t in process_pool]
 
@@ -86,17 +88,16 @@ class ProcessManager:
             log.debug(message)
             log.debug(e)
 
-    def check_mime_type(self, message: dict):
-        log.debug('Validating mime type')
-        msg_type = message.get('data_type', 'UNKNOWN')
-        log.debug('Message Mime type: {}'.format(msg_type))
-        log.debug('Accepted Mime types: {}'.format(self.plugin_manager.accepted_types))
+    def check_mime_type(self, message: Message):
+        log.debug('Validating data type')
+        log.debug('Message data type: {}'.format(message.type))
+        log.debug('Accepted data types: {}'.format(self.plugin_manager.accepted_types))
 
         if self.plugin_manager.accepted_types and (
-                msg_type not in self.plugin_manager.accepted_types
+                message.type not in self.plugin_manager.accepted_types
                 and '*' not in self.plugin_manager.accepted_types
         ):
-            err = 'Mime type {} is not supported by any of the active sqAPI plugins'.format(msg_type)
+            err = 'Data type "{}" is not supported by any of the active sqAPI plugins'.format(message.type)
             log.debug(err)
             raise NotImplementedError(err)
 
@@ -105,7 +106,13 @@ class ProcessManager:
         self.database.update_message(message, STATUS_QUERYING)
 
         data_path = q_data.download_data(self.config, message)
-        metadata = q_meta.fetch_metadata(self.config, message)
+
+        if message.metadata:
+            log.debug('Loading metadata from message')
+            metadata = json.loads(message.metadata)
+        else:
+            log.debug('Fetching metadata by query')
+            metadata = q_meta.fetch_metadata(self.config, message)
 
         log.debug('Queries completed')
         return data_path, metadata
@@ -113,6 +120,5 @@ class ProcessManager:
 
 def valid_data_type(message: Message, plugin):
     accepted_types = plugin.config.msg_broker.get('supported_mime') or []
-    data_type = message.body.get('data_type')
 
-    return data_type in accepted_types or not accepted_types
+    return message.type in accepted_types or not accepted_types
