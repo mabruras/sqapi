@@ -162,7 +162,9 @@ class Database:
             'status': message.status,
             'info': message.info,
             'uuid': message.uuid,
-            'data_type': message.type
+            'data_type': message.type,
+            'meta_location': message.meta_location,
+            'data_location': message.data_location,
         })
         script = UPDATE_MESSAGE_SCRIPT if self.get_message(**msg_body) else INSERT_MESSAGE_SCRIPT
         log.debug('Message script decided')
