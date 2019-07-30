@@ -2,6 +2,8 @@ import io
 import logging
 import os
 
+from sqapi.core.message import Message
+
 SQL_SCRIPT_DIR = '{}/scripts'.format(os.path.dirname(__file__))
 INSERT_ITEM = 'insert_item.sql'
 
@@ -11,7 +13,7 @@ Using default Python logging framework
 log = logging.getLogger(__name__)
 
 
-def execute(config, database, message: dict, metadata: dict, data: io.BufferedReader):
+def execute(config, database, message: Message, metadata: dict, data: io.BufferedReader):
     """
     This is the custom logic, where all data are available through the parameters.
     Create a structured data set and store it in the database, on disk or what ever you want.
@@ -69,9 +71,9 @@ def convert_to_db_insert(message, meta_size, data_size):
     :return: dictionary prepared for database script
     """
     return {
-        'uuid_ref': message.get('uuid_ref', None),
-        'meta_location': message.get('meta_location', None),
-        'data_location': message.get('data_location', None),
+        'uuid_ref': message.uuid,
+        'meta_location': message.meta_location,
+        'data_location': message.data_location,
         'metadata_size': meta_size,
         'data_size': data_size,
     }
