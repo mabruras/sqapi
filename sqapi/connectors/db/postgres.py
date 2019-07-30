@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
+import copy
 import logging
 import os
 import time
-import uuid
 
 import psycopg2
 import psycopg2.extras
@@ -44,6 +44,7 @@ class Database:
             log.debug('Trying to open connection')
             self.get_connection().close()
             return True
+
         except Exception as e:
             log.debug('Failed to open database connection: {}'.format(str(e)))
             return False
@@ -65,6 +66,7 @@ class Database:
             connection.autocommit = True
 
             return connection
+
         except ConnectionError as e:
             err = 'Failed to establish connection towards the database, please verify the configuration: {}'.format(
                 str(e)
@@ -80,6 +82,7 @@ class Database:
             log.debug('Executes custom initialization script {}'.format(self.init_script))
             out = self.execute_script(self.init_script)
             log.debug('Result of custom database initialization: {}'.format(out))
+
         except Exception as e:
             err = 'Could not initialize database: {}'.format(str(e))
             log.warning(err)
@@ -107,6 +110,7 @@ class Database:
             log.debug('Opening script file')
             with open(script_path, 'r') as f:
                 return self.execute_query(f.read(), **kwargs)
+
         except ConnectionError as e:
             err = 'Could not execute query: {}'.format(str(e))
             log.warning(err)
@@ -137,20 +141,24 @@ class Database:
                         except Exception as e:
                             log.debug('No result after query: {}'.format(str(e)))
                             return None
+
                 except Exception as e:
                     err = 'Could not execute query {}: {}'.format(query, str(e))
                     log.warning(err)
                     raise ConnectionError(err)
+
         except ConnectionAbortedError as e:
             err = 'Could not connect to local database: {}'.format(str(e))
             log.warning(err)
             raise ConnectionError(err)
 
     def update_message(self, message: Message, status: str, info: str = None):
-        msg_body = message.body
+        msg_body = copy.deepcopy(message.body)
+        message.status = status
+        message.info = info
 
         log.debug('Updating message if it exists')
-        msg_body.update({'status': status, 'info': info, 'id': msg_body.get('id', str(uuid.uuid4()))})
+        msg_body.update({'status': message.status, 'info': message.info, 'uuid': message.uuid})
         script = UPDATE_MESSAGE_SCRIPT if self.get_message(**msg_body) else INSERT_MESSAGE_SCRIPT
         log.debug('Message script decided')
         log.debug(script)
@@ -158,6 +166,7 @@ class Database:
         try:
             out = self.execute_script(script, **msg_body)
             log.debug('Result of updating message: {}'.format(out))
+
         except Exception as e:
             log.debug(str(e))
             out = None
@@ -171,6 +180,8 @@ class Database:
             log.debug('Result of selected message: {}'.format(out))
 
             return out
+
         except Exception as e:
             log.debug(str(e))
+
         return None

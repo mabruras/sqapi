@@ -1,7 +1,6 @@
 -- Create Messages table
 CREATE TABLE IF NOT EXISTS messages (
-  id            TEXT NOT NULL PRIMARY KEY,
-  uuid_ref      TEXT NOT NULL,
+  uuid          TEXT NOT NULL PRIMARY KEY,
   meta_location TEXT,
   data_location TEXT,
   data_type     TEXT,
