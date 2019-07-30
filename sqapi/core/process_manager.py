@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import multiprocessing
@@ -60,7 +61,8 @@ class ProcessManager:
             log.debug('Creating processor pool of plugin executions')
             process_pool = [
                 multiprocessing.Process(target=plugin.execute, args=[
-                    plugin.config, plugin.database, message.body, metadata, open(data_path, 'rb')
+                    plugin.config, plugin.database, copy.deepcopy(message),
+                    copy.deepcopy(metadata), open(data_path, 'rb')
                 ]) for plugin in self.plugin_manager.plugins
                 if valid_data_type(message, plugin)
             ]
