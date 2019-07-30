@@ -158,7 +158,12 @@ class Database:
         message.info = info
 
         log.debug('Updating message if it exists')
-        msg_body.update({'status': message.status, 'info': message.info, 'uuid': message.uuid})
+        msg_body.update({
+            'status': message.status,
+            'info': message.info,
+            'uuid': message.uuid,
+            'data_type': message.type
+        })
         script = UPDATE_MESSAGE_SCRIPT if self.get_message(**msg_body) else INSERT_MESSAGE_SCRIPT
         log.debug('Message script decided')
         log.debug(script)
