@@ -173,9 +173,9 @@ meta_store:
 
 ### Message Broker
 Connector towards the Message Broker is responsible for subscribing to a
-message broker or -bus for receiving messages to each plugin to process.
+message broker or -bus for receiving messages for each plugin to process.
 This is the main trigger for loading data into sqAPI,
-and execute the plugins custom logic.
+before each of the plugins custom logic is executed.
 
 #### Structure
 The Message Broker connector is an instantiated object,
@@ -193,28 +193,37 @@ The configuration sent to the init method will contain
 the dictionary with all `msg_broker` configuration defined.
 
 After parsing the received message,
-the resulting dictionary should be forwarded to `process_message`,
-so the `core.processor` are able to process the message as intended.
+the resulting dictionary should be put in `sqapi.core.message.Message` and forwarded to `process_message`,
+so the `ProcessManager` are able to process the message as intended.
 Definition of `process_message` below.
 
 ##### Methods
 ###### Listeners
-These methods are ran once from a separate thread.
-This means that each of the methods should take care of its own retry/loop logic.
+The following method is called upon from the main thread.
+This means that each of the listeners needed within the connector,
+should take care of its own retry/loop logic, threading etc.
 
 ```python
-def listen_exchange(self, callback):
-    pass
 
-def listen_queue(self, callback, routing_key=None):
+def start_listeners(self):
     pass
 ```
-The callback sent looks as follows,
+
+Notice that this is just the method called upon from the process manager,
+to start the connectors listeners.
+Within this method it's encouraged to start up each listener necessary.
+
+Eg. it may be desirable in a RabbitMQ connector,
+to start both an exchange listener as well as an queue listener.
+
+###### Callback
+Use the callback function when the listeners are fetching messages.
+
+The callback sent to the `__init__` looks as follows,
 where the `Message` is a wrapper object containing among others; a `body` attribute.
 The `body` is a dictionary containing the message as key-values.
-The Message object is to be sent along to the query section for both
-`data` and `metadata` connectors.
-The `body` attribute will ending up as argument the execute function in each plugin.
+The Message object is to be sent along to the query section for both `data` and `metadata` connectors.
+The `body` attribute will ending up as argument to the execute function in each plugin.
 
 ```python
 from sqapi.core.message import Message
