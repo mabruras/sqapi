@@ -2,7 +2,6 @@ import copy
 import json
 import logging
 import multiprocessing
-import threading
 
 from sqapi.core.message import Message
 from sqapi.core.plugin_manager import PluginManager
@@ -32,21 +31,7 @@ class ProcessManager:
 
     def start_subscribing(self):
         log.info('Starting message subscription')
-
-        # Setup sqAPI general exchange listener
-        log.debug('Starting Exchange Listener')
-        threading.Thread(
-            name='ExchangeListener',
-            target=self.listener.listen_exchange
-        ).start()
-
-        # Setup sqAPI unique queue listener
-        log.debug('Starting Queue Listener')
-        threading.Thread(
-            name='QueueListener',
-            target=self.listener.listen_queue
-        ).start()
-
+        self.listener.start_listeners()
         log.debug('Message subscription started')
 
     def process_message(self, message: Message):

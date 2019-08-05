@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import json
 import logging
+import threading
 import time
 
 import pika
@@ -59,8 +60,22 @@ class Listener:
                 log.debug('Connection tested: {}'.format(str(e)))
                 time.sleep(self.retry_interval)
 
-    def listen_queue(self, routing_key=None):
-        self.routing_key = routing_key if routing_key else self.routing_key
+    def start_listeners(self):
+        # Setup sqAPI general exchange listener
+        log.debug('Starting Exchange Listener')
+        threading.Thread(
+            name='ExchangeListener',
+            target=self.listen_exchange
+        ).start()
+
+        # Setup sqAPI unique queue listener
+        log.debug('Starting Queue Listener')
+        threading.Thread(
+            name='QueueListener',
+            target=self.listen_queue
+        ).start()
+
+    def listen_queue(self):
         log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
 
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
@@ -90,7 +105,7 @@ class Listener:
         channel.exchange_declare(exchange=self.exchange_name, exchange_type=self.exchange_type)
 
         # Create a queue
-        res = channel.queue_declare('', exclusive=True)
+        res = channel.queue_declare(self.routing_key)
         queue_name = res.method.queue
         channel.queue_bind(exchange=self.exchange_name, queue=queue_name)
         channel.basic_consume(queue=queue_name, auto_ack=True, on_message_callback=self.parse_message)
