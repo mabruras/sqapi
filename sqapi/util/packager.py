@@ -7,20 +7,27 @@ import pip
 log = logging.getLogger(__name__)
 
 
-def install_packages(packages):
-    for pkg in packages.get('pip') or []:
-        log.debug('Installing PIP package "{}"'.format(pkg))
-        install_pip_package(pkg)
+def install_packages(config):
+    log.debug('Config: {}'.format(config))
+    for module in config.keys() or {}:
+        pm = config.get(module) or {}
+        if type(pm) is dict:
+            log.debug('(module: {}), pm ({}) type: {}'.format(module, pm, type(pm)))
+            for action in pm.keys() or {}:
+                log.debug('action config type: {}'.format(type(pm.get(action))))
+                for package in pm.get(action):
+                    log.debug('Module: "{}", Action: "{}", Package: "{}"'.format(module, action, package))
+                    execute_module_action(module, action, package)
 
 
-def install_pip_package(pkg_name):
+def execute_module_action(module, action, package):
     try:
-        if hasattr(pip, 'main'):
-            pip.main(['install', pkg_name])
+        if (module == 'pip3' or module == 'pip') and hasattr(pip, 'main'):
+            pip.main([action, package])
         else:
             import subprocess
-            subprocess.call([sys.executable, '-m', 'pip', 'install', pkg_name])
+            subprocess.call([sys.executable, '-m', module, action, package])
     except Exception as e:
-        err = 'PIP package installation failed: {}'.format(str(e))
+        err = '{} action ({}) for package ({}) failed: {}'.format(module, action, package, str(e))
         log.warning(err)
         raise e

@@ -16,14 +16,13 @@ class PluginManager:
         self.config = config
 
         self.plugins = []
-        self.failed_plugins = []
+        self.failed_plugins = {}
         self.register_plugins()
 
         self.accepted_types = set()
         for plugin in self.plugins:
             supported_types = plugin.config.msg_broker.get('supported_mime') or ['*']
             log.debug('Plugin {} accepts data types: {}'.format(plugin.name, supported_types))
-            log.debug('{} msg_broker config: {}'.format(plugin.name, plugin.config.msg_broker))
             self.accepted_types.update(supported_types)
 
     def register_plugins(self):
@@ -42,14 +41,23 @@ class PluginManager:
             except Exception as e:
                 err = 'Could not register plugin {} ({}): {}'.format(plugin_name, plugin, str(e))
                 log.warning(err)
-                self.failed_plugins.append({
+                self.failed_plugins.update({
                     plugin_name: err
                 })
 
+        unloaded_plugins = [
+            n for n, _ in detected_plugins
+            if n not in self.failed_plugins and n not in [p.name for p in self.plugins]
+        ]
+
         log.info('{}/{} registered plugins'.format(len(self.plugins), len(detected_plugins)))
-        log.info('{}/{} unloaded plugins'.format(len(detected_plugins) - (len(self.plugins) + len(self.failed_plugins)),
-                                                 len(detected_plugins)))
+        log.debug('Registered: {}'.format(self.plugins))
+
+        log.info('{}/{} unloaded plugins'.format(len(unloaded_plugins), len(detected_plugins)))
+        log.debug('Unloaded: {}'.format(unloaded_plugins))
+
         log.info('{}/{} failed plugins'.format(len(self.failed_plugins), len(detected_plugins)))
+        log.debug('Failed: {}'.format(self.failed_plugins))
 
     def active_plugin(self, plugin_name):
         if SINGLE_PLUGIN:

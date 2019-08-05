@@ -76,12 +76,15 @@ this does not need to be any of the databases used by the plugins.
 
 
 ### Packages
-It is possible to specify PIP packages to install for each custom sqAPI Plugin.
-In the main configuration, it should be defined
-if custom packages are to be installed or not - default is `True`.
+It is possible to specify python modules for installment or downloading, for each custom sqAPI Plugin.
+In the main configuration, it should be defined if custom packages are to be installed or not - default is `True`.
 
 The `install` field is possible to overwrite in the plugin config files,
-to avoid the packages of a plugin to be installed.
+to avoid the packages of a plugin to be installed or downloaded.
+This means that you can deactivate download/installment of dependencies to specific plugins. 
+
+There are different modules that could be run, like `PIP` or `Spacy`,
+dependent on the plugins area of responsibility.
 
 ##### Example
 ```yaml
@@ -90,14 +93,30 @@ packages:
 ```
 
 ##### Plugin Specific
-In each plugin, the PIP packages should be defined.
+In each plugin, the module packages should be defined within the module and action it requires.
 This ensures documentation in addition to the README of each plugin.
 ```yaml
 packages:
   install: True # Optional in plugin specific config
   pip:
-  - 'Pillow'
+    install:
+    - 'spacy'
+  spacy:
+    download:
+    - 'en'
 ```
+
+The configuration above is translated to: 
+```bash
+python3 -m pip install spacy
+python3 -m spacy install en
+```
+
+_(**NOTE:** In the above example the PIP package installment of "Spacy"
+must be defined above the Spacey package download of "en", to be executed first)_
+
+This lets sqAPI being able to install and configure each plugin dependencies runtime.
+There might be a good idea to pre-install and configure each plugin, to reduce startup time.
 
 
 ### Plugin Details
