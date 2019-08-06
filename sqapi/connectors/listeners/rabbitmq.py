@@ -76,17 +76,17 @@ class Listener:
         ).start()
 
     def listen_queue(self):
-        log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
-
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
-        channel = connection.channel()
-
-        # Create a queue
-        channel.queue_declare(queue=self.routing_key)
-        channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=self.parse_message)
-
         while True:
             try:
+                log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
+
+                connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
+                channel = connection.channel()
+
+                # Create a queue
+                channel.queue_declare(queue=self.routing_key)
+                channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=self.parse_message)
+
                 log.debug('Starting to consume from queue: {}'.format(self.routing_key))
                 channel.start_consuming()
             except StreamLostError as e:
@@ -94,24 +94,25 @@ class Listener:
                 time.sleep(1)
             except (InterruptedError, KeyboardInterrupt) as e:
                 log.error('Interrupted, exiting consumer: {}'.format(str(e)))
+                channel.stop_consuming()
                 break
         log.info('Finished consuming from queue: {}'.format(self.routing_key))
 
     def listen_exchange(self):
-        log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
-        channel = connection.channel()
-
-        channel.exchange_declare(exchange=self.exchange_name, exchange_type=self.exchange_type)
-
-        # Create a queue
-        res = channel.queue_declare(self.routing_key)
-        queue_name = res.method.queue
-        channel.queue_bind(exchange=self.exchange_name, queue=queue_name)
-        channel.basic_consume(queue=queue_name, auto_ack=True, on_message_callback=self.parse_message)
-
         while True:
             try:
+                log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
+                connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
+                channel = connection.channel()
+
+                channel.exchange_declare(exchange=self.exchange_name, exchange_type=self.exchange_type)
+
+                # Create a queue
+                res = channel.queue_declare(self.routing_key)
+                queue_name = res.method.queue
+                channel.queue_bind(exchange=self.exchange_name, queue=queue_name)
+                channel.basic_consume(queue=queue_name, auto_ack=True, on_message_callback=self.parse_message)
+
                 log.debug('Starting to consume from exchange: {}'.format(self.exchange_name))
                 channel.start_consuming()
             except StreamLostError as e:
@@ -119,6 +120,7 @@ class Listener:
                 time.sleep(1)
             except (InterruptedError, KeyboardInterrupt) as e:
                 log.error('Interrupted, exiting consumer: {}'.format(str(e)))
+                channel.stop_consuming()
                 break
         log.info('Finished consuming from exchange: {}'.format(self.exchange_name))
 

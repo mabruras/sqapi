@@ -19,7 +19,7 @@ class Config:
         self.msg_broker = cfg.get('msg_broker') or {}
         self.meta_store = cfg.get('meta_store') or {}
         self.data_store = cfg.get('data_store') or {}
-        self.active_plugins = cfg.get('active_plugins') or {}
+        self.active_plugins = cfg.get('active_plugins') or []
         self.api = cfg.get('api') or {}
         self.custom = cfg.get('custom') or {}
         self.packages = cfg.get('packages') or {}
@@ -30,7 +30,7 @@ class Config:
         self.msg_broker.update(override.msg_broker)
         self.meta_store.update(override.meta_store)
         self.data_store.update(override.data_store)
-        self.active_plugins.update(override.active_plugins)
+        self.active_plugins.extend(override.active_plugins)
         self.api.update(override.api)
         self.custom.update(override.custom)
         self.packages.update(override.packages)
