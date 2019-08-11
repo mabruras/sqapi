@@ -124,6 +124,16 @@ services:
     deploy:
       replicas: 1
 
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 262144
+        hard: 262144
+
+    environment:
+    - 'discovery.type=single-node'
     ports:
     - '9200:9200'
     healthcheck:
