@@ -285,28 +285,38 @@ It is possible to reuse the default connection from the sqAPI configuration,
 where each plugin are able to overwrite if necessary.
 
 #### Structure
-The Database connector is an instantiated object,
-not used as a static module.
+The Database connector is an instantiated object, not used as a static module.
+There is two types of database connectors; _Relational storage_ and _Document storage_.
 
-When instantiated it should try the connection and run the initialization script, if needed.
-If the database connector cannot connect to the database,
+Note that the Database Connector type for sqAPI should always be a relational database.
+
+#### Instantiation
+When the database connector is created (using `__init__`-method) it should
+first create the database connection, test it, and store it within the connector.
+
+If needed; the initialization script should be run (usually just for relational storages).
+If the database connector cannot connect to the database and retries is exceeded,
 the sqAPI should shut down - at least not proceed with instantiating other connectors.
 
-#### Requirements
+#### Relational Storage
+The Relational Storage Database Connector type has the following requirements,
+that must be implemented to suit the method calls from both sqAPI Core and -Plugins.
+
 ##### Class
-The module must implement a class: `Database`, like follows.
+The module must implement a class named `Database`, like follows.
 ```python
 class Database:
     def __init__(self, config: dict):
         pass
 ```
-The configuration sent to the init method will contain
-the dictionary with all `database` configuration defined.
+The configuration sent to the init method will be a dictionary with
+all `database` configuration defined in the yaml configuration file.
 
 ##### Methods
-###### Init
+###### Initialization
 The database connector needs an initialization method,
 where all the setup is prepared and connection is tested.
+This could include executing a script for creating tables and views.
 ```python
 def initialize_database(self):
     pass
