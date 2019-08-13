@@ -143,6 +143,20 @@ services:
       test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
 
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.3.0
+    container_name: kibana
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+
+    environment:
+    - 'SERVER_NAME=kibana'
+    - 'ELASTICSEARCH_HOSTS=http://es:9200'
+    ports:
+    - '5601:5601'
+
+
 volumes:
   nifi-io:
   nifi-conf:

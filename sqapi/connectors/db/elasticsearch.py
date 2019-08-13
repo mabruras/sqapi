@@ -2,7 +2,7 @@
 import json
 import logging
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, Transport
 
 log = logging.getLogger(__name__)
 
@@ -10,19 +10,30 @@ log = logging.getLogger(__name__)
 class Database:
     def __init__(self, config: dict):
         self.cfg = config
-        self.cfg_con_list = config.get('connection') or []
+
+        cluster = [{**c} for c in config.get('connection') or []]
+        log.debug('Establishing connection towards: {}'.format(cluster))
+
+        try:
+            self.es = Elasticsearch(
+                cluster,
+                Transport,
+                **(config.get('kwargs') or {})
+            )
+            self.es.ping()
+        except ConnectionError as e:
+            err = 'Failed to establish connection to the Elasticsearch cluster, please verify the config: {}'
+            format(str(e))
+            log.debug(err)
+            raise ConnectionError(err)
 
     def get_connection(self):
         try:
-            cluster = [{
-                'host': c.get('host', 'localhost'),
-                'port': c.get('port', '9200')
-            } for c in self.cfg_con_list or []]
-            log.debug('Establishing connection towards: {}'.format(cluster))
-            es = Elasticsearch(cluster)
-            return es
+            self.es.ping()
+
+            return self.es
         except ConnectionError as e:
-            err = 'Failed to establish connection to the Elasticsearch cluster, please verify the config: {}'
+            err = 'Could not ping the ElasticSearch cluster, please try again later'
             format(str(e))
             log.debug(err)
             raise ConnectionError(err)
