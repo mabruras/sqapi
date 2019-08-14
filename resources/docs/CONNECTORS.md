@@ -331,9 +331,21 @@ that must be implemented to suit the method calls from both sqAPI Core and -Plug
 The database connector needs an initialization method,
 where all the setup is prepared, like creating tables, relations and views.
 ```python
+from sqapi.core.message import Message
+
 def initialize_database(self):
     pass
+def initialize_message_table(self):
+    pass
+def update_message(self, message: Message, status: str, info: str = None):
+    pass
 ```
+
+* The `initialize_database` should handle all preparation of the database,
+* `initialize_message_table` is intended for setting up the
+message table for the sqAPI core - if sqAPI is configured to use the connector.
+* To let sqAPI being able to update a message, the `update_message` should
+be able to create a new or change status of an existing message.
 
 ###### Execution
 There are two ways of executing queries against the database,
