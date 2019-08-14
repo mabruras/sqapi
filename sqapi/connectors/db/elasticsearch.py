@@ -38,13 +38,13 @@ class Database:
             log.debug(err)
             raise ConnectionError(err)
 
-    def create_document(self, area: str, body, kind: str = '_doc'):
+    def create_document(self, area: str, body: dict, kind: str = '_doc'):
         # Creates a new document(body) of a specified type(optional),
         # within a specific area (index/collection/etc)
         con = self.get_connection()
         con.index(area, body, kind)
 
-    def fetch_document(self, area: str, body, query_clause='match'):
+    def fetch_document(self, area: str, body: dict, query_clause='match'):
         # Uses Elasticsearch Query DSL:
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
         con = self.get_connection()
