@@ -40,7 +40,6 @@ class Processor:
         if not init_path:
             err = 'Missing configuration for database initialization script in plugin {}'.format(self.name)
             log.warning(err)
-            raise AttributeError('Missing configuration for database initialization script')
 
         if not os.path.exists(init_path):
             init_path = os.path.join(self.plugin_dir, init_path)

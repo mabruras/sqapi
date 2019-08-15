@@ -9,10 +9,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: '0.25'
           memory: 2g
         reservations:
-          cpus: '0.25'
+          cpus: '0.20'
           memory: 20M
       replicas: 1
     command: ['python', 'start.py', 'loader']
@@ -35,10 +35,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: '0.25'
           memory: 2g
         reservations:
-          cpus: '0.25'
+          cpus: '0.20'
           memory: 20M
       replicas: 2
     command: ['python', 'start.py', 'api']
@@ -115,6 +115,46 @@ services:
       interval: 5s
       retries: 5
       test: ["CMD-SHELL", "pg_isready", "--dbname=postgres", "--host=localhost", "--username=postgres"]
+
+
+  es:
+    image: elasticsearch:${ES_V:-7.3.0}
+    container_name: elasticsearch
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 262144
+        hard: 262144
+
+    environment:
+    - 'discovery.type=single-node'
+    ports:
+    - '9200:9200'
+    healthcheck:
+      timeout: 5s
+      interval: 10s
+      retries: 5
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.3.0
+    container_name: kibana
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+
+    environment:
+    - 'SERVER_NAME=kibana'
+    - 'ELASTICSEARCH_HOSTS=http://es:9200'
+    ports:
+    - '5601:5601'
 
 
 volumes:

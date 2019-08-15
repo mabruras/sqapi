@@ -37,19 +37,20 @@ class Database:
             log.debug('Testing database connection again in 1 second..')
             time.sleep(1)
 
+        self.connection = self._create_connection()
         log.debug('Initialized and tested connection OK, towards the {} database'.format(db_type))
 
     def active_connection(self):
         try:
             log.debug('Trying to open connection')
-            self.get_connection().close()
+            self._create_connection().close()
             return True
 
         except Exception as e:
             log.debug('Failed to open database connection: {}'.format(str(e)))
             return False
 
-    def get_connection(self):
+    def _create_connection(self):
         try:
             log.debug('Establishing connection towards {}:{}'.format(
                 self.cfg_con.get('host', 'localhost'),
@@ -64,9 +65,7 @@ class Database:
                 connect_timeout=self.cfg_con.get('timeout', 5)
             )
             connection.autocommit = True
-
             return connection
-
         except ConnectionError as e:
             err = 'Failed to establish connection towards the database, please verify the configuration: {}'.format(
                 str(e)
@@ -77,8 +76,6 @@ class Database:
     def initialize_database(self):
         log.info('Initializing Postgres database')
         try:
-            self.initialize_message_table()
-
             log.debug('Executes custom initialization script {}'.format(self.init_script))
             out = self.execute_script(self.init_script)
             log.debug('Result of custom database initialization: {}'.format(out))
@@ -129,7 +126,7 @@ class Database:
         log.debug(query)
         try:
             log.debug('Establishing database connection for query execution')
-            with self.get_connection() as con:
+            with self.connection as con:
                 try:
                     log.debug('Executing query')
                     with con.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:

@@ -3,6 +3,8 @@ import importlib
 import logging
 import os
 
+from sqapi.util import detector
+
 log = logging.getLogger(__name__)
 
 
@@ -13,20 +15,17 @@ def load_blueprints(plugin_name, bp_dir):
         log.warning('No blueprints directory was defined, no API exposed')
         return []
 
-    # detect_plugins(bp_dir)
-    full_path = os.path.join('.'.join(['sqapi', 'plugins', plugin_name, bp_dir]))
+    full_path = os.path.join(os.sep.join(['sqapi', 'plugins', plugin_name, bp_dir]))
 
-    bp_dir = _verify_directory(full_path.replace('.', os.sep))
-    if not bp_dir:
+    if not _verify_directory(full_path):
         log.warning('Blueprints directory was not an existing directory, no API exposed')
         return []
 
-    blueprints = [
-        importlib.import_module('.'.join([full_path, p.strip('.py')]))
-        for p in os.listdir(bp_dir) if not p.startswith('__')
+    plugin_dict = detector.detect_modules(full_path)
+    return [
+        importlib.import_module(plugin_dict.get(blueprints))
+        for blueprints in plugin_dict
     ]
-
-    return blueprints
 
 
 def _verify_directory(directory):

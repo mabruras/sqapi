@@ -277,45 +277,82 @@ msg_broker:
 
 
 ### Database
-The sqAPI configuration must have a database connector defined,
-so the process manager are able to store messages received.
+The Database Connector is an interface implementation towards a specific type of database.
+All connectors should be usable by each of the plugins, through one of two interfaces.
+The interface used, is dependent on the Database Connector Type;
+[_Relational storage_](#relational-storage) and [_Document storage_](#document-storage).
 
-The Database types are also dependent on each plugin and their data structure.
+All document stores (eg. MongoDB, ElasticSearch, CouchDB, etc.) will share the same interface,
+while all relational databases (eg. PostgreSQL, SQLite, MySQL, etc.) share another interface.
+Each of the interfaces is described below, within their respective headings.
+
+#### Structure
+The sqAPI Core configuration must have a _relational database_ connector
+defined, so the process manager are able to store messages received.
+Note that the Database Connector type for sqAPI should always be a relational database.
+
+The Database types are dependent on each plugin and their data structure.
 It is possible to reuse the default connection from the sqAPI configuration,
 where each plugin are able to overwrite if necessary.
 
-#### Structure
-The Database connector is an instantiated object,
-not used as a static module.
+The Database connector is an instantiated object, not used as a static module.
 
-When instantiated it should try the connection and run the initialization script, if needed.
-If the database connector cannot connect to the database,
-the sqAPI should shut down - at least not proceed with instantiating other connectors.
 
-#### Requirements
-##### Class
-The module must implement a class: `Database`, like follows.
+#### Instantiation
+When the database connector is created (_using `__init__`-method_) it should
+first create the database connection, test it, and store it within the connector.
+
+By storing the database connection on the connector, the same connection will be reused
+to avoid overhead of establishing and testing a connection on each query.
+If the database connection is not thread safe, consider making a thread pool.
+
+If needed; the initialization script should be run (usually just for relational
+storage connectors). If the database connector cannot connect to the database
+and retries is exceeded, the sqAPI should shut down -
+at least not proceed with instantiating other connectors.
+
+#### Class
+The module must implement a class named `Database`,
+regardless of being a relational DB or document storage.
 ```python
 class Database:
     def __init__(self, config: dict):
         pass
 ```
-The configuration sent to the init method will contain
-the dictionary with all `database` configuration defined.
+The configuration sent to the init method will be a dictionary with
+all `database` configuration defined in the yaml configuration file.
+
+#### Relational Storage
+The Relational Storage Database Connector type has the following requirements,
+that must be implemented to suit the method calls from both sqAPI Core and -Plugins.
 
 ##### Methods
-###### Init
+###### Initialization
 The database connector needs an initialization method,
-where all the setup is prepared and connection is tested.
+where all the setup is prepared, like creating tables, relations and views.
 ```python
+from sqapi.core.message import Message
+
 def initialize_database(self):
     pass
+def initialize_message_table(self):
+    pass
+def update_message(self, message: Message, status: str, info: str = None):
+    pass
 ```
+
+* The `initialize_database` should handle all preparation of the database,
+* `initialize_message_table` is intended for setting up the
+message table for the sqAPI core - if sqAPI is configured to use the connector.
+* To let sqAPI being able to update a message, the `update_message` should
+be able to create a new or change status of an existing message.
 
 ###### Execution
 There are two ways of executing queries against the database,
 where there is either sent in a script file, containing a query string,
 or the query string directly.
+This lets each plugin potentially give the user the option to generate queries,
+or keep predefined queries in scripts - might even be stored as templates.
 
 The `**kwargs` will contain key-value pairs to replace the placeholders in the query string.
 ```python
@@ -326,9 +363,12 @@ def execute_query(self, query: str, **kwargs):
 ```
 
 ###### Status Updates
-When receiving a message, it is important that the processors for
-all the plugins are able to register their status of processing.
-The `core.processor` will call upon this method as a small log,
+Relational databases is intended to also be used by the sqAPI core,
+thus should be able to store the messages that sqAPI receives.
+This is both to keep track of what messages have been received,
+and their current status (eg. `DONE`, `RETRY` or `FAILED`)
+
+The Process Manager will call upon this method as a small log,
 in case something breaks while processing the message.
 ```python
 from sqapi.core.message import Message
@@ -338,19 +378,20 @@ def update_message(self, message: Message, status: str, info: str = None):
 ```
 
 ##### Files
-For each of the Database Connector types, there must be an initialization script,
-which area of responsibility is to setup necessary adjustments of the database.
-If the `init` fields is missing from the configuration,
-or not an existing file, the sqAPI will not start.
+For Relational Database Connector types, there must be an initialization script,
+which area of responsibility is to setup necessary adjustments of the database - like tables and views.
+If the `init` fields is missing from the configuration, or not an existing file, the sqAPI will not start.
 
-#### Types
-##### PostgreSQL
+**Note**: _The `init` field should also be in place for Document Storage Database Connector type_
+
+##### Types
+###### PostgreSQL
 > PostgreSQL is a powerful, open source object-relational database system with
 over 30 years of active development that has earned it a strong reputation for reliability,
 feature robustness, and performance.
 - https://www.postgresql.org/
 
-###### Configuration
+**Configuration**
 ```yaml
 database:
   type: 'postgres'
@@ -363,6 +404,67 @@ database:
     password: 'postgres'
     timeout: 2
 ```
+
+#### Document Storage
+The Document Storage Database Connector type has the following requirements,
+that must be implemented to suit the method calls from both sqAPI Plugins.
+
+##### Methods
+###### Initialization
+The database connector needs an initialization method,
+where all the setup is prepared, like creating indices or other necessary setup.
+```python
+def initialize_database(self):
+    pass
+```
+
+###### Execution
+There are two ways of interacting with the storage solution,
+where one is to insert a new document, while the other is to retrieve the stored document.
+```python
+def create_document(self, area: str, body: dict, kind: str):
+    pass
+def fetch_document(self, area: str, body: dict, query_clause):
+    pass
+```
+* The `area` parameter indicates where the document is to be stored,
+which could be an index, collection or other storage groupings.
+* `body` being the actual document to store, or the content of the query towards the storage.
+* If needed, the `kind` of document could be defined - specifying where within the `area` the document is to be stored.
+* By using `query_clause` the connector can switch between different ways of query the stored data.
+
+##### Types
+###### Elasticsearch
+> Elasticsearch is a distributed, RESTful search and analytics engine capable of
+addressing a growing number of use cases. As the heart of the Elastic Stack,
+it centrally stores your data so you can discover the expected and uncover the unexpected.
+- https://www.elastic.co/products/elastic-stack
+
+**Configuration**
+```yaml
+
+database:
+  type: 'elasticsearch'
+  kwargs:
+    # sniff_on_start: true
+    # sniff_on_connection_fail: true
+    # sniff_timeout: 10
+    # sniffer_timeout: 60
+  connection:
+  - name: 'elasticsearch'
+    port: '9200'
+    user: 'elasticuser'
+    host: 'es'
+    password: 'elasticpass'
+    timeout: 2
+```
+
+The `kwargs` dictionary will be sent to the constructor of the Elasticsearch client.
+Please take a look at the [Elasticsearch API documentation](https://elasticsearch-py.readthedocs.io/en/master/)
+for more concrete values that could be defined.
+
+The `connection` field is a list of connections, where each running instance of the cluster should be defined,
+unless using the `sniff_on_start` keyword in the `kwargs` dictionary.
 
 
 # Contribution
