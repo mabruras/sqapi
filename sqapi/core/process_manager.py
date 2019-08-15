@@ -97,9 +97,12 @@ class ProcessManager:
         if message.metadata:
             log.debug('Loading metadata from message')
             metadata = json.loads(message.metadata)
-        else:
+        elif self.config.meta_store:
             log.debug('Fetching metadata by query')
             metadata = q_meta.fetch_metadata(self.config, message)
+        else:
+            log.debug('No metadata storage defined in configuration, skipping metadata retrieval')
+            metadata = {}
 
         log.debug('Queries completed')
         return data_path, metadata
