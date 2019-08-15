@@ -198,6 +198,15 @@ msg_broker:
 ### Metadata Store
 The metadata store is also defined by a type and connection details.
 
+It is important to notice that a configuration for Metadata store, is not required.
+This is because the metadata is possible to put on the message.
+If it is desirable to put the metadata on the message,
+the `message_fields` > `metadata` reference mentioned above could be used.
+
+If the metadata is not detected in the message,
+nor any configuration for a metadata storage is defined,
+the metadata will be represented as an empty dictionary.
+
 #### Redis
 ##### Example
 ```yaml
