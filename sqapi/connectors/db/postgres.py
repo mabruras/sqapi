@@ -37,7 +37,6 @@ class Database:
             log.debug('Testing database connection again in 1 second..')
             time.sleep(1)
 
-        self.connection = self._create_connection()
         log.debug('Initialized and tested connection OK, towards the {} database'.format(db_type))
 
     def active_connection(self):
@@ -65,7 +64,9 @@ class Database:
                 connect_timeout=self.cfg_con.get('timeout', 5)
             )
             connection.autocommit = True
+
             return connection
+
         except ConnectionError as e:
             err = 'Failed to establish connection towards the database, please verify the configuration: {}'.format(
                 str(e)
@@ -126,7 +127,7 @@ class Database:
         log.debug(query)
         try:
             log.debug('Establishing database connection for query execution')
-            with self.connection as con:
+            with self._create_connection() as con:
                 try:
                     log.debug('Executing query')
                     with con.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
