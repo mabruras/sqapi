@@ -1,5 +1,6 @@
 -- Insert Message
 INSERT INTO messages (
+  id,
   uuid,
   meta_location,
   data_location,
@@ -7,6 +8,7 @@ INSERT INTO messages (
   status
 )
 VALUES (
+  %(id)s,
   %(uuid)s,
   %(meta_location)s,
   %(data_location)s,
