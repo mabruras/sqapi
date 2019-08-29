@@ -1,4 +1,4 @@
 -- Select Message by UUID
 SELECT *
 FROM messages
-WHERE uuid=%(uuid)s;
+WHERE id = %(id)s;

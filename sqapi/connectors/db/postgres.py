@@ -159,6 +159,7 @@ class Database:
         msg_body.update({
             'status': message.status,
             'info': message.info,
+            'id': message.id,
             'uuid': message.uuid,
             'data_type': message.type,
             'meta_location': message.meta_location,

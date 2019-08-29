@@ -77,7 +77,7 @@ this does not need to be any of the databases used by the plugins.
 
 ### Packages
 It is possible to specify python modules for installment or downloading, for each custom sqAPI Plugin.
-In the main configuration, it should be defined if custom packages are to be installed or not - default is `True`.
+In the main configuration, it should be defined if custom packages are to be installed or not - default is `False`.
 
 The `install` field is possible to overwrite in the plugin config files,
 to avoid the packages of a plugin to be installed or downloaded.
@@ -89,7 +89,7 @@ dependent on the plugins area of responsibility.
 ##### Example
 ```yaml
 packages:
-  install: True # Default is True, if not defined
+  install: True # Default is False, if not defined
 ```
 
 ##### Plugin Specific
