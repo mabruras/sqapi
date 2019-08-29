@@ -9,7 +9,7 @@ msg_broker:
   routing_key: 'q_sqapi'
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
-  process_delay: 5
+  process_delay: 0
 
   message_fields:
     type:
