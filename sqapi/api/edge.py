@@ -100,15 +100,15 @@ def get_rules():
 
 
 def get_active_plugins():
-    return [plugin for plugin in current_app.plugins if plugin.status is 'active']
+    return [plugin for plugin in current_app.plugins if plugin.get('status', None) is 'active']
 
 
 def get_unloaded_plugins():
-    return [plugin for plugin in current_app.plugins if plugin.status is 'unloaded']
+    return [plugin for plugin in current_app.plugins if plugin.get('status', None) is 'unloaded']
 
 
 def get_failed_plugins():
-    return [plugin for plugin in current_app.plugins if plugin.status is 'failed']
+    return [plugin for plugin in current_app.plugins if plugin.get('status', None) is 'failed']
 
 
 def get_plugins():
