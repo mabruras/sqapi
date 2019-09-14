@@ -2,6 +2,7 @@ import copy
 import json
 import logging
 import multiprocessing
+import time
 
 from sqapi.core.message import Message
 from sqapi.core.plugin_manager import PluginManager
@@ -45,9 +46,8 @@ class ProcessManager:
 
             log.debug('Creating processor pool of plugin executions')
             process_pool = [
-                multiprocessing.Process(target=plugin.execute, args=[
-                    plugin.config, plugin.database, copy.deepcopy(message),
-                    copy.deepcopy(metadata), open(data_path, 'rb')
+                multiprocessing.Process(target=self.plugin_execution, args=[
+                    plugin, message, metadata, data_path
                 ]) for plugin in self.plugin_manager.plugins
                 if valid_data_type(message, plugin)
             ]
@@ -106,6 +106,24 @@ class ProcessManager:
 
         log.debug('Queries completed')
         return data_path, metadata
+
+    def plugin_execution(self, plugin, message, metadata, data_path):
+        log.info('{} started processing on {}'.format(plugin.name, message.uuid))
+        start = time.time()
+
+        try:
+            plugin.execute(
+                plugin.config,
+                plugin.database,
+                copy.deepcopy(message),
+                copy.deepcopy(metadata),
+                open(data_path, 'rb')
+            )
+        except Exception as e:
+            log.warning('{} failed processing {}: {}'.format(plugin.name, message.uuid, str(e)))
+        else:
+            run_time = (time.time() - start) * 1000.0
+            log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
 
 
 def valid_data_type(message: Message, plugin):
