@@ -46,11 +46,24 @@ def plugins():
     return response.ok(plugin_list)
 
 
-@bp.route("/rules")
+@bp.route('/rules')
 def rules():
     out = get_rules()
 
     return response.ok(out)
+
+
+@bp.route('/health')
+def health():
+    stats = {
+        'plugins': {
+            'active': [p.name for p in get_active_plugins()],
+            'unloaded': [p.name for p in get_unloaded_plugins()],
+            'failed': [p.name for p in get_failed_plugins()],
+        }
+    }
+
+    return response.ok(stats)
 
 
 def render_markdown(doc_file):
@@ -86,13 +99,17 @@ def get_rules():
     return out
 
 
-def get_database():
-    return current_app.database.get('duplicates')
-
-
-def get_config():
-    return current_app.config.get('duplicates')
-
-
 def get_active_plugins():
+    return [plugin for plugin in current_app.plugins if plugin.status is 'active']
+
+
+def get_unloaded_plugins():
+    return [plugin for plugin in current_app.plugins if plugin.status is 'unloaded']
+
+
+def get_failed_plugins():
+    return [plugin for plugin in current_app.plugins if plugin.status is 'failed']
+
+
+def get_plugins():
     return [plugin for plugin in current_app.plugins]

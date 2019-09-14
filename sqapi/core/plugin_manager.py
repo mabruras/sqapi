@@ -17,6 +17,7 @@ class PluginManager:
 
         self.plugins = []
         self.failed_plugins = {}
+        self.unloaded_plugins = []
         self.register_plugins()
 
         self.accepted_types = set()
@@ -45,7 +46,7 @@ class PluginManager:
                     plugin_name: err
                 })
 
-        unloaded_plugins = [
+        self.unloaded_plugins = [
             n for n, _ in detected_plugins
             if n not in self.failed_plugins and n not in [p.name for p in self.plugins]
         ]
@@ -53,8 +54,8 @@ class PluginManager:
         log.info('{}/{} registered plugins'.format(len(self.plugins), len(detected_plugins)))
         log.debug('Registered: {}'.format(self.plugins))
 
-        log.info('{}/{} unloaded plugins'.format(len(unloaded_plugins), len(detected_plugins)))
-        log.debug('Unloaded: {}'.format(unloaded_plugins))
+        log.info('{}/{} unloaded plugins'.format(len(self.unloaded_plugins), len(detected_plugins)))
+        log.debug('Unloaded: {}'.format(self.unloaded_plugins))
 
         log.info('{}/{} failed plugins'.format(len(self.failed_plugins), len(detected_plugins)))
         log.debug('Failed: {}'.format(self.failed_plugins))
