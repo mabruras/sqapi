@@ -21,16 +21,6 @@ class ResourceManager:
         self.app.url_map.strict_slashes = False
         self.app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
 
-        self.app.plugins.extend([{
-            'name': p.name,
-            'status': 'failed'
-        } for p in self.plugin_manager.failed_plugins])
-
-        self.app.plugins.extend([{
-            'name': p.name,
-            'status': 'unloaded'
-        } for p in self.plugin_manager.unloaded_plugins])
-
         self.register_blueprints()
         self.app.run(host='0.0.0.0')
 
@@ -49,6 +39,16 @@ class ResourceManager:
             self.append_plugin_blueprints(p)
             self.register_plugin_blueprints(p)
             log.debug('Processor information: {}'.format(p.__dict__))
+
+        self.app.plugins.extend([{
+            'name': p.name,
+            'status': 'failed'
+        } for p in self.plugin_manager.failed_plugins])
+
+        self.app.plugins.extend([{
+            'name': p.name,
+            'status': 'unloaded'
+        } for p in self.plugin_manager.unloaded_plugins])
 
     def append_plugin_blueprints(self, p):
         self.app.plugins.append({
