@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 import logging
 import os
+import time
+from datetime import datetime
 
 import markdown
 from flask import Blueprint, current_app, url_for, send_from_directory
@@ -57,9 +59,15 @@ def rules():
 def health():
     stats = {
         'plugins': {
-            'active': [p.get('name') for p in get_active_plugins()],
-            'unloaded': [p.get('name') for p in get_unloaded_plugins()],
-            'failed': [p.get('name') for p in get_failed_plugins()],
+            'active': {p.get('name'): p for p in get_active_plugins()},
+            'unloaded': {p.get('name'): p for p in get_unloaded_plugins()},
+            'failed': {p.get('name'): p for p in get_failed_plugins()},
+        },
+        'instance': {
+            'started': datetime.fromtimestamp(current_app.start_time).isoformat(),
+            'uptime': time.time() - current_app.start_time,
+            # TODO: Impl. a processing_time to indicate how much time spent on each plugin:
+            # 'processing': current_app.processing_time
         }
     }
 

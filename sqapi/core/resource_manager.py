@@ -1,4 +1,5 @@
 import logging
+import time
 
 from flask import Flask
 from flask_cors import CORS
@@ -14,6 +15,7 @@ class ResourceManager:
     def __init__(self, config: Config, plugin_manager: PluginManager):
         self.config = config
         self.app = Flask(__name__)
+        self.app.start_time = time.time()
         self.plugin_manager = plugin_manager
 
     def start_api(self):
