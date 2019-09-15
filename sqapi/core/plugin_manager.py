@@ -16,7 +16,8 @@ class PluginManager:
         self.config = config
 
         self.plugins = []
-        self.failed_plugins = {}
+        self.failed_plugins = []
+        self.unloaded_plugins = []
         self.register_plugins()
 
         self.accepted_types = set()
@@ -41,20 +42,25 @@ class PluginManager:
             except Exception as e:
                 err = 'Could not register plugin {} ({}): {}'.format(plugin_name, plugin, str(e))
                 log.warning(err)
-                self.failed_plugins.update({
-                    plugin_name: err
+                self.failed_plugins.append({
+                    'name': plugin_name,
+                    'error': err
                 })
 
-        unloaded_plugins = [
-            n for n, _ in detected_plugins
-            if n not in self.failed_plugins and n not in [p.name for p in self.plugins]
+        self.unloaded_plugins = [
+            {'name': name} for name, _ in detected_plugins
+            if name not in [
+                p.get('name') for p in self.failed_plugins
+            ] and name not in [
+                p.name for p in self.plugins
+            ]
         ]
 
         log.info('{}/{} registered plugins'.format(len(self.plugins), len(detected_plugins)))
         log.debug('Registered: {}'.format(self.plugins))
 
-        log.info('{}/{} unloaded plugins'.format(len(unloaded_plugins), len(detected_plugins)))
-        log.debug('Unloaded: {}'.format(unloaded_plugins))
+        log.info('{}/{} unloaded plugins'.format(len(self.unloaded_plugins), len(detected_plugins)))
+        log.debug('Unloaded: {}'.format(self.unloaded_plugins))
 
         log.info('{}/{} failed plugins'.format(len(self.failed_plugins), len(detected_plugins)))
         log.debug('Failed: {}'.format(self.failed_plugins))

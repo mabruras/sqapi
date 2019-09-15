@@ -16,7 +16,7 @@ def install_packages(config):
             for action in pm.keys() or {}:
                 log.debug('action config type: {}'.format(type(pm.get(action))))
                 for package in pm.get(action):
-                    log.debug('Module: "{}", Action: "{}", Package: "{}"'.format(module, action, package))
+                    log.debug('Module: {}, Action: {}, Package: {}'.format(module, action, package))
                     execute_module_action(module, action, package)
 
 
