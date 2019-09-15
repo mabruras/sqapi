@@ -41,12 +41,13 @@ class ResourceManager:
             log.debug('Processor information: {}'.format(p.__dict__))
 
         self.app.plugins.extend([{
-            'name': p.name,
-            'status': 'failed'
+            'name': p.get('name'),
+            'status': 'failed',
+            'error': p.get('error')
         } for p in self.plugin_manager.failed_plugins])
 
         self.app.plugins.extend([{
-            'name': p.name,
+            'name': p.get('name'),
             'status': 'unloaded'
         } for p in self.plugin_manager.unloaded_plugins])
 

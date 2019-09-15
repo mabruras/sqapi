@@ -57,9 +57,9 @@ def rules():
 def health():
     stats = {
         'plugins': {
-            'active': [p.name for p in get_active_plugins()],
-            'unloaded': [p.name for p in get_unloaded_plugins()],
-            'failed': [p.name for p in get_failed_plugins()],
+            'active': [p.get('name') for p in get_active_plugins()],
+            'unloaded': [p.get('name') for p in get_unloaded_plugins()],
+            'failed': [p.get('name') for p in get_failed_plugins()],
         }
     }
 

@@ -16,7 +16,7 @@ class PluginManager:
         self.config = config
 
         self.plugins = []
-        self.failed_plugins = {}
+        self.failed_plugins = []
         self.unloaded_plugins = []
         self.register_plugins()
 
@@ -42,13 +42,18 @@ class PluginManager:
             except Exception as e:
                 err = 'Could not register plugin {} ({}): {}'.format(plugin_name, plugin, str(e))
                 log.warning(err)
-                self.failed_plugins.update({
-                    plugin_name: err
+                self.failed_plugins.append({
+                    'name': plugin_name,
+                    'error': err
                 })
 
         self.unloaded_plugins = [
-            n for n, _ in detected_plugins
-            if n not in self.failed_plugins and n not in [p.name for p in self.plugins]
+            {'name': name} for name, _ in detected_plugins
+            if name not in [
+                p.get('name') for p in self.failed_plugins
+            ] and name not in [
+                p.name for p in self.plugins
+            ]
         ]
 
         log.info('{}/{} registered plugins'.format(len(self.plugins), len(detected_plugins)))
