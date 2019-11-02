@@ -46,3 +46,6 @@ meta_store:
 
 data_store:
   type: 'disk'
+
+execution:
+  post_processing: True

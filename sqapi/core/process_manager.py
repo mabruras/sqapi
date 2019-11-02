@@ -6,6 +6,7 @@ import time
 
 from sqapi.core.message import Message
 from sqapi.core.plugin_manager import PluginManager
+from sqapi.core.post_processor import PostProcessor
 from sqapi.query import data as q_data, metadata as q_meta
 from sqapi.util import detector
 from sqapi.util.cfg_util import Config
@@ -29,6 +30,7 @@ class ProcessManager:
         self.database.initialize_message_table()
 
         self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
+        self.post_processor = PostProcessor(config.execution)
 
     def start_subscribing(self):
         log.info('Starting message subscription')
@@ -59,9 +61,12 @@ class ProcessManager:
             self.database.update_message(message, STATUS_DONE)
             log.info('Processing completed')
 
+            self.post_processor.post_execution(message, True)
+
         except LookupError as e:
             self.database.update_message(message, STATUS_RETRY, str(e))
             log.warning('Could not fetch data and/or metadata at this point: {}'.format(str(e)))
+            self.post_processor.post_execution(message, False)
 
         except Exception as e:
             try:
@@ -74,6 +79,8 @@ class ProcessManager:
             log.error('Could not process message: {}'.format(str(e)))
             log.debug(message)
             log.debug(e)
+
+            self.post_processor.post_execution(message, False)
 
     def check_mime_type(self, message: Message):
         log.debug('Validating data type')
@@ -120,8 +127,10 @@ class ProcessManager:
                 open(data_path, 'rb')
             )
         except Exception as e:
+            self.post_processor.post_plugin(message, plugin.name, False)
             log.warning('{} failed processing {}: {}'.format(plugin.name, message.uuid, str(e)))
         else:
+            self.post_processor.post_plugin(message, plugin.name, True)
             run_time = (time.time() - start) * 1000.0
             log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
 

@@ -84,6 +84,22 @@ def detect_meta_connectors(config):
         raise AttributeError(err)
 
 
+def detect_post_processor(config):
+    log.debug('Detecting post processors')
+
+    if not config.get('active'):
+        log.debug('Post Processing is not activated in configuration')
+        return
+
+    # TODO: Decide; Detect from post_processor package, or specific file?
+    # TODO: Decide; Multiple post processors vs. singular
+
+    # TODO: Example; post_processors in packages and multiple configurable options
+    # TODO: Enable specific post_processors, like "send event", "log execution", etc.?
+
+    return None
+
+
 def import_module(target_module, directory):
     module_dict = detect_modules(directory)
 
