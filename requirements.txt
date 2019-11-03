@@ -10,3 +10,5 @@ redis==3.2.1
 requests==2.22.0
 urllib3==1.25.3
 elasticsearch==7.0.2
+pyzmq==18.1.0
+zmq==0.0.0
