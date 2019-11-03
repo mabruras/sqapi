@@ -7,6 +7,7 @@ from shutil import copyfile
 
 import pika
 import redis
+import zmq
 
 EXCHANGE = 'x_sqapi'
 
@@ -34,7 +35,7 @@ def populate_data(uuid_ref):
 
     file_location = '/tmp/my_file_{}'.format(uuid_ref)
 
-    test_file = os.path.join(script_dir, 'resources/test_picture01.jpg')
+    test_file = os.path.join(script_dir, 'test_picture01.jpg')
     print('Test file: {}'.format(test_file))
     copyfile(test_file, file_location)
 
@@ -65,8 +66,30 @@ def populate_rabbit(file_location, uuid_ref):
     print('Connection closed')
 
 
-rnd_uuid = str(uuid.uuid4())
+def send_zmq_msg(data_location, rnd_uuid):
+    msg = json.dumps({
+        'data_type': 'image/jpeg',
+        'data_location': data_location,
+        'meta_location': rnd_uuid,
+        'uuid_ref': rnd_uuid,
+        'metadata': {},
+    })
 
-populate_redis(rnd_uuid)
-data_location = populate_data(rnd_uuid)
-populate_rabbit(data_location, rnd_uuid)
+    context = zmq.Context()
+    bind_addr = f'tcp://127.0.0.1:5001'
+    socket = context.socket(zmq.PUSH)
+    socket.connect(bind_addr)
+
+    print(f'Sending message: {msg}')
+    socket.send(msg.encode('utf-8'))
+    print(f'Message sent')
+    socket.close()
+
+
+if __name__ == '__main__':
+    rnd_uuid = str(uuid.uuid4())
+
+    # populate_redis(rnd_uuid)
+    data_location = populate_data(rnd_uuid)
+    # populate_rabbit(data_location, rnd_uuid)
+    send_zmq_msg(data_location, rnd_uuid)
