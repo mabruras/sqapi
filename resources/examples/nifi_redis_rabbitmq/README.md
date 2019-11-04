@@ -1,13 +1,12 @@
-# ZeroMQ
+# NiFi - Redis - RabbitMQ
 This is a document describing how an example system can be created,
-with only a message as trigger for the sqAPI execution,
-before exposing the data to the end user.
+where you have the whole flow from the Data Loader,
+through the data aggregation and exposing the data to the end user.
 
 **Note: This is a guide to setup your own example system!**
 
 ## Components
-This example consist of a minimal set of components,
-all intended to populate a central storage unit,
+This example consist of a set of components, all intended to populate a central storage unit,
 execute specific logic on receive message and expose the aggregated data to the users.
 
 The components are represented by specific technologies in this example,
@@ -15,10 +14,10 @@ but it is possible to switch to other similar alternatives.
 
 | Component | Technology | Description |
 | --------- | ---------- | ----------- |
-| `Data Loader` | `Script` | Loading data into `Data Store`, `Metadata Store` and `Message Broker` |
+| `Data Loader` | `NiFi` | Loading data into `Data Store`, `Metadata Store` and `Message Broker` |
 | `Data Store` | `Xubuntu file system` | Keeping original incoming files |
-| `Metadata Store` | `N/A` | Metadata is included in message |
-| `Message System` | `ZeroMQ` | Publishes messages to each active `sqAPI`-instance |
+| `Metadata Store` | `Redis` | Holding metadata with ID reference to `Data Store` location |
+| `Message System` | `RabbitMQ` | Publishes messages to each active `sqAPI`-instance |
 | `sqAPI` | `Python` | System for executing queries based on a subscription, fetch, aggregate and expose data |
 | `sqAPI Storage` | `PostgreSQL` | Local storage for each `sqAPI`, keeps record of all messages and aggregated data |
 
@@ -43,7 +42,7 @@ When uploading a file into NiFi, the *Main*-flow is executed.
 After *Main*, the flow is forked into three:
 *Store File*, *Store Metadata*, *Publish Message*
 
-![NiFi Flow](https://github.com/mabruras/sqapi/raw/master/resources/images/nifi-flow.png)
+![NiFi Flow](https://github.com/mabruras/sqapi/raw/master/resources/examples/nifi_redis_rabbit/nifi-flow.png)
 
 
 ##### Main

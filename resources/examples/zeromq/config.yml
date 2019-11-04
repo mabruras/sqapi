@@ -1,0 +1,43 @@
+packages:
+  install: False
+
+msg_broker:
+  type: 'zeromq'
+  host: '*'
+  port: 5001
+  retry_interval: 0
+  process_delay: 0
+  connection_type: bind
+  socket_type: 7
+  protocol: 'tcp'
+
+  message_fields:
+    type:
+      key: 'data_type'
+      required: True
+    data_location:
+      key: 'data_path'
+      required: True
+    meta_location:
+      key: 'meta_path'
+      required: True
+    uuid:
+      key: 'uuid'
+      required: True
+    metadata:
+      key: 'metadata'
+      required: False
+
+database:
+  type: 'postgres'
+  init: 'scripts/init.sql'
+  connection:
+    name: 'postgres'
+    port: '5432'
+    user: 'postgres'
+    host: 'db'
+    password: 'postgres'
+    timeout: 2
+
+data_store:
+  type: 'disk'

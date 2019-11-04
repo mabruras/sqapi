@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   sqapi:
-    build: ../../../../
+    build: ../../..
     image: mabruras/sqapi:${SQAPI_V:-latest}
     container_name: sqapi
     restart: unless-stopped
@@ -14,6 +14,8 @@ services:
     volumes:
     - nifi-io:/io
     - sqapi-files:/opt/app/files
+    - ./config.yml:/opt/sqapi/sqapi/conf/sqapi.yml:ro
+    - ../../test/:/test/:ro
 
 
   nifi:
