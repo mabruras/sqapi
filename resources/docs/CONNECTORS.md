@@ -234,6 +234,22 @@ def process_message(self, message: Message):
 ```
 
 #### Types
+Regardless of the chosen type,
+there should be included configuration
+for which mime types each plugin supports.
+
+The following configuration is example
+of config used in a plugin configuration.
+```yaml
+msg_broker:
+  # Supported Mime should be custom for each sqAPI Plugin,
+  # not necessarily defined in the parent configuration
+  supported_mime:
+  - 'image/jpeg'
+  - 'image/png'
+  - 'image/gif'
+```
+
 ##### RabbitMQ
 > RabbitMQ is the most widely deployed open source message broker.
 - https://www.rabbitmq.com/
@@ -273,6 +289,43 @@ msg_broker:
   - 'image/jpeg'
   - 'image/png'
   - 'image/gif'
+```
+
+##### ZeroMQ
+> ZeroMQ
+>
+> An open-source universal messaging library
+- https://zeromq.org/
+
+###### Configuration
+```yaml
+msg_broker:
+
+  type: 'zeromq'
+  host: '*'
+  port: 5001
+  retry_interval: 0
+  process_delay: 0
+  connection_type: bind
+  socket_type: 7
+  protocol: 'tcp'
+
+  message_fields:
+    type:
+      key: 'data_type'
+      required: True
+    data_location:
+      key: 'data_path'
+      required: True
+    meta_location:
+      key: 'meta_path'
+      required: True
+    uuid:
+      key: 'uuid'
+      required: True
+    metadata:
+      key: 'metadata'
+      required: False
 ```
 
 
