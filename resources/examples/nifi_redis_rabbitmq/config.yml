@@ -2,14 +2,14 @@ packages:
   install: False
 
 msg_broker:
-  type: 'zeromq'
-  host: '*'
-  port: 5001
-  retry_interval: 0
+  type: 'rabbitmq'
+  host: 'mq'
+  port: 5672
+
+  routing_key: 'q_sqapi'
+  exchange_name: 'x_sqapi'
+  exchange_type: 'fanout'
   process_delay: 0
-  connection_type: bind
-  socket_type: 7
-  protocol: 'tcp'
 
   message_fields:
     type:
@@ -24,9 +24,6 @@ msg_broker:
     uuid:
       key: 'uuid_ref'
       required: True
-    metadata:
-      key: 'metadata'
-      required: False
 
 database:
   type: 'postgres'
