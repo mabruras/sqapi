@@ -132,10 +132,10 @@ plugin:
 ```
 
 
-### Message Broker
-The message broker, usually defined in
+### Message System
+The message system, usually defined in
 [sqAPI configuration](https://github.com/mabruras/sqapi/blob/master/sqapi/conf/sqapi.yml),
-must contain a reference to the type of broker and connection details.
+must contain a reference to the type of message system and connection details.
 
 Remember to list up minimum required fields of the message (`message_fields`)
 as these will be validated upon received message.

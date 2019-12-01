@@ -14,15 +14,17 @@ for subscribing to messages, query towards data- and metadata stores,
 aggregate and expose data to the users.
 
 Receiving a message will make the system fetch referred data and metadata,
-and execute all active plugins for custom data aggregation.
-The aggregated data will be stored in a local database,
-and on disk if necessary - dependent on the plugin implementations.
+calculate a hash digest and guess the mime type before proceeding.
+Following an execution of all active plugins,
+which accepts the guessed mime type, for custom data manipulation.
+The manipulated data can be stored in a database or on disk if necessary -
+dependent on the plugin implementations.
 
 Each sqAPI plugin has its own area of responsibility, and will receive its own
 copy of the queried data and metadata independent of each other.
-The data being aggregated within the plugin, will be stored in
-the sqAPIs local data storage.
-The storage type depends up on what data it's intended for.
+The data being manipulated and/or reduced within the plugin,
+can be stored in the sqAPIs local data storage.
+The local storage type depends up on what data it's intended for.
 
 When a user wants to search, or in other ways access the data,
 they will do so through all of sqAPIs exposed API resources.
@@ -88,28 +90,15 @@ necessary installations, based on the documentation of the plugins you want to u
 ### Prerequisites
 sqAPI is dependent on receiving messages,
 and being able to fetch elements from external systems.
-Use the following to start the external systems;
-a Redis as metadata store, a RabbitMQ as message broker,
-a PostgreSQL as the internal database and sqAPI itself.
 
-In this example, the data store is represented by `disk`
-at the host running the solution.
+Eg. the data could be stored in a Swift storage,
+while the metadata is stored in a Redis cache.
+This requires that sqAPI is configured to reach those systems,
+by selecting the correct configuration for sqAPI, and its plugins.
 
-Use
-[data producer](https://github.com/mabruras/sqapi/blob/master/resources/test/data_producer.py)
-to insert test data.
-```bash
-# Start Redis, RabbitMQ and PostgreSQL
-docker run -d -p 6379:6379 redis:latest
-docker run -d -p 5672:5672 rabbitmq:latest
-docker run -d -p 5432:5432 postgres
+For example systems, take a look in
+[resources / examples](https://github.com/mabruras/sqapi/blob/master/resources/examples)
 
-# Start sqAPI
-./start.py
-
-# Produce test data
-./resources/data_producer.py
-```
 
 ### Docker
 To load a set of plugins, it should be mounted as follows.
@@ -196,4 +185,4 @@ For detailed information, see
 * [Database](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#database)
 * [Data Store](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#data-store)
 * [Metadata Store](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#metadata-store)
-* [Message Broker](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#message-broker)
+* [Message System](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md#message-system)

@@ -1,8 +1,11 @@
 import copy
+import hashlib
 import json
 import logging
 import multiprocessing
 import time
+
+import filetype
 
 from sqapi.core.message import Message
 from sqapi.core.plugin_manager import PluginManager
@@ -16,6 +19,8 @@ STATUS_PROCESSING = 'PROCESSING'
 STATUS_DONE = 'DONE'
 STATUS_RETRY = 'RETRY'
 STATUS_FAILED = 'FAILED'
+
+CHUNK_SIZE = 65536
 
 log = logging.getLogger(__name__)
 
@@ -36,12 +41,16 @@ class ProcessManager:
         log.debug('Message subscription started')
 
     def process_message(self, message: Message):
-        log.info('Message processing started')
-        self.check_mime_type(message)
-
         try:
-            # Query
+            log.info('Message processing started')
             data_path, metadata = self.query(message)
+
+            if not message.type:
+                message.type = self.detect_filetype(data_path).mime
+            self.check_mime_type(message)
+
+            message.hash_digest = self._calculate_hash_digest(data_path)
+
             self.database.update_message(message, STATUS_PROCESSING)
 
             log.debug('Creating processor pool of plugin executions')
@@ -49,7 +58,7 @@ class ProcessManager:
                 multiprocessing.Process(target=self.plugin_execution, args=[
                     plugin, message, metadata, data_path
                 ]) for plugin in self.plugin_manager.plugins
-                if valid_data_type(message, plugin)
+                if self.valid_data_type(message, plugin)
             ]
 
             log.debug('Starting processor pool')
@@ -75,16 +84,18 @@ class ProcessManager:
             log.debug(message)
             log.debug(e)
 
-    def check_mime_type(self, message: Message):
-        log.debug('Validating data type')
-        log.debug('Message data type: {}'.format(message.type))
-        log.debug('Accepted data types: {}'.format(self.plugin_manager.accepted_types))
+    def detect_filetype(self, file_path):
+        return filetype.guess(file_path) or self._get_default_filetype()
+
+    def check_mime_type(self, mime):
+        log.debug('Validating mime type')
+        log.debug('Accepted mime types: {}'.format(self.plugin_manager.accepted_types))
 
         if self.plugin_manager.accepted_types and (
-                message.type not in self.plugin_manager.accepted_types
+                mime not in self.plugin_manager.accepted_types
                 and '*' not in self.plugin_manager.accepted_types
         ):
-            err = 'Data type "{}" is not supported by any of the active sqAPI plugins'.format(message.type)
+            err = 'Mime type "{}" is not supported by any of the active sqAPI plugins'.format(mime)
             log.debug(err)
             raise NotImplementedError(err)
 
@@ -125,8 +136,31 @@ class ProcessManager:
             run_time = (time.time() - start) * 1000.0
             log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
 
+    @staticmethod
+    def _calculate_hash_digest(file_path):
+        digest = hashlib.sha256()
 
-def valid_data_type(message: Message, plugin):
-    accepted_types = plugin.config.msg_broker.get('supported_mime') or []
+        with open(file_path, 'rb') as f:
+            while True:
+                chunk = f.read(CHUNK_SIZE)
 
-    return message.type in accepted_types or not accepted_types
+                if not chunk:
+                    break
+
+                digest.update(chunk)
+
+        return digest.hexdigest()
+
+    @staticmethod
+    def valid_data_type(message: Message, plugin):
+        accepted_types = plugin.config.msg_broker.get('supported_mime') or []
+
+        return message.type in accepted_types or not accepted_types
+
+    @staticmethod
+    def _get_default_filetype():
+        kind = type('', (), {})()
+        kind.extension = None
+        kind.mime = 'application/octet-stream'
+
+        return kind

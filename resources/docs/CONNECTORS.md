@@ -20,12 +20,13 @@ so make sure to read on before setting up the specific types for the different T
 #### Overview
 The following external systems has its own Connector Topic,
 located within the specific topics package.
+(_Note: This setup is just an example stack_)
 
 | External System | Topic | Package | Default Type |
 | --------------- | ----- | ------- | ------------ |
 | `Data Store` | `data` | `sqapi.connectors.data` | `disk` |
 | `Metadata Store` | `meta` | `sqapi.connectors.meta` | `redis` |
-| `Message Broker` | `listeners` | `sqapi.connectors.listeners` | `rabbitmq` |
+| `Message System` | `listeners` | `sqapi.connectors.listeners` | `zeromq` |
 | `Database` | `db` | `sqapi.connectors.db` | `postgres` |
 
 
@@ -47,8 +48,8 @@ data_store:
   type: 'swift'
   ... # Other configuration
 ```
-Notice that the `type` field needs to match the module name,
-or else it will not be loaded in as a connector runtime.
+Notice that the `type` field needs to match the name of the module,
+or it will not be loaded in as a connector during runtime.
 
 
 ## Topics
@@ -171,14 +172,15 @@ meta_store:
 ```
 
 
-### Message Broker
-Connector towards the Message Broker is responsible for subscribing to a
-message broker or -bus for receiving messages for each plugin to process.
+### Message System
+Connector towards the Message System is responsible for subscribing to a
+message broker, -bus or other message system connections,
+for receiving messages for sqAPI to process.
 This is the main trigger for loading data into sqAPI,
 before each of the plugins custom logic is executed.
 
 #### Structure
-The Message Broker connector is an instantiated object,
+The Message System connector is an instantiated object,
 not used as a static module.
 
 #### Requirements
