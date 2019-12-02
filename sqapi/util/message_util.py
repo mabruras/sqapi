@@ -26,7 +26,7 @@ def validate_message(message, req_fields):
             missing_fields.append(f)
 
     if missing_fields:
-        err = 'The field(/s) "{}" are missing in the message'.format('", "'.join(missing_fields))
+        err = 'The field(/s) {} are missing in the message'.format(', '.join(missing_fields))
         log.debug(err)
         raise AttributeError(err)
 
