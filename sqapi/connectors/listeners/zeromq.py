@@ -9,14 +9,6 @@ import zmq as zmq
 from sqapi.core.message import Message
 from sqapi.util import message_util
 
-MSG_FIELDS = {
-    'data_type': {'key': 'data_type', 'required': True},
-    'data_location': {'key': 'data_location', 'required': True},
-    'meta_location': {'key': 'meta_location', 'required': True},
-    'uuid_ref': {'key': 'uuid_ref', 'required': True},
-    'metadata': {'key': 'metadata', 'required': False},
-}
-
 log = logging.getLogger(__name__)
 
 
@@ -39,7 +31,7 @@ class Listener:
         self.socket_type = config.get('socket_type', zmq.PULL)
         self.protocol = config.get('protocol', 'tcp')
 
-        self.msg_fields = config.get('message_fields') or MSG_FIELDS
+        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
 
     def start_listeners(self):
         connect_addr = f'{self.protocol}://{self.host}:{self.port}'
