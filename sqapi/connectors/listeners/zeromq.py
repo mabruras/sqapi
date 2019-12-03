@@ -7,14 +7,7 @@ import time
 import zmq as zmq
 
 from sqapi.core.message import Message
-
-MSG_FIELDS = {
-    'data_type': {'key': 'data_type', 'required': True},
-    'data_location': {'key': 'data_location', 'required': True},
-    'meta_location': {'key': 'meta_location', 'required': True},
-    'uuid_ref': {'key': 'uuid_ref', 'required': True},
-    'metadata': {'key': 'metadata', 'required': False},
-}
+from sqapi.util import message_util
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +31,7 @@ class Listener:
         self.socket_type = config.get('socket_type', zmq.PULL)
         self.protocol = config.get('protocol', 'tcp')
 
-        self.msg_fields = config.get('message_fields') or MSG_FIELDS
+        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
 
     def start_listeners(self):
         connect_addr = f'{self.protocol}://{self.host}:{self.port}'
@@ -72,36 +65,11 @@ class Listener:
         try:
             log.debug('Received message: {}'.format(body))
 
-            body = self.validate_message(body)
+            message = json.loads(body)
+            body = message_util.validate_message(message, self.msg_fields)
 
             self.pm_callback(Message(body, self.config))
+
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
             log.warning(err)
-
-    def validate_message(self, body):
-        log.debug('Validating message')
-        message = json.loads(body)
-        self.validate_fields(message)
-        log.debug('Message validated successfully')
-
-        return message
-
-    def validate_fields(self, message):
-        log.debug('Validating required fields of set: {}'.format(self.msg_fields))
-        required_fields = {
-            self.msg_fields.get(f).get('key') for f in self.msg_fields
-            if self.msg_fields.get(f).get('required')
-        }
-        log.debug('Required fields: {}'.format(required_fields))
-        missing_fields = []
-
-        for f in required_fields:
-            if f not in dict(message.items()):
-                log.debug('Field {} is missing'.format(f))
-                missing_fields.append(f)
-
-        if missing_fields:
-            err = 'The field(/s) "{}" are missing in the message'.format('", "'.join(missing_fields))
-            log.debug(err)
-            raise AttributeError(err)
