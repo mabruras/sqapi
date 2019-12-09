@@ -9,11 +9,6 @@ import psycopg2.extras
 
 from sqapi.core.message import Message
 
-CREATE_MESSAGES_SCRIPT = '{dir}{sep}pg_script{sep}create_messages.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
-INSERT_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}insert_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
-SELECT_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}select_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
-UPDATE_MESSAGE_SCRIPT = '{dir}{sep}pg_script{sep}update_message.sql'.format(dir=os.path.dirname(__file__), sep=os.sep)
-
 DB_TYPE = 'postgres'
 
 log = logging.getLogger(__name__)
@@ -86,11 +81,6 @@ class Database:
             log.warning(err)
             raise type(e)(err)
 
-    def initialize_message_table(self):
-        log.debug('Creating messages table if it does not exist')
-        out = self.execute_script(CREATE_MESSAGES_SCRIPT)
-        log.debug('Result of creating messages table: {}'.format(out))
-
     def execute_script(self, script_path: str, **kwargs):
         log.debug('Preparing script {}'.format(script_path))
 
@@ -149,45 +139,3 @@ class Database:
             err = 'Could not connect to local database: {}'.format(str(e))
             log.warning(err)
             raise ConnectionError(err)
-
-    def update_message(self, message: Message, status: str, info: str = None):
-        msg_body = copy.deepcopy(message.body)
-        message.status = status
-        message.info = info
-
-        log.debug('Updating message if it exists')
-        msg_body.update({
-            'status': message.status,
-            'info': message.info,
-            'id': message.id,
-            'uuid': message.uuid,
-            'data_type': message.type,
-            'meta_location': message.meta_location,
-            'data_location': message.data_location,
-        })
-        script = UPDATE_MESSAGE_SCRIPT if self.get_message(**msg_body) else INSERT_MESSAGE_SCRIPT
-        log.debug('Message script decided')
-        log.debug(script)
-
-        try:
-            out = self.execute_script(script, **msg_body)
-            log.debug('Result of updating message: {}'.format(out))
-
-        except Exception as e:
-            log.debug(str(e))
-            out = None
-
-        return out
-
-    def get_message(self, **message):
-        log.debug('Selecting message from DB: {}'.format(message))
-        try:
-            out = self.execute_script(SELECT_MESSAGE_SCRIPT, **message)
-            log.debug('Result of selected message: {}'.format(out))
-
-            return out
-
-        except Exception as e:
-            log.debug(str(e))
-
-        return None

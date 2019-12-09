@@ -342,9 +342,8 @@ while all relational databases (eg. PostgreSQL, SQLite, MySQL, etc.) share anoth
 Each of the interfaces is described below, within their respective headings.
 
 #### Structure
-The sqAPI Core configuration must have a _relational database_ connector
-defined, so the process manager are able to store messages received.
-Note that the Database Connector type for sqAPI should always be a relational database.
+The sqAPI Core configuration can have a database connector defined,
+that will be default for all plugins, as long as they support the database type.
 
 The Database types are dependent on each plugin and their data structure.
 It is possible to reuse the default connection from the sqAPI configuration,
@@ -392,15 +391,11 @@ def initialize_database(self):
     pass
 def initialize_message_table(self):
     pass
-def update_message(self, message: Message, status: str, info: str = None):
-    pass
 ```
 
 * The `initialize_database` should handle all preparation of the database,
 * `initialize_message_table` is intended for setting up the
 message table for the sqAPI core - if sqAPI is configured to use the connector.
-* To let sqAPI being able to update a message, the `update_message` should
-be able to create a new or change status of an existing message.
 
 ###### Execution
 There are two ways of executing queries against the database,
@@ -414,21 +409,6 @@ The `**kwargs` will contain key-value pairs to replace the placeholders in the q
 def execute_script(self, script_path: str, **kwargs):
     pass
 def execute_query(self, query: str, **kwargs):
-    pass
-```
-
-###### Status Updates
-Relational databases is intended to also be used by the sqAPI core,
-thus should be able to store the messages that sqAPI receives.
-This is both to keep track of what messages have been received,
-and their current status (eg. `DONE`, `RETRY` or `FAILED`)
-
-The Process Manager will call upon this method as a small log,
-in case something breaks while processing the message.
-```python
-from sqapi.core.message import Message
-
-def update_message(self, message: Message, status: str, info: str = None):
     pass
 ```
 
