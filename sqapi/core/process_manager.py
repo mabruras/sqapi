@@ -87,9 +87,11 @@ class ProcessManager:
         if message.metadata:
             log.debug('Loading metadata from message')
             metadata = json.loads(message.metadata)
+
         elif self.config.meta_store:
             log.debug('Fetching metadata by query')
             metadata = q_meta.fetch_metadata(self.config, message)
+
         else:
             log.debug('No metadata storage defined in configuration, skipping metadata retrieval')
             metadata = {}
@@ -97,7 +99,8 @@ class ProcessManager:
         log.debug('Queries completed')
         return data_path, metadata
 
-    def plugin_execution(self, plugin, message, metadata, data_path):
+    @staticmethod
+    def plugin_execution(plugin, message, metadata, data_path):
         log.info('{} started processing on {}'.format(plugin.name, message.uuid))
         start = time.time()
 
@@ -109,8 +112,10 @@ class ProcessManager:
                 copy.deepcopy(metadata),
                 open(data_path, 'rb')
             )
+
         except Exception as e:
             log.warning('{} failed processing {}: {}'.format(plugin.name, message.uuid, str(e)))
+
         else:
             run_time = (time.time() - start) * 1000.0
             log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
