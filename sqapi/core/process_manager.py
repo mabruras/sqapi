@@ -24,8 +24,6 @@ class ProcessManager:
         self.plugin_manager = plugin_manager
 
         self.database = detector.detect_database(self.config.database)
-        self.database.initialize_message_table()
-
         self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
 
     def start_subscribing(self):

@@ -389,13 +389,9 @@ from sqapi.core.message import Message
 
 def initialize_database(self):
     pass
-def initialize_message_table(self):
-    pass
 ```
 
 * The `initialize_database` should handle all preparation of the database,
-* `initialize_message_table` is intended for setting up the
-message table for the sqAPI core - if sqAPI is configured to use the connector.
 
 ###### Execution
 There are two ways of executing queries against the database,
