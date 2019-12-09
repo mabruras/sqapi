@@ -13,13 +13,6 @@ from sqapi.query import data as q_data, metadata as q_meta
 from sqapi.util import detector
 from sqapi.util.cfg_util import Config
 
-STATUS_VALIDATING = 'VALIDATING'
-STATUS_QUERYING = 'QUERYING'
-STATUS_PROCESSING = 'PROCESSING'
-STATUS_DONE = 'DONE'
-STATUS_RETRY = 'RETRY'
-STATUS_FAILED = 'FAILED'
-
 CHUNK_SIZE = 65536
 
 log = logging.getLogger(__name__)
@@ -31,8 +24,6 @@ class ProcessManager:
         self.plugin_manager = plugin_manager
 
         self.database = detector.detect_database(self.config.database)
-        self.database.initialize_message_table()
-
         self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
 
     def start_subscribing(self):
@@ -51,8 +42,6 @@ class ProcessManager:
 
             message.hash_digest = self._calculate_hash_digest(data_path)
 
-            self.database.update_message(message, STATUS_PROCESSING)
-
             log.debug('Creating processor pool of plugin executions')
             process_pool = [
                 multiprocessing.Process(target=self.plugin_execution, args=[
@@ -65,21 +54,12 @@ class ProcessManager:
             [t.start() for t in process_pool]
             [t.join() for t in process_pool]
 
-            self.database.update_message(message, STATUS_DONE)
             log.info('Processing completed')
 
         except LookupError as e:
-            self.database.update_message(message, STATUS_RETRY, str(e))
             log.warning('Could not fetch data and/or metadata at this point: {}'.format(str(e)))
 
         except Exception as e:
-            try:
-                self.database.update_message(message, STATUS_FAILED, str(e))
-
-            except Exception as _:
-                log.debug('Could not update message status in database: {}'.format(str(_)))
-                pass
-
             log.error('Could not process message: {}'.format(str(e)))
             log.debug(message)
             log.debug(e)
@@ -101,16 +81,17 @@ class ProcessManager:
 
     def query(self, message: Message):
         log.info('Querying metadata and data stores')
-        self.database.update_message(message, STATUS_QUERYING)
 
         data_path = q_data.download_data(self.config, message)
 
         if message.metadata:
             log.debug('Loading metadata from message')
             metadata = json.loads(message.metadata)
+
         elif self.config.meta_store:
             log.debug('Fetching metadata by query')
             metadata = q_meta.fetch_metadata(self.config, message)
+
         else:
             log.debug('No metadata storage defined in configuration, skipping metadata retrieval')
             metadata = {}
@@ -118,7 +99,8 @@ class ProcessManager:
         log.debug('Queries completed')
         return data_path, metadata
 
-    def plugin_execution(self, plugin, message, metadata, data_path):
+    @staticmethod
+    def plugin_execution(plugin, message, metadata, data_path):
         log.info('{} started processing on {}'.format(plugin.name, message.uuid))
         start = time.time()
 
@@ -130,8 +112,10 @@ class ProcessManager:
                 copy.deepcopy(metadata),
                 open(data_path, 'rb')
             )
+
         except Exception as e:
             log.warning('{} failed processing {}: {}'.format(plugin.name, message.uuid, str(e)))
+
         else:
             run_time = (time.time() - start) * 1000.0
             log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
