@@ -4,8 +4,7 @@ import logging
 import threading
 import time
 
-import kafka as kafka
-import zmq as zmq
+from kafka import KafkaConsumer
 
 from sqapi.core.message import Message
 from sqapi.util import message_util
@@ -20,17 +19,14 @@ class Listener:
         self.pm_callback = process_message
         log.info('Loading Kafka')
 
-        self.context = zmq.Context()
-
         self.retry_interval = float(config.get('retry_interval', 3))
         self.delay = config.get('process_delay', 0)
 
         self.host = config.get('host', 'localhost')
         self.port = config.get('port', 9092)
 
-        self.consume_type = config.get('consume_type', 'topic')
-        self.topic_name = config.get('topic_name', 'sqapi')
-        self.sub_pattern = config.get('subscription_pattern', '^.*$')
+        self.topic_names = config.get('topic_names', [])
+        self.sub_pattern = config.get('subscription_pattern', None)
         self.consumer_group = config.get('consumer_group', 'sqapi')
         self.api_version = tuple(config.get('api_version', [0, 10, 0]))
 
@@ -45,26 +41,29 @@ class Listener:
     def _listen_for_messages(self):
         while True:
             log.info(f'Listening for messages from Kafka')
+            consumer = KafkaConsumer(
+                group_id=self.consumer_group,
+                api_version=self.api_version,
+                bootstrap_servers=f'{self.host}:{self.port}'
+            )
 
-            if self.consume_type.lower() == 'topic':
-                consumer = kafka.KafkaConsumer(self.topic_name, self.consumer_group, api_version=self.api_version)
-            elif self.consume_type.lower() == 'subscribe':
-                consumer = kafka.KafkaConsumer(api_version=self.api_version)
-                consumer.subscribe(self.sub_pattern)
-            else:
-                raise AttributeError(f'Consume type "{self.consume_type}" is not a supported type')
+            log.info(f'Subscription topics: {self.topic_names}')
+            log.info(f'Subscription pattern: {self.sub_pattern}')
+            consumer.subscribe(topics=self.topic_names, pattern=self.sub_pattern)
 
             consumer.poll()
             for msg in consumer:
-                log.info(f'Received message')
+                log.info('Received message: {} (topic), {} (partition), {} (offset), {} (key)'.format(
+                    msg.topic, msg.partition, msg.offset, msg.key
+                ))
                 self.parse_message(msg)
 
     def parse_message(self, body):
-        log.info('Received message. Processing starts after delay ({} seconds)'.format(self.delay))
+        log.info('Processing starts after delay ({} seconds)'.format(self.delay))
         time.sleep(self.delay)
 
         try:
-            log.debug('Received message: {}'.format(body))
+            log.debug('Message body: {}'.format(body))
 
             message = json.loads(body.value.decode('utf-8'))
             body = message_util.validate_message(message, self.msg_fields)

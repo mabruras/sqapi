@@ -21,7 +21,7 @@ def validate_message(message, req_fields):
     missing_fields = []
 
     for f in required_fields:
-        if f not in {i.lower() for i in message.items()}:
+        if f not in {i.lower() for i in message.keys()}:
             log.debug('Field {} is missing'.format(f))
             missing_fields.append(f)
 
