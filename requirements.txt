@@ -13,3 +13,4 @@ elasticsearch==7.0.2
 pyzmq==18.1.0
 zmq==0.0.0
 filetype==1.0.5
+kafka-python==1.4.7

@@ -330,6 +330,53 @@ msg_broker:
       required: False
 ```
 
+##### Kafka
+> Kafka
+>
+> Kafka® is used for building real-time data pipelines and streaming apps.
+> It is horizontally scalable, fault-tolerant, wicked fast,
+> and runs in production in thousands of companies.
+- https://kafka.apache.org/
+
+###### Configuration
+```yaml
+msg_broker:
+
+  type: 'kafka'
+  host: 'localhost'
+  port: 9092
+
+  retry_interval: 0
+  process_delay: 0
+
+  # Note: Define either subscription_pattern OR topic_names - Not both!
+  # subscription_pattern: '^.*$'
+  topic_names:
+  - 'sqapi'
+  consumer_group: 'sqapi'
+  api_version:
+    - 0
+    - 10
+    - 0
+
+  message_fields:
+    type:
+      key: 'data_type'
+      required: True
+    data_location:
+      key: 'data_path'
+      required: True
+    meta_location:
+      key: 'meta_path'
+      required: True
+    uuid:
+      key: 'uuid'
+      required: True
+    metadata:
+      key: 'metadata'
+      required: False
+```
+
 
 ### Database
 The Database Connector is an interface implementation towards a specific type of database.

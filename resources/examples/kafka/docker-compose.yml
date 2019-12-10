@@ -1,0 +1,57 @@
+version: '3.7'
+
+services:
+  sqapi:
+    image: mabruras/sqapi:${SQAPI_V:-latest}
+    container_name: sqapi
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+    ports:
+    - '5000:5000'
+    volumes:
+    - sqapi-files:/opt/app/files
+    - ./config.yml:/opt/sqapi/sqapi/conf/sqapi.yml:ro
+    - ../../test/:/test/:ro
+
+
+  db:
+    image: postgres:${DB_V:-latest}
+    container_name: postgres
+    restart: unless-stopped
+    user: "postgres:postgres"
+    deploy:
+      replicas: 1
+
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: ["CMD-SHELL", "pg_isready", "--dbname=postgres", "--host=localhost", "--username=postgres"]
+
+
+  # The following services are fetched from
+  # https://github.com/confluentinc/cp-docker-images/blob/master/examples/kafka-single-node/docker-compose.yml
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+    - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+
+volumes:
+  sqapi-files:
