@@ -65,7 +65,7 @@ class Listener:
         try:
             log.debug('Received message: {}'.format(body))
 
-            message = json.loads(body)
+            message = message_util.parse_message(body, self.config)
             body = message_util.validate_message(message, self.msg_fields)
 
             self.pm_callback(Message(body, self.config))
