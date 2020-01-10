@@ -1,24 +1,22 @@
-import hashlib
 import json
 import logging
-import uuid
 
 MSG_FIELDS = {
-    'data_type': {'key': 'data_type', 'required': False},
+    'uuid_ref': {'key': 'uuid_ref', 'required': True},
     'data_location': {'key': 'data_location', 'required': True},
     'meta_location': {'key': 'meta_location', 'required': True},
-    'uuid_ref': {'key': 'uuid_ref', 'required': True},
+    'data_type': {'key': 'data_type', 'required': False},
     'metadata': {'key': 'metadata', 'required': False},
 }
 
 log = logging.getLogger(__name__)
 
 
-def parse_message(message, config):
-    parser = config.get('parser', '')
+def parse_message(message, cfg):
+    parser = cfg.get('parser', '')
 
     if parser.lower() == 'str' or parser.lower() == 'string':
-        return parse_string(config, message.decode('utf-8'))
+        return parse_string(cfg, message.decode('utf-8'))
 
     elif parser.lower() == 'json':
         return json.loads(message)
@@ -30,9 +28,9 @@ def parse_message(message, config):
         raise NotImplementedError(err)
 
 
-def parse_string(config, message):
-    fmt = config.get('format')
-    delimiter = config.get('delimiter')
+def parse_string(cfg, message):
+    fmt = cfg.get('format')
+    delimiter = cfg.get('delimiter')
 
     keys = fmt.split(delimiter)
     values = message.split(delimiter)
@@ -43,13 +41,22 @@ def parse_string(config, message):
     )
 
 
-def validate_message(message, req_fields):
-    log.debug('Validating required fields of set: {}'.format(req_fields))
-    required_fields = {
-        req_fields.get(f).get('key').lower() for f in req_fields
-        if req_fields.get(f).get('required')
+def convert_to_internal(message, fields):
+    log.debug('Validating required fields of set: {}'.format(fields))
+    _validate_required_fields(message, fields)
+
+    return {
+        key: message.get(fields.get(key).get('key').lower())
+        for key in fields
     }
-    log.debug('Required fields: {}'.format(required_fields))
+
+
+def _validate_required_fields(message, fields):
+    required_fields = {
+        fields.get(f).get('key').lower() for f in fields
+        if fields.get(f).get('required')
+    }
+
     missing_fields = []
 
     for f in required_fields:
@@ -61,22 +68,3 @@ def validate_message(message, req_fields):
         err = 'The field(/s) {} are missing in the message'.format(', '.join(missing_fields))
         log.debug(err)
         raise AttributeError(err)
-
-    return message
-
-
-if __name__ == '__main__':
-    config = {
-        'parser': 'str',
-        'delimiter': '.',
-        'format': 'uuid_ref.data_location.meta_location.metadata',
-    }
-
-    uuid_ref = str(uuid.uuid4())
-    hash_ref = hashlib.sha256(b'').hexdigest()
-    meta = {}
-
-    msg = f'{uuid_ref}.{hash_ref}.{uuid_ref}.{json.dumps(meta)}'
-
-    res = parse_message(msg.encode('utf-8'), config)
-    print(res)

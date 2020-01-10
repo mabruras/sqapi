@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-import json
 import logging
 import threading
 import time
@@ -127,10 +126,10 @@ class Listener:
             log.debug('Received properties: {}'.format(properties))
             log.debug('Received message: {}'.format(body))
 
-            message = json.loads(body)
-            body = message_util.validate_message(message, self.msg_fields)
+            body_dict = message_util.parse_message(body, self.config)
+            message = message_util.convert_to_internal(body_dict, self.msg_fields)
 
-            self.pm_callback(Message(body, self.config))
+            self.pm_callback(Message(message, self.config))
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
