@@ -19,14 +19,24 @@ def send_zmq_msg(message):
     socket.close()
 
 
+def get_string_data(rnd_uuid):
+    return f'{rnd_uuid}|/test/test_picture01.jpg|sqapi|messaging|0'
+
+
+def get_json_data(rnd_uuid):
+    return json.dumps({
+        'uuid': rnd_uuid,
+        'hash': '/test/test_picture01.jpg',
+        'meta_path': rnd_uuid,
+        'system': 'sqapi',
+        'module': 'test',
+        'state': 0,
+    })
+
+
 if __name__ == '__main__':
     rnd_uuid = str(uuid.uuid4())
-    msg = json.dumps({
-        'data_type': 'image/jpeg',
-        'data_path': '/test/test_picture01.jpg',
-        'meta_path': rnd_uuid,
-        'uuid': rnd_uuid,
-        'metadata': '{}',
-    })
+    #msg = get_json_data(rnd_uuid)
+    msg = get_string_data(rnd_uuid)
 
     send_zmq_msg(msg)

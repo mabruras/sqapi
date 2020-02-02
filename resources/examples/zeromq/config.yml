@@ -11,17 +11,18 @@ msg_broker:
   socket_type: 7
   protocol: 'tcp'
 
+  parser: string
+  format: 'uuid|hash|system|module'
+  delimiter: '|'
+
   message_fields:
-    type:
-      key: 'data_type'
+    uuid:
+      key: 'uuid'
       required: True
     data_location:
-      key: 'data_path'
+      key: 'hash'
       required: True
     meta_location:
-      key: 'meta_path'
-      required: True
-    uuid:
       key: 'uuid'
       required: True
     metadata:

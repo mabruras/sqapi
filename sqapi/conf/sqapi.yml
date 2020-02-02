@@ -12,8 +12,8 @@ msg_broker:
   protocol: 'tcp'
 
   parser: 'string'
-  format: 'uuid.hash.sys.mod.metadata'
-  delimiter: '.'
+  format: 'uuid|hash|sys|mod|state'
+  delimiter: '|'
 
   message_fields:
     uuid:
@@ -25,9 +25,6 @@ msg_broker:
     meta_location:
       key: 'uuid'
       required: True
-    type:
-      key: 'data_type'
-      required: False
     metadata:
       key: 'metadata'
       required: False

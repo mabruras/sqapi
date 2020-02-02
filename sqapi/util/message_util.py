@@ -12,11 +12,11 @@ MSG_FIELDS = {
 log = logging.getLogger(__name__)
 
 
-def parse_message(message, cfg):
+def parse_message(message: bytes, cfg) -> dict:
     parser = cfg.get('parser', '')
 
     if parser.lower() == 'str' or parser.lower() == 'string':
-        return parse_string(cfg, message.decode('utf-8'))
+        return _parse_string(cfg, message.decode('utf-8'))
 
     elif parser.lower() == 'json':
         return json.loads(message)
@@ -28,7 +28,7 @@ def parse_message(message, cfg):
         raise NotImplementedError(err)
 
 
-def parse_string(cfg, message):
+def _parse_string(cfg, message):
     fmt = cfg.get('format')
     delimiter = cfg.get('delimiter')
 
@@ -41,7 +41,10 @@ def parse_string(cfg, message):
     )
 
 
-def convert_to_internal(message, fields):
+def convert_to_internal(message: dict, fields) -> dict:
+    # TODO: Is this method useless due to #Message:_field_key() ?
+    return message
+
     log.debug('Validating required fields of set: {}'.format(fields))
     _validate_required_fields(message, fields)
 
