@@ -16,6 +16,8 @@ msg_broker:
   consumer_group: 'sqapi'
   api_version: [ 0, 10, 0 ]
 
+  parser: json
+
   message_fields:
     type:
       key: 'data_type'

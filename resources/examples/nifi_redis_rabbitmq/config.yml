@@ -11,6 +11,8 @@ msg_broker:
   exchange_type: 'fanout'
   process_delay: 0
 
+  parser: json
+
   message_fields:
     type:
       key: 'data_type'
