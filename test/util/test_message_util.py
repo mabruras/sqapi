@@ -1,4 +1,5 @@
 import hashlib
+import json
 import uuid
 from unittest import TestCase
 
@@ -6,7 +7,7 @@ from sqapi.util import message_util
 
 config = dict({
     # String parsing specific config
-    'format': 'uuid.hash.sys.mod.metadata',
+    'format': 'uuid|hash|system|module|metadata',
     'delimiter': '|',
 
     # General config
@@ -38,10 +39,13 @@ class TestParseMessage(TestCase):
         self.msg_sys = msg_sys = 'sqapi'
         self.msg_mod = msg_mod = 'test'
 
-        self.json_bytes = f'{"uuid":{msg_uuid},"hash":{msg_hash},"system":{msg_sys},"module":{msg_mod}}'.encode('UTF-8')
+        self.json_bytes = json.dumps({
+            'uuid': msg_uuid, 'hash': msg_hash,
+            'system': msg_sys, 'module': msg_mod
+        }).encode('UTF-8')
         self.string_bytes = f'{msg_uuid}|{msg_hash}|{msg_sys}|{msg_mod}'.encode('UTF-8')
 
-    def TestShould_parse_string(self):
+    def test_should_parse_string(self):
         # Setup
         updated_config = {'parser': 'string'}
         updated_config.update(config)
@@ -55,13 +59,13 @@ class TestParseMessage(TestCase):
         self.assertEqual(self.msg_sys, result.get('system'))
         self.assertEqual(self.msg_mod, result.get('module'))
 
-    def testShould_parse_json(self):
+    def test_should_parse_json(self):
         # Setup
         updated_config = {'parser': 'json'}
         updated_config.update(config)
 
         # Execute
-        result = message_util.parse_message(self.string_bytes, updated_config)
+        result = message_util.parse_message(self.json_bytes, updated_config)
 
         # Verify
         self.assertEqual(self.msg_uuid, result.get('uuid'))
@@ -75,27 +79,12 @@ class TestParseMessage(TestCase):
         updated_config.update(config)
 
         # Execute
-        pass
-
-        # Verify
-        pass
-
-    def tearDown(self):
-        pass
-
-
-class TestConvertToInternal(TestCase):
-    def setUp(self):
-        pass
-
-    def test_a(self):
-        pass
-
-    def test_b(self):
-        pass
-
-    def test_c(self):
-        pass
+        try:
+            message_util.parse_message(self.json_bytes, updated_config)
+            self.fail("Should have thrown exception due missing parse field in config")
+        except Exception as e:
+            # Verify
+            self.assertTrue(isinstance(e, NotImplementedError))
 
     def tearDown(self):
         pass

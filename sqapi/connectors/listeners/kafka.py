@@ -64,8 +64,7 @@ class Listener:
         try:
             log.debug('Message body: {}'.format(body))
 
-            body_dict = message_util.parse_message(body.value.decode('utf-8'), self.config)
-            message = message_util.convert_to_internal(body_dict, self.msg_fields)
+            message = message_util.parse_message(body.value.decode('utf-8'), self.config)
 
             self.pm_callback(Message(message, self.config))
 

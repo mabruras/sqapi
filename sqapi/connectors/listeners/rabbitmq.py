@@ -126,8 +126,7 @@ class Listener:
             log.debug('Received properties: {}'.format(properties))
             log.debug('Received message: {}'.format(body))
 
-            body_dict = message_util.parse_message(body, self.config)
-            message = message_util.convert_to_internal(body_dict, self.msg_fields)
+            message = message_util.parse_message(body, self.config)
 
             self.pm_callback(Message(message, self.config))
 

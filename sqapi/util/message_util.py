@@ -39,35 +39,3 @@ def _parse_string(cfg, message):
         (k, v) for k, v in
         list(zip(keys, values))
     )
-
-
-def convert_to_internal(message: dict, fields) -> dict:
-    # TODO: Is this method useless due to #Message:_field_key() ?
-    return message
-
-    log.debug('Validating required fields of set: {}'.format(fields))
-    _validate_required_fields(message, fields)
-
-    return {
-        key: message.get(fields.get(key).get('key').lower())
-        for key in fields
-    }
-
-
-def _validate_required_fields(message, fields):
-    required_fields = {
-        fields.get(f).get('key').lower() for f in fields
-        if fields.get(f).get('required')
-    }
-
-    missing_fields = []
-
-    for f in required_fields:
-        if f not in {i.lower() for i in message.keys()}:
-            log.debug('Field {} is missing'.format(f))
-            missing_fields.append(f)
-
-    if missing_fields:
-        err = 'The field(/s) {} are missing in the message'.format(', '.join(missing_fields))
-        log.debug(err)
-        raise AttributeError(err)
