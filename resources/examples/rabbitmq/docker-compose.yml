@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+  sqapi:
+    image: mabruras/sqapi:${SQAPI_V:-latest}
+    container_name: sqapi
+    restart: unless-stopped
+
+    ports:
+    - '5000:5000'
+    volumes:
+    - nifi-io:/io
+    - sqapi-files:/opt/app/files
+    - ./config.yml:/opt/sqapi/sqapi/conf/sqapi.yml:ro
+    - ../../test/:/test/:ro
+
+  mq:
+    image: rabbitmq:${RABBIT_V:-latest}
+    container_name: rabbit
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+    ports:
+    - '5672:5672'
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: [ "CMD", "rabbitmqctl", "status" ]
+
+
+  db:
+    image: postgres:${DB_V:-latest}
+    container_name: postgres
+    restart: unless-stopped
+    user: "postgres:postgres"
+    deploy:
+      replicas: 1
+
+    ports:
+    - '5432:5432'
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test: ["CMD-SHELL", "pg_isready", "--dbname=postgres", "--host=localhost", "--username=postgres"]
+
+
+volumes:
+  nifi-io:
+  nifi-conf:
+  sqapi-files:

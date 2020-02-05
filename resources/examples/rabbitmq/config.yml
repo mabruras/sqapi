@@ -1,0 +1,39 @@
+packages:
+  install: False
+
+msg_broker:
+  type: 'rabbitmq'
+  host: 'mq'
+  port: 5672
+
+  routing_key: 'q_sqapi'
+  exchange_name: 'x_sqapi'
+  exchange_type: 'fanout'
+  process_delay: 0
+
+  parser: json
+
+  message_fields:
+    data_location:
+      key: 'data_path'
+      required: True
+    meta_location:
+      key: 'meta_location'
+      required: True
+    uuid:
+      key: 'uuid'
+      required: True
+
+database:
+  type: 'postgres'
+  init: 'scripts/init.sql'
+  connection:
+    name: 'postgres'
+    port: '5432'
+    user: 'postgres'
+    host: 'db'
+    password: 'postgres'
+    timeout: 2
+
+data_store:
+  type: 'disk'
