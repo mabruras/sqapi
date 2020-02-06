@@ -143,6 +143,30 @@ as these will be validated upon received message.
 The `key`-field, of each field in `message_fields`, is the representation of the field-name within the message.
 This means that a message defining `type` by `mime.type`, should change `key: 'data_type'` to `key: 'mime.type'`.
 
+It must be defined a `parser`, being either `json` or `string`.
+
+###### JSON Parser
+Json parser does not need any other configuration,
+since it only requires a valid serialized json.
+
+Its fields should be represented within the `message_fields`.
+
+###### String Parser
+When using a String parser the string `format` and a `delimiter` should be defined.
+This will help sqAPI split each message into the defined format with the field keys.
+
+A format with `uuid|hash` should have the delimiter `|`,
+and following `message_fields`:
+```yaml
+  message_fields:
+    data_location:
+      key: 'hash'
+      required: True
+    meta_location:
+      key: 'uuid'
+      required: True
+```
+
 ##### Example
 ```yaml
 msg_broker:
@@ -154,6 +178,10 @@ msg_broker:
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
   process_delay: 5
+
+  parser: 'string'
+  format: 'uuid|hash|sys|mod|state'
+  delimiter: '|'
 
   message_fields:
     type:
