@@ -11,9 +11,7 @@ msg_broker:
   socket_type: 7
   protocol: 'tcp'
 
-  parser: 'string'
-  format: 'uuid|hash|sys|mod|state'
-  delimiter: '|'
+  parser: 'json'
 
   message_fields:
     uuid:
