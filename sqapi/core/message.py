@@ -8,11 +8,6 @@ MSG_FIELDS = {
     'metadata': {'key': 'metadata', 'required': False},
 }
 
-REQ_FIELDS = {
-    'data_location': {'required': True},
-    'meta_location': {'required': True},
-}
-
 
 class Message:
 
