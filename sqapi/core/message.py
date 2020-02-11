@@ -8,6 +8,11 @@ MSG_FIELDS = {
     'metadata': {'key': 'metadata', 'required': False},
 }
 
+REQ_FIELDS = {
+    'data_location': {'required': True},
+    'meta_location': {'required': True},
+}
+
 
 class Message:
 
@@ -15,6 +20,7 @@ class Message:
         self.body = body
 
         self.msg_fields = config.get('message_fields', MSG_FIELDS)
+        self.msg_fields.get('data_location').update({'required': True})  # Enforce requirement of data location
 
         self.hash_digest = None
 
