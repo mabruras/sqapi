@@ -30,8 +30,6 @@ class Listener:
         self.socket_type = config.get('socket_type', zmq.PULL)
         self.protocol = config.get('protocol', 'tcp')
 
-        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
-
     def start_listeners(self):
         connect_addr = f'{self.protocol}://{self.host}:{self.port}'
         print(f'Connecting to {self.socket_type}-socket on {connect_addr}')
@@ -66,7 +64,7 @@ class Listener:
 
             message = message_util.parse_message(body, self.config)
 
-            self.pm_callback(Message(message, self.config))
+            self.pm_callback(message)
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))

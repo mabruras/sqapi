@@ -29,8 +29,6 @@ class Listener:
         self.host = config.get('host', 'localhost')
         self.port = config.get('port', 5672)
 
-        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
-
         self.test_connection()
 
     def test_connection(self):
@@ -128,7 +126,7 @@ class Listener:
 
             message = message_util.parse_message(body, self.config)
 
-            self.pm_callback(Message(message, self.config))
+            self.pm_callback(message)
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))

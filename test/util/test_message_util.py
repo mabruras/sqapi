@@ -54,10 +54,12 @@ class TestParseMessage(TestCase):
         result = message_util.parse_message(self.string_bytes, updated_config)
 
         # Verify
-        self.assertEqual(self.msg_uuid, result.get('uuid'))
-        self.assertEqual(self.msg_hash, result.get('hash'))
-        self.assertEqual(self.msg_sys, result.get('system'))
-        self.assertEqual(self.msg_mod, result.get('module'))
+        self.assertEqual(self.msg_uuid, result.uuid)
+        self.assertEqual(self.msg_uuid, result.meta_location)
+        self.assertEqual(self.msg_hash, result.data_location)
+
+        self.assertEqual(self.msg_sys, result.body.get('system'))
+        self.assertEqual(self.msg_mod, result.body.get('module'))
 
     def test_should_parse_json(self):
         # Setup
@@ -68,10 +70,12 @@ class TestParseMessage(TestCase):
         result = message_util.parse_message(self.json_bytes, updated_config)
 
         # Verify
-        self.assertEqual(self.msg_uuid, result.get('uuid'))
-        self.assertEqual(self.msg_hash, result.get('hash'))
-        self.assertEqual(self.msg_sys, result.get('system'))
-        self.assertEqual(self.msg_mod, result.get('module'))
+        self.assertEqual(self.msg_uuid, result.uuid)
+        self.assertEqual(self.msg_uuid, result.meta_location)
+        self.assertEqual(self.msg_hash, result.data_location)
+
+        self.assertEqual(self.msg_sys, result.body.get('system'))
+        self.assertEqual(self.msg_mod, result.body.get('module'))
 
     def test_should_not_parse_due_missing_config(self):
         # Setup

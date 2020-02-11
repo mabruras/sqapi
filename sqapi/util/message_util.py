@@ -1,31 +1,30 @@
 import json
 import logging
 
-MSG_FIELDS = {
-    'uuid_ref': {'key': 'uuid_ref', 'required': True},
-    'data_location': {'key': 'data_location', 'required': True},
-    'meta_location': {'key': 'meta_location', 'required': True},
-    'data_type': {'key': 'data_type', 'required': False},
-    'metadata': {'key': 'metadata', 'required': False},
-}
+from sqapi.core.message import Message
 
 log = logging.getLogger(__name__)
 
 
-def parse_message(message: bytes, cfg) -> dict:
+def parse_message(msg_body: bytes, cfg) -> Message:
     parser = cfg.get('parser', '')
 
     if parser.lower() == 'str' or parser.lower() == 'string':
-        return _parse_string(cfg, message.decode('utf-8'))
+        out = _parse_string(cfg, msg_body.decode('utf-8'))
 
     elif parser.lower() == 'json':
-        return json.loads(message)
+        out = json.loads(msg_body)
 
     else:
         err = f'Parser ({parser}) not implemented' if parser else 'Parser not defined'
-        log.warning(err)
+        log.error(err)
 
         raise NotImplementedError(err)
+
+    message = Message(out, cfg)
+    _validate_required_fields(message)
+
+    return message
 
 
 def _parse_string(cfg, message):
@@ -39,3 +38,25 @@ def _parse_string(cfg, message):
         (k, v) for k, v in
         list(zip(keys, values))
     )
+
+
+def _validate_required_fields(message):
+    body = message.body
+    fields = message.msg_fields
+
+    required_fields = {
+        fields.get(f).get('key').lower() for f in fields
+        if fields.get(f).get('required')
+    }
+
+    missing_fields = [
+        f for f in required_fields
+        if f not in {
+            i.lower() for i in body.keys()
+        }
+    ]
+
+    if missing_fields:
+        err = 'The following field(/s) are missing in the message: {}'.format(', '.join(missing_fields))
+        log.debug(err)
+        raise AttributeError(err)

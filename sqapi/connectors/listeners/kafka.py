@@ -29,8 +29,6 @@ class Listener:
         self.consumer_group = config.get('consumer_group', 'sqapi')
         self.api_version = tuple(config.get('api_version', [0, 10, 0]))
 
-        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
-
     def start_listeners(self):
         threading.Thread(
             name='Kafka Listener',
@@ -66,7 +64,7 @@ class Listener:
 
             message = message_util.parse_message(body.value.decode('utf-8'), self.config)
 
-            self.pm_callback(Message(message, self.config))
+            self.pm_callback(message)
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
