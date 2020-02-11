@@ -1,12 +1,12 @@
-# ZeroMQ
-Example setup explaining how sqAPI can be used with ZeroMQ
+# RabbitMQ
+Example setup explaining how sqAPI can be used with RabbitMQ
 
 ## Components
 
 | Component | Technology | Description |
 | --------- | ---------- | ----------- |
 | `Data Store` | `File System` | Data located on disk |
-| `Message System` | `ZeroMQ` | Publishes messages to each active `sqAPI`-instance |
+| `Message System` | `RabbitMQ` | Publishes messages to each active `sqAPI`-instance |
 | `sqAPI` | `Python` | System for executing queries based on a subscription, fetch, aggregate and expose data |
 | `sqAPI Storage` | `PostgreSQL` | Local storage for each `sqAPI`, keeps record of all messages and aggregated data |
 

@@ -1,13 +1,9 @@
 #! /usr/bin/env python
-import json
 import logging
 import threading
 import time
 
 from kafka import KafkaConsumer
-
-from sqapi.core.message import Message
-from sqapi.util import message_util
 
 log = logging.getLogger(__name__)
 
@@ -29,8 +25,6 @@ class Listener:
         self.sub_pattern = config.get('subscription_pattern', None)
         self.consumer_group = config.get('consumer_group', 'sqapi')
         self.api_version = tuple(config.get('api_version', [0, 10, 0]))
-
-        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
 
     def start_listeners(self):
         threading.Thread(
@@ -65,10 +59,7 @@ class Listener:
         try:
             log.debug('Message body: {}'.format(body))
 
-            message = json.loads(body.value.decode('utf-8'))
-            body = message_util.validate_message(message, self.msg_fields)
-
-            self.pm_callback(Message(body, self.config))
+            self.pm_callback(body.value.decode('utf-8'))
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))

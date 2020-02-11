@@ -17,10 +17,10 @@ def fetch_metadata(config, message: Message):
 
     try:
         meta_store = detector.detect_meta_connectors(config.meta_store)
-
         out = meta_store.fetch_metadata(config, loc)
 
         return json.loads(out)
+
     except FileNotFoundError as e:
         err = 'Metadata by reference {} was not available at this moment: {}'.format(loc, str(e))
         log.warning(err)

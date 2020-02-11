@@ -1,13 +1,9 @@
 #! /usr/bin/env python
-import json
 import logging
 import threading
 import time
 
 import zmq as zmq
-
-from sqapi.core.message import Message
-from sqapi.util import message_util
 
 log = logging.getLogger(__name__)
 
@@ -30,8 +26,6 @@ class Listener:
         self.connection_type = config.get('connection_type', 'connect')
         self.socket_type = config.get('socket_type', zmq.PULL)
         self.protocol = config.get('protocol', 'tcp')
-
-        self.msg_fields = config.get('message_fields') or message_util.MSG_FIELDS
 
     def start_listeners(self):
         connect_addr = f'{self.protocol}://{self.host}:{self.port}'
@@ -65,10 +59,7 @@ class Listener:
         try:
             log.debug('Received message: {}'.format(body))
 
-            message = json.loads(body)
-            body = message_util.validate_message(message, self.msg_fields)
-
-            self.pm_callback(Message(body, self.config))
+            self.pm_callback(body)
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))

@@ -1,12 +1,21 @@
 import uuid
 
+MSG_FIELDS = {
+    'uuid_ref': {'key': 'uuid_ref', 'required': True},
+    'data_location': {'key': 'data_location', 'required': True},
+    'meta_location': {'key': 'meta_location', 'required': True},
+    'data_type': {'key': 'data_type', 'required': False},
+    'metadata': {'key': 'metadata', 'required': False},
+}
+
 
 class Message:
 
     def __init__(self, body: dict, config: dict):
         self.body = body
 
-        self.msg_fields = config.get('message_fields', {})
+        self.msg_fields = config.get('message_fields', MSG_FIELDS)
+        self.msg_fields.get('data_location').update({'required': True})  # Enforce requirement of data location
 
         self.hash_digest = None
 

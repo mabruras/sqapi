@@ -1,13 +1,10 @@
 #! /usr/bin/env python3
-import copy
 import logging
 import os
 import time
 
 import psycopg2
 import psycopg2.extras
-
-from sqapi.core.message import Message
 
 DB_TYPE = 'postgres'
 

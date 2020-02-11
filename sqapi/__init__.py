@@ -11,7 +11,11 @@ CONFIG_DIR = '{pd}{sep}sqapi{sep}conf'.format(pd=PROJECT_DIR, sep=os.sep)
 CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
 LOG_FILE = os.environ.get('LOG_FILE', '{}{}logging.conf'.format(CONFIG_DIR, os.sep))
 
-logging.config.fileConfig(LOG_FILE)
+try:
+    logging.config.fileConfig(LOG_FILE)
+except KeyError:
+    logging.basicConfig()
+
 log = logging.getLogger(__name__)
 
 

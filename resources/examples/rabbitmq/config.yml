@@ -2,30 +2,27 @@ packages:
   install: False
 
 msg_broker:
-  type: 'zeromq'
-  host: '*'
-  port: 5001
-  retry_interval: 0
-  process_delay: 0
-  connection_type: bind
-  socket_type: 7
-  protocol: 'tcp'
+  type: 'rabbitmq'
+  host: 'mq'
+  port: 5672
 
-  parser: 'json'
+  routing_key: 'q_sqapi'
+  exchange_name: 'x_sqapi'
+  exchange_type: 'fanout'
+  process_delay: 0
+
+  parser: json
 
   message_fields:
+    data_location:
+      key: 'data_path'
+      required: True
+    meta_location:
+      key: 'meta_location'
+      required: True
     uuid:
       key: 'uuid'
       required: True
-    data_location:
-      key: 'hash'
-      required: True
-    meta_location:
-      key: 'uuid'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
 
 database:
   type: 'postgres'
@@ -37,11 +34,6 @@ database:
     host: 'db'
     password: 'postgres'
     timeout: 2
-
-meta_store:
-  type: 'redis'
-  host: 'redis'
-  port: 6379
 
 data_store:
   type: 'disk'
