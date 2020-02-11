@@ -5,7 +5,6 @@ import time
 
 from kafka import KafkaConsumer
 
-from sqapi.core.message import Message
 from sqapi.util import message_util
 
 log = logging.getLogger(__name__)

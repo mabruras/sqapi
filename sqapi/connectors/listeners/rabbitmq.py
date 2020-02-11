@@ -6,7 +6,6 @@ import time
 import pika
 from pika.exceptions import StreamLostError
 
-from sqapi.core.message import Message
 from sqapi.util import message_util
 
 log = logging.getLogger(__name__)
