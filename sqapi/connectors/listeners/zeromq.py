@@ -5,8 +5,6 @@ import time
 
 import zmq as zmq
 
-from sqapi.util import message_util
-
 log = logging.getLogger(__name__)
 
 
@@ -61,9 +59,7 @@ class Listener:
         try:
             log.debug('Received message: {}'.format(body))
 
-            message = message_util.parse_message(body, self.config)
-
-            self.pm_callback(message)
+            self.pm_callback(body)
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))

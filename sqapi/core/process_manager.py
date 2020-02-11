@@ -10,7 +10,7 @@ import filetype
 from sqapi.core.message import Message
 from sqapi.core.plugin_manager import PluginManager
 from sqapi.query import data as q_data, metadata as q_meta
-from sqapi.util import detector
+from sqapi.util import detector, message_util
 from sqapi.util.cfg_util import Config
 
 CHUNK_SIZE = 65536
@@ -31,7 +31,9 @@ class ProcessManager:
         self.listener.start_listeners()
         log.debug('Message subscription started')
 
-    def process_message(self, message: Message):
+    def process_message(self, body: bytes):
+        message = message_util.parse_message(body, self.config.msg_broker)
+
         try:
             log.info('Message processing started')
             data_path, metadata = self.query(message)

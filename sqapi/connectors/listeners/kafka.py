@@ -5,8 +5,6 @@ import time
 
 from kafka import KafkaConsumer
 
-from sqapi.util import message_util
-
 log = logging.getLogger(__name__)
 
 
@@ -61,9 +59,7 @@ class Listener:
         try:
             log.debug('Message body: {}'.format(body))
 
-            message = message_util.parse_message(body.value.decode('utf-8'), self.config)
-
-            self.pm_callback(message)
+            self.pm_callback(body.value.decode('utf-8'))
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
