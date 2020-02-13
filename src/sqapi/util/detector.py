@@ -35,7 +35,7 @@ def detect_database(config):
 
         return module.Database(config)
     except Exception as e:
-        err = '{} is not a supported Database type: '.format(target_module, str(e))
+        err = '{} is not a supported Database type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
@@ -51,7 +51,7 @@ def detect_listener(config, processor_callback):
 
         return module.Listener(config, processor_callback)
     except Exception as e:
-        err = '{} is not a supported Listener type: '.format(target_module, str(e))
+        err = '{} is not a supported Listener type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
@@ -65,7 +65,7 @@ def detect_data_connectors(config):
     try:
         return import_module(target_module, directory)
     except Exception as e:
-        err = '{} is not a supported Data Store type: '.format(target_module, str(e))
+        err = '{} is not a supported Data Store type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
@@ -79,7 +79,7 @@ def detect_meta_connectors(config):
     try:
         return import_module(target_module, directory)
     except Exception as e:
-        err = '{} is not a supported Metadata Store type: '.format(target_module, str(e))
+        err = '{} is not a supported Metadata Store type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 

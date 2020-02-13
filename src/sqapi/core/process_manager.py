@@ -7,11 +7,12 @@ import time
 
 import filetype
 
-from sqapi.core.message import Message
-from sqapi.core.plugin_manager import PluginManager
-from sqapi.query import data as q_data, metadata as q_meta
-from sqapi.util import detector, message_util
 from sqapi.util.cfg_util import Config
+from sqapi import PluginManager
+from sqapi.core.message import Message
+from sqapi.query import data as q_data, metadata as q_meta
+from sqapi.util import detector
+from sqapi.util import message_util
 
 CHUNK_SIZE = 65536
 
@@ -23,7 +24,6 @@ class ProcessManager:
         self.config = config
         self.plugin_manager = plugin_manager
 
-        self.database = detector.detect_database(self.config.database)
         self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
 
     def start_subscribing(self):

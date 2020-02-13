@@ -4,7 +4,7 @@ import sys
 
 import urllib3
 
-import sqapi
+from sqapi import SqapiApplication
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     try:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        sqapi = sqapi.SqapiApplication(sqapi_type)
+        sqapi = SqapiApplication(sqapi_type)
         sqapi.start()
     except Exception as e:
         log.error('Could not start sqAPI application')

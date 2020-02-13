@@ -72,7 +72,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `download_to_disk`.
 See a more detailed example within one of
-[the actual modules](https://github.com/mabruras/sqapi/blob/master/sqapi/connectors/data).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/connectors/data).
 ```python
 import os
 
@@ -142,7 +142,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `fetch_metadata`.
 See a more detailed example within one of
-[the actual modules](https://github.com/mabruras/sqapi/blob/master/sqapi/connectors/meta).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/connectors/meta).
 ```python
 def fetch_metadata(config, reference):
     ## 1. Connect to the metadata store

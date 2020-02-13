@@ -148,8 +148,8 @@ There are some environment variables, that could be set to overwrite specific de
 | VARIABLE | EXAMPLE | DESCRIPTION | DEFAULT |
 | :------- | :-----: | :---------- | :-----: |
 | `WRK_DIR`| /opt/sqapi | Directory where sqAPI is located | current directory/`.` |
-| `CFG_FILE`| /opt/sqapi/conf/sqapi.yml | sqAPI main configuration file | `${WRK_DIR}/conf/sqapi.yml` |
-| `LOG_FILE`| /opt/sqapi/conf/logging.conf | sqAPI log configuration file | `${WRK_DIR}/conf/logging.conf` |
+| `CFG_FILE`| /opt/sqapi/sqapi/conf/sqapi.yml | sqAPI main configuration file | `${WRK_DIR}/sqapi/conf/sqapi.yml` |
+| `LOG_FILE`| /opt/sqapi/sqapi/conf/logging.conf | sqAPI log configuration file | `${WRK_DIR}/sqapi/conf/logging.conf` |
 | `PLUGIN`| faces | Specifies a single plugin - disables all other | Empty/`None` |
 
 

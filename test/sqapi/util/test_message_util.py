@@ -43,7 +43,7 @@ class TestParseMessage(TestCase):
             'uuid': msg_uuid, 'hash': msg_hash,
             'system': msg_sys, 'module': msg_mod
         }).encode('UTF-8')
-        self.string_bytes = f'{msg_uuid}|{msg_hash}|{msg_sys}|{msg_mod}'.encode('UTF-8')
+        self.string_bytes = '{}|{}|{}|{}'.format(msg_uuid, msg_hash, msg_sys, msg_mod).encode('UTF-8')
 
     def test_should_parse_string(self):
         # Setup
