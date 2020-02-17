@@ -15,7 +15,7 @@ def load_blueprints(plugin_name, bp_dir):
         log.warning('No blueprints directory was defined, no API exposed')
         return []
 
-    full_path = os.path.join(os.sep.join(['sqapi', 'plugins', plugin_name, bp_dir]))
+    full_path = os.path.join(os.sep.join(['sqapi', 'plugin', 'plugins', plugin_name, bp_dir]))
 
     if not _verify_directory(full_path):
         log.warning('Blueprints directory was not an existing directory, no API exposed')

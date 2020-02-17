@@ -28,11 +28,11 @@ where each plugin contains the following.
     "name": "thumbnails",
     "blueprints": [
       {
-        "package": "sqapi.plugins.thumbnails.blueprints.thumbnails",
+        "package": sqapi.plugin.plugins,
         "url_prefix": "/thumbnails",
         "endpoints": [
           {
-            "function": "sqapi.plugins.thumbnails.blueprints.thumbnails.thumbnail_by_uuid",
+            "function": sqapi.plugin.plugins,
             "endpoint": "/thumbnails/%3Cuuid_ref%3E",
             "arguments": [
               "uuid_ref"

@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def detect_plugins():
-    directory = os.sep.join(['sqapi', 'plugins'])
+    directory = os.sep.join(['sqapi', 'plugin', 'plugins'])
 
     log.debug('Detecting plugins in dir {}'.format(directory))
     plugin_dict = detect_modules(directory, True)
