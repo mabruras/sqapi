@@ -14,7 +14,7 @@ def ok(data):
 
 def no_content(data):
     log.debug(data)
-    data = {'error': 'Could not find any data', 'details': data}
+    data = {'error': 'Could not find any content', 'details': data}
 
     return _create_response(data, 204)
 
@@ -52,7 +52,7 @@ def not_impl(err):
 
 def _create_response(data, code):
     log.debug(f'Final response status code: {code}')
-    log.debug(f'Final response data: {data}')
+    log.debug(f'Final response content: {content}')
     return Response(
         response=json.dumps(data, cls=DateEncoder),
         mimetype='application/json',

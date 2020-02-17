@@ -24,10 +24,10 @@ located within the specific topics package.
 
 | External System | Topic | Package | Default Type |
 | --------------- | ----- | ------- | ------------ |
-| `Data Store` | `data` | `sqapi.connectors.data` | `disk` |
-| `Metadata Store` | `meta` | `sqapi.connectors.meta` | `redis` |
-| `Message System` | `listeners` | `sqapi.connectors.listeners` | `zeromq` |
-| `Database` | `db` | `sqapi.connectors.db` | `postgres` |
+| `Data Store` | `data` | `sqapi.query.content` | `disk` |
+| `Metadata Store` | `meta` | `sqapi.query.metadata` | `redis` |
+| `Message System` | `listeners` | `sqapi.messaging.brokers` | `zeromq` |
+| `Database` | `db` | `sqapi.storage` | `postgres` |
 
 
 ## General
@@ -40,7 +40,7 @@ where the _Data Store_ is a _Connector Topic_.
 
 This means that the Connector type (Swift) should be located as follows:
 * Directory: `./sqapi/connectors/data/swift.py`
-* Package: `sqapi.connectors.data.swift`
+* Package: `sqapi.query.content.swift`
 
 **Configuration:**
 ```yaml
@@ -195,7 +195,7 @@ The configuration sent to the init method will contain
 the dictionary with all `msg_broker` configuration defined.
 
 After parsing the received message,
-the resulting dictionary should be put in `sqapi.core.message.Message` and forwarded to `process_message`,
+the resulting dictionary should be put in `sqapi.processing.message.Message` and forwarded to `process_message`,
 so the `ProcessManager` are able to process the message as intended.
 Definition of `process_message` below.
 
@@ -228,7 +228,7 @@ The Message object is to be sent along to the query section for both `data` and 
 The `body` attribute will ending up as argument to the execute function in each plugin.
 
 ```python
-from sqapi.core.message import Message
+from sqapi.processing.message import Message
 
 # Callback method located in the core.processor:
 def process_message(self, message: Message):
@@ -432,7 +432,7 @@ that must be implemented to suit the method calls from both sqAPI Core and -Plug
 The database connector needs an initialization method,
 where all the setup is prepared, like creating tables, relations and views.
 ```python
-from sqapi.core.message import Message
+from sqapi.processing.message import Message
 
 def initialize_database(self):
     pass

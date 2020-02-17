@@ -1,7 +1,7 @@
 import json
 import logging
 
-from sqapi.core.message import Message
+from sqapi.messaging.message import Message
 
 log = logging.getLogger(__name__)
 

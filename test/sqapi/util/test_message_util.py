@@ -3,7 +3,7 @@ import json
 import uuid
 from unittest import TestCase
 
-from sqapi.util import message_util
+from sqapi.messaging import util
 
 config = dict({
     # String parsing specific config
@@ -51,7 +51,7 @@ class TestParseMessage(TestCase):
         updated_config.update(config)
 
         # Execute
-        result = message_util.parse_message(self.string_bytes, updated_config)
+        result = util.parse_message(self.string_bytes, updated_config)
 
         # Verify
         self.assertEqual(self.msg_uuid, result.uuid)
@@ -67,7 +67,7 @@ class TestParseMessage(TestCase):
         updated_config.update(config)
 
         # Execute
-        result = message_util.parse_message(self.json_bytes, updated_config)
+        result = util.parse_message(self.json_bytes, updated_config)
 
         # Verify
         self.assertEqual(self.msg_uuid, result.uuid)
@@ -84,7 +84,7 @@ class TestParseMessage(TestCase):
 
         # Execute
         try:
-            message_util.parse_message(self.json_bytes, updated_config)
+            util.parse_message(self.json_bytes, updated_config)
             self.fail("Should have thrown exception due missing parse field in config")
         except Exception as e:
             # Verify

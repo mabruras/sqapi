@@ -3,7 +3,9 @@ import importlib
 import logging
 import os
 
-from sqapi.util import detector, cfg_util, plugin_util, packager
+from sqapi.plugin import util, packager
+from sqapi.configuration.util import Config
+from sqapi.configuration import detector
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class Processor:
         self.config.plugin = {'name': self.name, 'directory': self.plugin_dir}
 
         config_file = os.path.join(self.plugin_dir, 'config.yml')
-        custom_config = cfg_util.Config(config_file)
+        custom_config = Config(config_file)
         self.config.merge_config(custom_config)
 
         if self.config.packages.get('install', True):
@@ -28,7 +30,7 @@ class Processor:
 
         self.execute = plugin.execute
         blueprints_dir = self.config.api.get('blueprints_directory', None)
-        self.blueprints = plugin_util.load_blueprints(plugin_name, blueprints_dir)
+        self.blueprints = util.load_blueprints(plugin_name, blueprints_dir)
 
         self.config.database['init'] = self.validate_db_init_script(self.config.database)
         self.database = detector.detect_database(self.config.database)

@@ -3,7 +3,7 @@ import importlib
 import logging
 import os
 
-from sqapi.util import detector
+from sqapi.configuration import detector
 
 log = logging.getLogger(__name__)
 

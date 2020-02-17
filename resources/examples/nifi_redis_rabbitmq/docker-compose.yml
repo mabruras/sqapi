@@ -14,7 +14,7 @@ services:
     volumes:
     - nifi-io:/io
     - sqapi-files:/opt/app/files
-    - ./config.yml:/opt/sqapi/sqapi/conf/sqapi.yml:ro
+    - ./config.yml:/opt/sqapi/sqapi/resources/sqapi.yml:ro
     - ../../test/:/test/:ro
 
 
@@ -29,7 +29,7 @@ services:
     - '8080:8080'
     volumes:
     - nifi-io:/io
-    - nifi-conf:/opt/nifi/nifi-current/conf
+    - nifi-configuration:/opt/nifi/nifi-current/configuration
 
 
   redis:

@@ -7,12 +7,12 @@ import time
 
 import filetype
 
-from sqapi.util.cfg_util import Config
+from sqapi.configuration.util import Config
 from sqapi import PluginManager
-from sqapi.core.message import Message
-from sqapi.query import data as q_data, metadata as q_meta
-from sqapi.util import detector
-from sqapi.util import message_util
+from sqapi.messaging.message import Message
+from sqapi.query import data, meta
+from sqapi.configuration import detector
+from sqapi.messaging import util
 
 CHUNK_SIZE = 65536
 
@@ -32,7 +32,7 @@ class ProcessManager:
         log.debug('Message subscription started')
 
     def process_message(self, body: bytes):
-        message = message_util.parse_message(body, self.config.msg_broker)
+        message = util.parse_message(body, self.config.msg_broker)
 
         try:
             log.info('Message processing started')
@@ -59,7 +59,7 @@ class ProcessManager:
             log.info('Processing completed')
 
         except LookupError as e:
-            log.warning('Could not fetch data and/or metadata at this point: {}'.format(str(e)))
+            log.warning('Could not fetch content and/or metadata at this point: {}'.format(str(e)))
 
         except Exception as e:
             log.error('Could not process message: {}'.format(str(e)))
@@ -82,17 +82,18 @@ class ProcessManager:
             raise NotImplementedError(err)
 
     def query(self, message: Message):
-        log.info('Querying metadata and data stores')
+        log.info('Querying metadata and content stores')
 
-        data_path = q_data.download_data(self.config, message)
+        data_path = data.download_data(self.config, message)
 
         if message.metadata:
-            log.debug('Loading metadata from message')
+            log.info('Loading metadata from message')
             metadata = json.loads(message.metadata)
 
         elif self.config.meta_store:
-            log.debug('Fetching metadata by query')
-            metadata = q_meta.fetch_metadata(self.config, message)
+            log.info(self.config.meta_store)
+            log.info('Fetching metadata by query')
+            metadata = meta.fetch_metadata(self.config, message)
 
         else:
             log.debug('No metadata storage defined in configuration, skipping metadata retrieval')

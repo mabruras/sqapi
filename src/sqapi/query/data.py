@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 import logging
 
-from sqapi.core.message import Message
-from sqapi.util import detector
+from sqapi.messaging.message import Message
+from sqapi.configuration import detector
 
 log = logging.getLogger(__name__)
 

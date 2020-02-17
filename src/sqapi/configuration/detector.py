@@ -28,7 +28,7 @@ def detect_database(config):
     log.debug('Looking up database type in configuration')
 
     target_module = config.get('type', 'postgres')
-    directory = os.sep.join(['sqapi', 'connectors', 'db'])
+    directory = os.sep.join(['sqapi', 'storage'])
 
     try:
         module = import_module(target_module, directory)
@@ -44,7 +44,7 @@ def detect_listener(config, processor_callback):
     log.debug('Looking up listener type in configuration')
 
     target_module = config.get('type', 'rabbitmq')
-    directory = os.sep.join(['sqapi', 'connectors', 'listeners'])
+    directory = os.sep.join(['sqapi', 'messaging', 'brokers'])
 
     try:
         module = import_module(target_module, directory)
@@ -57,10 +57,10 @@ def detect_listener(config, processor_callback):
 
 
 def detect_data_connectors(config):
-    log.debug('Looking up data store connector type in configuration')
+    log.debug('Looking up content store connector type in configuration')
 
     target_module = config.get('type', 'disk')
-    directory = os.sep.join(['sqapi', 'connectors', 'data'])
+    directory = os.sep.join(['sqapi', 'query', 'content'])
 
     try:
         return import_module(target_module, directory)
@@ -74,7 +74,7 @@ def detect_meta_connectors(config):
     log.debug('Looking up metadata store connector type in configuration')
 
     target_module = config.get('type', 'redis')
-    directory = os.sep.join(['sqapi', 'connectors', 'meta'])
+    directory = os.sep.join(['sqapi', 'query', 'metadata'])
 
     try:
         return import_module(target_module, directory)
