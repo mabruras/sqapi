@@ -2,9 +2,9 @@ import copy
 import logging
 import os
 
-from sqapi.processing.processor import Processor
 from sqapi.configuration import detector
 from sqapi.configuration.util import Config
+from sqapi.processing.processor import Processor
 
 log = logging.getLogger(__name__)
 

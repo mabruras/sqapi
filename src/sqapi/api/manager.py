@@ -5,8 +5,8 @@ from flask import Flask
 from flask_cors import CORS
 
 from sqapi.api import edge
-from sqapi.plugin.manager import PluginManager
 from sqapi.configuration.util import Config
+from sqapi.plugin.manager import PluginManager
 
 log = logging.getLogger(__name__)
 

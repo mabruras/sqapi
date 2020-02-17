@@ -3,9 +3,9 @@ import importlib
 import logging
 import os
 
-from sqapi.plugin import util, packager
-from sqapi.configuration.util import Config
 from sqapi.configuration import detector
+from sqapi.configuration.util import Config
+from sqapi.plugin import util, packager
 
 log = logging.getLogger(__name__)
 

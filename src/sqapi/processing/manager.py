@@ -7,12 +7,12 @@ import time
 
 import filetype
 
-from sqapi.configuration.util import Config
 from sqapi import PluginManager
+from sqapi.configuration import detector
+from sqapi.configuration.util import Config
+from sqapi.messaging import util
 from sqapi.messaging.message import Message
 from sqapi.query import data, meta
-from sqapi.configuration import detector
-from sqapi.messaging import util
 
 CHUNK_SIZE = 65536
 

@@ -1,10 +1,10 @@
 import logging.config
 import os
 
-from sqapi.plugin.manager import PluginManager
-from sqapi.processing.manager import ProcessManager
 from sqapi.api.manager import ResourceManager
 from sqapi.configuration.util import Config
+from sqapi.plugin.manager import PluginManager
+from sqapi.processing.manager import ProcessManager
 
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 RESOURCE_DIR = '{pd}{sep}sqapi{sep}resources'.format(pd=PROJECT_DIR, sep=os.sep)
