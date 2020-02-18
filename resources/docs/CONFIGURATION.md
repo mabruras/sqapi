@@ -8,7 +8,7 @@ sqAPI consist of two types of configuration:
 * `plugin config`: plugin specific
 
 The sqAPI config file, is default located in
-[sqAPI > conf > sqapi.yml](https://github.com/mabruras/sqapi/blob/master/src/sqapi/conf/sqapi.yml),
+[sqAPI > conf > sqapi.yml](https://github.com/mabruras/sqapi/blob/master/src/sqapi/resources/sqapi.yml),
 but can be overwritten with the `CFG_FILE` environment variable.
 
 The plugin configuration is located in the root directory
@@ -134,7 +134,7 @@ plugin:
 
 ### Message System
 The message system, usually defined in
-[sqAPI configuration](https://github.com/mabruras/sqapi/blob/master/src/sqapi/conf/sqapi.yml),
+[sqAPI configuration](https://github.com/mabruras/sqapi/blob/master/src/sqapi/resources/sqapi.yml),
 must contain a reference to the type of message system and connection details.
 
 Remember to list up minimum required fields of the message (`message_fields`)

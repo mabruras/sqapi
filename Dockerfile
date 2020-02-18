@@ -1,6 +1,6 @@
 FROM            python:3.7-slim-stretch
 
-ENV             WRK_DIR /opt/sqapi
+ENV             WRK_DIR /opt/mab
 ENV             VIRTUAL_ENV=${WRK_DIR}
 ENV             PATH="${VIRTUAL_ENV}/bin:${PATH}"
 

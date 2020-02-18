@@ -39,7 +39,7 @@ _Swift_ is a _Connector Type_ of _Data Store_,
 where the _Data Store_ is a _Connector Topic_.
 
 This means that the Connector type (Swift) should be located as follows:
-* Directory: `./sqapi/connectors/data/swift.py`
+* Directory: `./sqapi/query/content/swift.py`
 * Package: `sqapi.query.content.swift`
 
 **Configuration:**
@@ -72,7 +72,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `download_to_disk`.
 See a more detailed example within one of
-[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/connectors/data).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/query/content).
 ```python
 import os
 
@@ -142,7 +142,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `fetch_metadata`.
 See a more detailed example within one of
-[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/connectors/meta).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/query/metadata).
 ```python
 def fetch_metadata(config, reference):
     ## 1. Connect to the metadata store

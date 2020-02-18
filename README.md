@@ -107,7 +107,7 @@ The example is taken with usage of the
 ```bash
 docker run -d \
   -p 5000:5000 \
-  -v "${PWD}/../sqapi-plugins":/opt/sqapi/sqapi/plugins \
+  -v "${PWD}/../sqapi-plugins":/opt/mab/sqapi/plugin/plugins \
   mabruras/sqapi
 ```
 
@@ -147,9 +147,9 @@ There are some environment variables, that could be set to overwrite specific de
 
 | VARIABLE | EXAMPLE | DESCRIPTION | DEFAULT |
 | :------- | :-----: | :---------- | :-----: |
-| `WRK_DIR`| /opt/sqapi | Directory where sqAPI is located | current directory/`.` |
-| `CFG_FILE`| /opt/sqapi/sqapi/conf/sqapi.yml | sqAPI main configuration file | `${WRK_DIR}/sqapi/conf/sqapi.yml` |
-| `LOG_FILE`| /opt/sqapi/sqapi/conf/logging.conf | sqAPI log configuration file | `${WRK_DIR}/sqapi/conf/logging.conf` |
+| `WRK_DIR`| /opt/mab | Directory where sqAPI is located | current directory/`.` |
+| `CFG_FILE`| /opt/mab/sqapi/resources/sqapi.yml | sqAPI main configuration file | `${WRK_DIR}/sqapi/resources/sqapi.yml` |
+| `LOG_FILE`| /opt/mab/sqapi/resources/logging.conf | sqAPI log configuration file | `${WRK_DIR}/sqapi/resources/logging.conf` |
 | `PLUGIN`| faces | Specifies a single plugin - disables all other | Empty/`None` |
 
 
