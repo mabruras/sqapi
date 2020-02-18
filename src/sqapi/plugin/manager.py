@@ -2,9 +2,9 @@ import copy
 import logging
 import os
 
-from sqapi.core.processor import Processor
-from sqapi.util import detector
-from sqapi.util.cfg_util import Config
+from sqapi.configuration import detector
+from sqapi.configuration.util import Config
+from sqapi.processing.processor import Processor
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class PluginManager:
         self.accepted_types = set()
         for plugin in self.plugins:
             supported_types = plugin.config.msg_broker.get('supported_mime') or ['*']
-            log.debug('Plugin {} accepts data types: {}'.format(plugin.name, supported_types))
+            log.debug('Plugin {} accepts mime types: {}'.format(plugin.name, supported_types))
             self.accepted_types.update(supported_types)
 
     def register_plugins(self):

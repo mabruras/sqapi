@@ -1,15 +1,15 @@
 import logging.config
 import os
 
-from sqapi.core.plugin_manager import PluginManager
-from sqapi.core.process_manager import ProcessManager
-from sqapi.core.resource_manager import ResourceManager
-from sqapi.util.cfg_util import Config
+from sqapi.api.manager import ResourceManager
+from sqapi.configuration.util import Config
+from sqapi.plugin.manager import PluginManager
+from sqapi.processing.manager import ProcessManager
 
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
-CONFIG_DIR = '{pd}{sep}sqapi{sep}conf'.format(pd=PROJECT_DIR, sep=os.sep)
-CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(CONFIG_DIR, os.sep))
-LOG_FILE = os.environ.get('LOG_FILE', '{}{}logging.conf'.format(CONFIG_DIR, os.sep))
+RESOURCE_DIR = '{pd}{sep}sqapi{sep}resources'.format(pd=PROJECT_DIR, sep=os.sep)
+CONFIG_FILE = os.environ.get('CFG_FILE', '{}{}sqapi.yml'.format(RESOURCE_DIR, os.sep))
+LOG_FILE = os.environ.get('LOG_FILE', '{}{}logging.conf'.format(RESOURCE_DIR, os.sep))
 
 try:
     logging.config.fileConfig(LOG_FILE)

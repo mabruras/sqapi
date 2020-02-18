@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def detect_plugins():
-    directory = os.sep.join(['sqapi', 'plugins'])
+    directory = os.sep.join(['sqapi', 'plugin', 'plugins'])
 
     log.debug('Detecting plugins in dir {}'.format(directory))
     plugin_dict = detect_modules(directory, True)
@@ -28,14 +28,14 @@ def detect_database(config):
     log.debug('Looking up database type in configuration')
 
     target_module = config.get('type', 'postgres')
-    directory = os.sep.join(['sqapi', 'connectors', 'db'])
+    directory = os.sep.join(['sqapi', 'storage'])
 
     try:
         module = import_module(target_module, directory)
 
         return module.Database(config)
     except Exception as e:
-        err = '{} is not a supported Database type: '.format(target_module, str(e))
+        err = '{} is not a supported Database type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
@@ -44,14 +44,14 @@ def detect_listener(config, processor_callback):
     log.debug('Looking up listener type in configuration')
 
     target_module = config.get('type', 'rabbitmq')
-    directory = os.sep.join(['sqapi', 'connectors', 'listeners'])
+    directory = os.sep.join(['sqapi', 'messaging', 'brokers'])
 
     try:
         module = import_module(target_module, directory)
 
         return module.Listener(config, processor_callback)
     except Exception as e:
-        err = '{} is not a supported Listener type: '.format(target_module, str(e))
+        err = '{} is not a supported Listener type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
@@ -60,26 +60,26 @@ def detect_data_connectors(config):
     log.debug('Looking up data store connector type in configuration')
 
     target_module = config.get('type', 'disk')
-    directory = os.sep.join(['sqapi', 'connectors', 'data'])
+    directory = os.sep.join(['sqapi', 'query', 'content'])
 
     try:
         return import_module(target_module, directory)
     except Exception as e:
-        err = '{} is not a supported Data Store type: '.format(target_module, str(e))
+        err = '{} is not a supported Data Store type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 
 
-def detect_meta_connectors(config):
+def detect_metadata_connectors(config):
     log.debug('Looking up metadata store connector type in configuration')
 
     target_module = config.get('type', 'redis')
-    directory = os.sep.join(['sqapi', 'connectors', 'meta'])
+    directory = os.sep.join(['sqapi', 'query', 'metadata'])
 
     try:
         return import_module(target_module, directory)
     except Exception as e:
-        err = '{} is not a supported Metadata Store type: '.format(target_module, str(e))
+        err = '{} is not a supported Metadata Store type: {}'.format(target_module, str(e))
         log.warning(err)
         raise AttributeError(err)
 

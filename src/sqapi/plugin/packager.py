@@ -27,6 +27,7 @@ def execute_module_action(module, action, package):
         else:
             import subprocess
             subprocess.call([sys.executable, '-m', module, action, package])
+
     except Exception as e:
         err = '{} action ({}) for package ({}) failed: {}'.format(module, action, package, str(e))
         log.warning(err)

@@ -24,10 +24,10 @@ located within the specific topics package.
 
 | External System | Topic | Package | Default Type |
 | --------------- | ----- | ------- | ------------ |
-| `Data Store` | `data` | `sqapi.connectors.data` | `disk` |
-| `Metadata Store` | `meta` | `sqapi.connectors.meta` | `redis` |
-| `Message System` | `listeners` | `sqapi.connectors.listeners` | `zeromq` |
-| `Database` | `db` | `sqapi.connectors.db` | `postgres` |
+| `Data Store` | `data` | `sqapi.query.content` | `disk` |
+| `Metadata Store` | `meta` | `sqapi.query.metadata` | `redis` |
+| `Message System` | `listeners` | `sqapi.messaging.brokers` | `zeromq` |
+| `Database` | `db` | `sqapi.storage` | `postgres` |
 
 
 ## General
@@ -39,8 +39,8 @@ _Swift_ is a _Connector Type_ of _Data Store_,
 where the _Data Store_ is a _Connector Topic_.
 
 This means that the Connector type (Swift) should be located as follows:
-* Directory: `./sqapi/connectors/data/swift.py`
-* Package: `sqapi.connectors.data.swift`
+* Directory: `./sqapi/query/content/swift.py`
+* Package: `sqapi.query.content.swift`
 
 **Configuration:**
 ```yaml
@@ -72,7 +72,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `download_to_disk`.
 See a more detailed example within one of
-[the actual modules](https://github.com/mabruras/sqapi/blob/master/sqapi/connectors/data).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/query/content).
 ```python
 import os
 
@@ -142,7 +142,7 @@ but used directly as static modules.
 ##### Functions
 Only required function is `fetch_metadata`.
 See a more detailed example within one of
-[the actual modules](https://github.com/mabruras/sqapi/blob/master/sqapi/connectors/meta).
+[the actual modules](https://github.com/mabruras/sqapi/blob/master/src/sqapi/query/metadata).
 ```python
 def fetch_metadata(config, reference):
     ## 1. Connect to the metadata store
@@ -194,8 +194,7 @@ class Listener:
 The configuration sent to the init method will contain
 the dictionary with all `msg_broker` configuration defined.
 
-After parsing the received message,
-the resulting dictionary should be put in `sqapi.core.message.Message` and forwarded to `process_message`,
+After receiving the message, the extracted body should be forwarded to `process_message`,
 so the `ProcessManager` are able to process the message as intended.
 Definition of `process_message` below.
 
@@ -222,16 +221,14 @@ to start both an exchange listener as well as an queue listener.
 Use the callback function when the listeners are fetching messages.
 
 The callback sent to the `__init__` looks as follows,
-where the `Message` is a wrapper object containing among others; a `body` attribute.
-The `body` is a dictionary containing the message as key-values.
-The Message object is to be sent along to the query section for both `data` and `metadata` connectors.
-The `body` attribute will ending up as argument to the execute function in each plugin.
+where the `message` is the body of the message, in bytes.
+
+The bytes are to be parsed and put into a Message object, before it is used
+in the query section for both the `content` and `metadata` connectors.
 
 ```python
-from sqapi.core.message import Message
-
 # Callback method located in the core.processor:
-def process_message(self, message: Message):
+def process_message(self, message: bytes):
     pass
 ```
 
@@ -432,7 +429,7 @@ that must be implemented to suit the method calls from both sqAPI Core and -Plug
 The database connector needs an initialization method,
 where all the setup is prepared, like creating tables, relations and views.
 ```python
-from sqapi.core.message import Message
+from sqapi.processing.message import Message
 
 def initialize_database(self):
     pass

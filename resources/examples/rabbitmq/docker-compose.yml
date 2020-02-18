@@ -11,7 +11,7 @@ services:
     volumes:
     - nifi-io:/io
     - sqapi-files:/opt/app/files
-    - ./config.yml:/opt/sqapi/sqapi/conf/sqapi.yml:ro
+    - ./config.yml:/opt/mab/sqapi/resources/sqapi.yml:ro
     - ../../test/:/test/:ro
 
   mq:

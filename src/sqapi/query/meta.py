@@ -2,8 +2,8 @@
 import json
 import logging
 
-from sqapi.core.message import Message
-from sqapi.util import detector
+from sqapi.configuration import detector
+from sqapi.messaging.message import Message
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ def fetch_metadata(config, message: Message):
         raise AttributeError(err)
 
     try:
-        meta_store = detector.detect_meta_connectors(config.meta_store)
+        meta_store = detector.detect_metadata_connectors(config.meta_store)
         out = meta_store.fetch_metadata(config, loc)
 
         return json.loads(out)

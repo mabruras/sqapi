@@ -14,7 +14,7 @@ def ok(data):
 
 def no_content(data):
     log.debug(data)
-    data = {'error': 'Could not find any data', 'details': data}
+    data = {'error': 'Could not find any content', 'details': data}
 
     return _create_response(data, 204)
 

@@ -1,6 +1,6 @@
 FROM            python:3.7-slim-stretch
 
-ENV             WRK_DIR /opt/sqapi
+ENV             WRK_DIR /opt/mab
 ENV             VIRTUAL_ENV=${WRK_DIR}
 ENV             PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
@@ -30,7 +30,6 @@ RUN             pip3 install --upgrade pip \
                 && pip3 install \
                   --no-cache-dir -r             ${WRK_DIR}/requirements.txt
 
-ADD             --chown=sqapi start.py          ${WRK_DIR}/
-ADD             --chown=sqapi sqapi             ${WRK_DIR}/sqapi
+ADD             --chown=sqapi src/              ${WRK_DIR}/
 
 CMD             [ "python", "start.py" ]
