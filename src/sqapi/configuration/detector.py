@@ -57,7 +57,7 @@ def detect_listener(config, processor_callback):
 
 
 def detect_data_connectors(config):
-    log.debug('Looking up content store connector type in configuration')
+    log.debug('Looking up data store connector type in configuration')
 
     target_module = config.get('type', 'disk')
     directory = os.sep.join(['sqapi', 'query', 'content'])
@@ -70,7 +70,7 @@ def detect_data_connectors(config):
         raise AttributeError(err)
 
 
-def detect_meta_connectors(config):
+def detect_metadata_connectors(config):
     log.debug('Looking up metadata store connector type in configuration')
 
     target_module = config.get('type', 'redis')

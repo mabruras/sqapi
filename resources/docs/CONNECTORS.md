@@ -194,8 +194,7 @@ class Listener:
 The configuration sent to the init method will contain
 the dictionary with all `msg_broker` configuration defined.
 
-After parsing the received message,
-the resulting dictionary should be put in `sqapi.processing.message.Message` and forwarded to `process_message`,
+After receiving the message, the extracted body should be forwarded to `process_message`,
 so the `ProcessManager` are able to process the message as intended.
 Definition of `process_message` below.
 
@@ -222,16 +221,14 @@ to start both an exchange listener as well as an queue listener.
 Use the callback function when the listeners are fetching messages.
 
 The callback sent to the `__init__` looks as follows,
-where the `Message` is a wrapper object containing among others; a `body` attribute.
-The `body` is a dictionary containing the message as key-values.
-The Message object is to be sent along to the query section for both `data` and `metadata` connectors.
-The `body` attribute will ending up as argument to the execute function in each plugin.
+where the `message` is the body of the message, in bytes.
+
+The bytes are to be parsed and put into a Message object, before it is used
+in the query section for both the `content` and `metadata` connectors.
 
 ```python
-from sqapi.processing.message import Message
-
 # Callback method located in the core.processor:
-def process_message(self, message: Message):
+def process_message(self, message: bytes):
     pass
 ```
 

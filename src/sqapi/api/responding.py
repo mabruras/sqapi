@@ -52,7 +52,7 @@ def not_impl(err):
 
 def _create_response(data, code):
     log.debug(f'Final response status code: {code}')
-    log.debug(f'Final response content: {content}')
+    log.debug(f'Final response data: {data}')
     return Response(
         response=json.dumps(data, cls=DateEncoder),
         mimetype='application/json',

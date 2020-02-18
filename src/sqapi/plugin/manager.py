@@ -23,7 +23,7 @@ class PluginManager:
         self.accepted_types = set()
         for plugin in self.plugins:
             supported_types = plugin.config.msg_broker.get('supported_mime') or ['*']
-            log.debug('Plugin {} accepts content types: {}'.format(plugin.name, supported_types))
+            log.debug('Plugin {} accepts mime types: {}'.format(plugin.name, supported_types))
             self.accepted_types.update(supported_types)
 
     def register_plugins(self):

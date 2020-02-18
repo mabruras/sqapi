@@ -30,7 +30,7 @@ services:
     user: "postgres:postgres"
 
     volumes:
-    - db-content:/var/lib/postgresql/content
+    - db-data:/var/lib/postgresql/data
     healthcheck:
       timeout: 5s
       interval: 5s

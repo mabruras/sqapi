@@ -10,12 +10,12 @@ for each module in the source code.
 ```bash
 src
 └── sqapi
-    └── util
-        └── message_util.py
+    └── messaging
+        └── util.py
 test
 └── sqapi
-    └── util
-        └── test_message_util.py
+    └── messaging
+        └── test_util.py
 ```
 
 ## Running tests

@@ -127,8 +127,8 @@ This information is possible to overwrite, but is not recommended since it's sys
 ##### Example
 ```yaml
 plugin:
-  name: 'duplicates'                        processing
-  directory: '/opt/app/plugins/duplicates'  processing
+  name: 'duplicates'                        # Values set by core processor
+  directory: '/opt/app/plugins/duplicates'  # Values set by core processor
 ```
 
 

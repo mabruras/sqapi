@@ -29,7 +29,7 @@ services:
     - '8080:8080'
     volumes:
     - nifi-io:/io
-    - nifi-configuration:/opt/nifi/nifi-current/configuration
+    - nifi-conf:/opt/nifi/nifi-current/conf
 
 
   redis:

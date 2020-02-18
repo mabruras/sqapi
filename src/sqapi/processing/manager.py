@@ -91,7 +91,6 @@ class ProcessManager:
             metadata = json.loads(message.metadata)
 
         elif self.config.meta_store:
-            log.info(self.config.meta_store)
             log.info('Fetching metadata by query')
             metadata = meta.fetch_metadata(self.config, message)
 
