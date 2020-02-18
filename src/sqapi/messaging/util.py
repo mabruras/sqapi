@@ -60,3 +60,9 @@ def _validate_required_fields(message):
         err = 'The following field(/s) are missing in the message: {}'.format(', '.join(missing_fields))
         log.debug(err)
         raise AttributeError(err)
+
+
+def extract_mime_from_metadata(config, metadata):
+    # TODO: Check path of mime-type from config
+    # TODO: Extract mime-type from metadata if possible or return null
+    pass

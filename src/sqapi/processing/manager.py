@@ -39,8 +39,10 @@ class ProcessManager:
             data_path, metadata = self.query(message)
 
             if not message.type:
-                message.type = self.detect_filetype(data_path).mime
-            self.check_mime_type(message)
+                message.type = util.extract_mime_from_metadata(self.config.msg_broker, metadata)
+                message.type = message.type or self.detect_filetype(data_path).mime
+
+            self.check_mime_type(message.type)
 
             message.hash_digest = self._calculate_hash_digest(data_path)
 
@@ -67,6 +69,7 @@ class ProcessManager:
             log.debug(e)
 
     def detect_filetype(self, file_path):
+        log.info('Guessing mime type')
         return filetype.guess(file_path) or self._get_default_filetype()
 
     def check_mime_type(self, mime):
