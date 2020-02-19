@@ -3,11 +3,13 @@ import mimetypes
 
 import filetype
 
+APPLICATION_OCTET_STREAM = 'application/octet-stream'
+
 log = logging.getLogger(__name__)
 
 
 def get_mime_type(data_path, metadata, config):
-    return mime_from_metadata(metadata, config) or guess_mime_type(data_path) or _get_default_filetype()
+    return mime_from_metadata(metadata, config) or guess_mime_type(data_path) or APPLICATION_OCTET_STREAM
 
 
 def mime_from_metadata(metadata, config):
@@ -22,7 +24,7 @@ def mime_from_metadata(metadata, config):
     for key in mime_path.split(mime_separator):
         val = val.get(key, {})
 
-    return val
+    return val or None
 
 
 def guess_mime_type(file_path):
@@ -35,14 +37,6 @@ def guess_mime_type(file_path):
     guessed_type = mimetypes.guess_type(file_path)
     if guessed_type[0]:
         return guessed_type[0]
-
-
-def _get_default_filetype():
-    kind = type('', (), {})()
-    kind.extension = None
-    kind.mime = 'application/octet-stream'
-
-    return kind
 
 
 def validate_mime_type(mime, accepted_types):
