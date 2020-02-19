@@ -5,10 +5,8 @@ import logging
 import multiprocessing
 import time
 
-import filetype
-
 from sqapi import PluginManager
-from sqapi.configuration import detector
+from sqapi.configuration import detector, fileinfo
 from sqapi.configuration.util import Config
 from sqapi.messaging import util
 from sqapi.messaging.message import Message
@@ -32,17 +30,14 @@ class ProcessManager:
         log.debug('Message subscription started')
 
     def process_message(self, body: bytes):
-        message = util.parse_message(body, self.config.msg_broker)
-
         try:
+            message = util.parse_message(body, self.config.msg_broker)
+
             log.info('Message processing started')
             data_path, metadata = self.query(message)
 
-            if not message.type:
-                message.type = util.extract_mime_from_metadata(self.config.msg_broker, metadata)
-                message.type = message.type or self.detect_filetype(data_path).mime
-
-            self.check_mime_type(message.type)
+            message.type = message.type or fileinfo.get_mime_type(data_path, metadata, self.config.msg_broker)
+            fileinfo.validate_mime_type(message.type, self.plugin_manager.accepted_types)
 
             message.hash_digest = self._calculate_hash_digest(data_path)
 
@@ -65,24 +60,6 @@ class ProcessManager:
 
         except Exception as e:
             log.error('Could not process message: {}'.format(str(e)))
-            log.debug(message)
-            log.debug(e)
-
-    def detect_filetype(self, file_path):
-        log.info('Guessing mime type')
-        return filetype.guess(file_path) or self._get_default_filetype()
-
-    def check_mime_type(self, mime):
-        log.debug('Validating mime type')
-        log.debug('Accepted mime types: {}'.format(self.plugin_manager.accepted_types))
-
-        if self.plugin_manager.accepted_types and (
-                mime not in self.plugin_manager.accepted_types
-                and '*' not in self.plugin_manager.accepted_types
-        ):
-            err = 'Mime type "{}" is not supported by any of the active sqAPI plugins'.format(mime)
-            log.debug(err)
-            raise NotImplementedError(err)
 
     def query(self, message: Message):
         log.info('Querying metadata and content stores')

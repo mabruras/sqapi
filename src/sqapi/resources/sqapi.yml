@@ -11,14 +11,20 @@ msg_broker:
   socket_type: 7
   protocol: 'tcp'
 
-  parser: 'json'
+  parser: 'string'
+  format: 'uuid|file|metadata'
+  delimiter: '|'
+
+  mime:
+    path: 'mime.type'
+    path_separator: '_'
 
   message_fields:
     uuid:
       key: 'uuid'
       required: True
     data_location:
-      key: 'hash'
+      key: 'file'
       required: True
     meta_location:
       key: 'uuid'

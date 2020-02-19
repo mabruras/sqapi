@@ -31,7 +31,7 @@ def download_to_disk(config, object_ref):
         raise FileNotFoundError(err)
 
     log.debug('Creating temporary file for Swift object download')
-    fd, path = tempfile.mkstemp()
+    fd, path = tempfile.mkstemp(os.path.splitext(object_ref)[-1])
     os.write(fd, res[1])
     os.close(fd)
 
