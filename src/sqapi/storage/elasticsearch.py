@@ -44,13 +44,18 @@ class Database:
         con = self.get_connection()
         con.index(area, body, kind)
 
-    def fetch_document(self, area: str, body: dict, query_clause='match'):
+    def fetch_document(self, area: str, body: dict, query_clause='match', **kwargs):
         # Uses Elasticsearch Query DSL:
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
         con = self.get_connection()
-        res = con.search(area, body=json.dumps({'query': {query_clause: body}}))
 
-        return res.get('hits', {}).get('hits', [])
+        offset = kwargs.get('start', 0)
+        size = kwargs.get('size', 10)
+        search_body = json.dumps({'from': offset, 'size': size, 'query': {query_clause: body}})
+
+        res = con.search(area, body=search_body)
+
+        return res.get('hits', {})
 
     def initialize_database(self):
         pass
