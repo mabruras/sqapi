@@ -11,7 +11,7 @@ config = dict({
     'delimiter': '|',
 
     # General config
-    'message_fields': {
+    'fields': {
         'uuid': {
             'key': 'uuid',
             'required': True

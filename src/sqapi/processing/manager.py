@@ -22,7 +22,7 @@ class ProcessManager:
         self.config = config
         self.plugin_manager = plugin_manager
 
-        self.listener = detector.detect_listener(self.config.msg_broker, self.process_message)
+        self.listener = detector.detect_listener(self.config.broker, self.process_message)
 
     def start_subscribing(self):
         log.info('Starting message subscription')
@@ -31,12 +31,12 @@ class ProcessManager:
 
     def process_message(self, body: bytes):
         try:
-            message = util.parse_message(body, self.config.msg_broker)
+            message = util.parse_message(body, self.config.message)
 
             log.info('Message processing started')
             data_path, metadata = self.query(message)
 
-            message.type = message.type or fileinfo.get_mime_type(data_path, metadata, self.config.msg_broker)
+            message.type = message.type or fileinfo.get_mime_type(data_path, metadata, self.config.message)
             fileinfo.validate_mime_type(message.type, self.plugin_manager.accepted_types)
 
             message.hash_digest = self._calculate_hash_digest(data_path)
@@ -119,7 +119,7 @@ class ProcessManager:
 
     @staticmethod
     def valid_data_type(message: Message, plugin):
-        accepted_types = plugin.config.msg_broker.get('supported_mime') or []
+        accepted_types = plugin.config.broker.get('supported_mime') or []
 
         return message.type in accepted_types or not accepted_types
 
