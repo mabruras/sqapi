@@ -1,5 +1,8 @@
 import logging.config
 import os
+import signal
+import sys
+from contextlib import contextmanager
 
 from sqapi.api.manager import ResourceManager
 from sqapi.configuration.util import Config
@@ -17,6 +20,40 @@ except KeyError:
     logging.basicConfig()
 
 log = logging.getLogger(__name__)
+
+received_signal = False
+processing_callback = False
+
+
+def signal_handler(sig, frame):
+    global received_signal
+    log.info('Shutdown signal received: {}'.format(sig))
+    received_signal = True
+
+    if not processing_callback:
+        sys.exit()
+
+    log.warn('sqAPI is still working.. Shutting down after finishing current processes')
+
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
+
+@contextmanager
+def signal_blocker():
+    global processing_callback
+    processing_callback = True
+
+    try:
+        yield
+
+    finally:
+        processing_callback = False
+
+        if received_signal:
+            log.info('Completed current processes, shutting down...')
+            sys.exit()
 
 
 class SqapiApplication:

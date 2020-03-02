@@ -3,9 +3,10 @@ import hashlib
 import json
 import logging
 import multiprocessing
+import threading
 import time
 
-from sqapi import PluginManager
+from sqapi import PluginManager, signal_blocker
 from sqapi.configuration import detector, fileinfo
 from sqapi.configuration.util import Config
 from sqapi.messaging import util
@@ -26,7 +27,11 @@ class ProcessManager:
 
     def start_subscribing(self):
         log.info('Starting message subscription')
-        self.listener.start_listeners()
+
+        threading.Thread(
+            name='{} Listener'.format(self.listener.__name__),
+            target=self.listener.start_listener()
+        ).start()
         log.debug('Message subscription started')
 
     def process_message(self, body: bytes):
@@ -41,17 +46,8 @@ class ProcessManager:
 
             message.hash_digest = self._calculate_hash_digest(data_path)
 
-            log.debug('Creating processor pool of plugin executions')
-            process_pool = [
-                multiprocessing.Process(target=self.plugin_execution, args=[
-                    plugin, message, metadata, data_path
-                ]) for plugin in self.plugin_manager.plugins
-                if self.valid_data_type(message, plugin)
-            ]
-
-            log.debug('Starting processor pool')
-            [t.start() for t in process_pool]
-            [t.join() for t in process_pool]
+            with signal_blocker:
+                self.execute_plugins(data_path, message, metadata)
 
             log.info('Processing completed')
 
@@ -60,6 +56,20 @@ class ProcessManager:
 
         except Exception as e:
             log.error('Could not process message: {}'.format(str(e)))
+
+    def execute_plugins(self, data_path, message, metadata):
+        log.debug('Creating processor pool of plugin executions')
+
+        process_pool = [
+            multiprocessing.Process(target=self.plugin_execution, args=[
+                plugin, message, metadata, data_path
+            ]) for plugin in self.plugin_manager.plugins
+            if self.valid_data_type(message, plugin)
+        ]
+
+        log.debug('Starting processor pool')
+        [t.start() for t in process_pool]
+        [t.join() for t in process_pool]
 
     def query(self, message: Message):
         log.info('Querying metadata and content stores')

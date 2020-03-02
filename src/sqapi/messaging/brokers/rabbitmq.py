@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import logging
-import threading
 import time
 
 import pika
@@ -47,20 +46,14 @@ class Listener:
                 log.debug('Connection tested: {}'.format(str(e)))
                 time.sleep(self.retry_interval)
 
-    def start_listeners(self):
-        # Setup sqAPI general exchange listener
-        log.debug('Starting Exchange Listener')
-        threading.Thread(
-            name='ExchangeListener',
-            target=self.listen_exchange
-        ).start()
+    def start_listener(self):
+        if self.config.get('exchange_name'):
+            log.debug('Starting Exchange Listener')
+            self.listen_exchange()
 
-        # Setup sqAPI unique queue listener
-        log.debug('Starting Queue Listener')
-        threading.Thread(
-            name='QueueListener',
-            target=self.listen_queue
-        ).start()
+        else:
+            log.debug('Starting Queue Listener')
+            self.listen_queue()
 
     def listen_queue(self):
         while True:

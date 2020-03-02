@@ -206,7 +206,7 @@ should take care of its own retry/loop logic, threading etc.
 
 ```python
 
-def start_listeners(self):
+def start_listener(self):
     pass
 ```
 

@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import logging
-import threading
 import time
 
 import zmq as zmq
@@ -27,7 +26,7 @@ class Listener:
         self.socket_type = config.get('socket_type', zmq.PULL)
         self.protocol = config.get('protocol', 'tcp')
 
-    def start_listeners(self):
+    def start_listener(self):
         connect_addr = f'{self.protocol}://{self.host}:{self.port}'
         print(f'Connecting to {self.socket_type}-socket on {connect_addr}')
 
@@ -39,11 +38,7 @@ class Listener:
         else:
             raise AttributeError(f'Connection type "{self.connection_type}" is not a supported type')
 
-        threading.Thread(
-            name='ZeroMQ Listener',
-            target=self._listen_for_messages,
-            args=[socket]
-        ).start()
+        self._listen_for_messages(socket)
 
     def _listen_for_messages(self, socket):
         while True:
