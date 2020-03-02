@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-
+import datetime
 import json
 import uuid
 
@@ -20,7 +20,30 @@ def send_zmq_msg(message):
 
 
 def get_string_data(rnd_uuid):
-    return f'{rnd_uuid}|/test/test_picture01.jpg|sqapi|messaging|0'
+    # return f'{rnd_uuid}|/test/test_picture01.jpg|sqapi|messaging|0'
+    # return f'{rnd_uuid}|/test/test_json01.json|sqapi|messaging|application/json'
+
+    json_meta = json.dumps({
+        'wrapper-a': {
+            'field-a-1': 'abc',
+            'field-a-2': 456,
+            'field-a-3': 3.14,
+        },
+        'wrapper-b': {
+            'field-b-1': True,
+            'field-b-2': None,
+            'field-b-3': '',
+        },
+        'date-stamps': [
+            datetime.datetime.now().isoformat(),
+            (datetime.datetime.now() + datetime.timedelta(1)).isoformat(),
+        ],
+        'wrapped-stamp': {
+            'timestamp': datetime.datetime.now().isoformat(),
+        },
+        'uuid': rnd_uuid,
+    })
+    return f'{rnd_uuid}|/test/test_json01.json|{json_meta}'
 
 
 def get_json_data(rnd_uuid):
@@ -36,7 +59,7 @@ def get_json_data(rnd_uuid):
 
 if __name__ == '__main__':
     rnd_uuid = str(uuid.uuid4())
-    #msg = get_json_data(rnd_uuid)
+    # msg = get_json_data(rnd_uuid)
     msg = get_string_data(rnd_uuid)
 
     send_zmq_msg(msg)
