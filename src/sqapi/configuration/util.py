@@ -2,12 +2,17 @@
 import logging
 import os
 import re
+import sys
+from contextlib import contextmanager
 
 import yaml
 
 CONFIG = dict()
 
 log = logging.getLogger(__name__)
+
+received_signal = False
+in_progress = False
 
 
 class Config:
@@ -60,3 +65,31 @@ def load_config(config_file):
             config = dict()
 
     return config
+
+
+def signal_handler(sig, frame):
+    global received_signal
+    log.info('Shutdown signal received: {}'.format(sig))
+    received_signal = True
+
+    if not in_progress:
+        log.info('sqAPI is shutting down')
+        sys.exit()
+
+    log.warning('sqAPI is still working.. Shutting down after finishing current processes')
+
+
+@contextmanager
+def signal_blocker():
+    global in_progress
+
+    try:
+        in_progress = True
+        yield
+
+    finally:
+        in_progress = False
+
+        if received_signal:
+            log.info('Completed current processes; sqAPI is shutting down')
+            sys.exit()

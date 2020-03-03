@@ -6,11 +6,12 @@ import multiprocessing
 import threading
 import time
 
-from sqapi import PluginManager, signal_blocker
 from sqapi.configuration import detector, fileinfo
 from sqapi.configuration.util import Config
+from sqapi.configuration.util import signal_blocker
 from sqapi.messaging import util
 from sqapi.messaging.message import Message
+from sqapi.plugin.manager import PluginManager
 from sqapi.query import data, meta
 
 CHUNK_SIZE = 65536
@@ -29,8 +30,8 @@ class ProcessManager:
         log.info('Starting message subscription')
 
         threading.Thread(
-            name='{} Listener'.format(self.listener.__name__),
-            target=self.listener.start_listener()
+            name='{} Listener'.format(self.listener.__class__),
+            target=self.listener.start_listener
         ).start()
         log.debug('Message subscription started')
 
@@ -46,7 +47,7 @@ class ProcessManager:
 
             message.hash_digest = self._calculate_hash_digest(data_path)
 
-            with signal_blocker:
+            with signal_blocker():
                 self.execute_plugins(data_path, message, metadata)
 
             log.info('Processing completed')
