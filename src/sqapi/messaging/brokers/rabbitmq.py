@@ -21,6 +21,7 @@ class Listener:
         self.routing_key = config.get('routing_key', 'q_sqapi')
         self.exchange_name = config.get('exchange_name', 'x_sqapi')
         self.exchange_type = config.get('exchange_type', 'fanout')
+        self.requeue_failures = config.get('requeue', True)
 
         self.host = config.get('host', 'localhost')
         self.port = config.get('port', 5672)
@@ -47,62 +48,49 @@ class Listener:
                 time.sleep(self.retry_interval)
 
     def start_listener(self):
-        if self.config.get('exchange_name'):
-            log.debug('Starting Exchange Listener')
-            self.listen_exchange()
+        while True:
+            try:
+                listener = self.listen_exchange if self.config.get('exchange_name') else self.listen_queue
+                listener()
 
-        else:
-            log.debug('Starting Queue Listener')
-            self.listen_queue()
+            except StreamLostError as e:
+                log.warning('Lost connection to broker: {}'.format(str(e)))
+                time.sleep(1)
+
+            except (InterruptedError, KeyboardInterrupt) as e:
+                log.error('Interrupted, exiting consumer: {}'.format(str(e)))
+                break
+
+        log.info('Finished consuming from RabbitMQ')
 
     def listen_queue(self):
-        while True:
-            try:
-                log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
+        log.debug('Starting Queue listener with routing key: {}'.format(self.routing_key))
 
-                connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
-                channel = connection.channel()
+        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
+        channel = connection.channel()
 
-                # Create a queue
-                channel.queue_declare(queue=self.routing_key)
-                channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=self.parse_message)
+        # Create a queue
+        channel.queue_declare(queue=self.routing_key)
+        channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=self.parse_message)
 
-                log.debug('Starting to consume from queue: {}'.format(self.routing_key))
-                channel.start_consuming()
-            except StreamLostError as e:
-                log.warning('Lost connection to broker: {}'.format(str(e)))
-                time.sleep(1)
-            except (InterruptedError, KeyboardInterrupt) as e:
-                log.error('Interrupted, exiting consumer: {}'.format(str(e)))
-                channel.stop_consuming()
-                break
-        log.info('Finished consuming from queue: {}'.format(self.routing_key))
+        log.debug('Starting to consume from queue: {}'.format(self.routing_key))
+        channel.start_consuming()
 
     def listen_exchange(self):
-        while True:
-            try:
-                log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
-                connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
-                channel = connection.channel()
+        log.debug('Starting Exchange listener {} as type {}'.format(self.exchange_name, self.exchange_type))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, self.port))
+        channel = connection.channel()
 
-                channel.exchange_declare(exchange=self.exchange_name, exchange_type=self.exchange_type)
+        channel.exchange_declare(exchange=self.exchange_name, exchange_type=self.exchange_type)
 
-                # Create a queue
-                res = channel.queue_declare(self.routing_key)
-                queue_name = res.method.queue
-                channel.queue_bind(exchange=self.exchange_name, queue=queue_name)
-                channel.basic_consume(queue=queue_name, auto_ack=True, on_message_callback=self.parse_message)
+        # Create a queue
+        res = channel.queue_declare(self.routing_key)
+        queue_name = res.method.queue
+        channel.queue_bind(exchange=self.exchange_name, queue=queue_name)
+        channel.basic_consume(queue=queue_name, on_message_callback=self.parse_message)
 
-                log.debug('Starting to consume from exchange: {}'.format(self.exchange_name))
-                channel.start_consuming()
-            except StreamLostError as e:
-                log.warning('Lost connection to broker: {}'.format(str(e)))
-                time.sleep(1)
-            except (InterruptedError, KeyboardInterrupt) as e:
-                log.error('Interrupted, exiting consumer: {}'.format(str(e)))
-                channel.stop_consuming()
-                break
-        log.info('Finished consuming from exchange: {}'.format(self.exchange_name))
+        log.debug('Starting to consume from exchange: {}'.format(self.exchange_name))
+        channel.start_consuming()
 
     def parse_message(self, ch, method, properties, body):
         log.info('Received message. Processing starts after delay ({} seconds)'.format(self.delay))
@@ -115,7 +103,11 @@ class Listener:
             log.debug('Received message: {}'.format(body))
 
             self.pm_callback(body)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            log.info('Message acknowledged sent')
 
         except Exception as e:
             err = 'Could not process received message: {}'.format(str(e))
             log.warning(err)
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=self.requeue_failures)
+            log.info('Message not-acknowledged sent')

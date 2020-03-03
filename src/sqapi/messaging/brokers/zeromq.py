@@ -33,8 +33,10 @@ class Listener:
         socket = self.context.socket(self.socket_type)
         if self.connection_type.lower() == 'connect':
             socket.connect(connect_addr)
+
         elif self.connection_type.lower() == 'bind':
             socket.bind(connect_addr)
+
         else:
             raise AttributeError(f'Connection type "{self.connection_type}" is not a supported type')
 

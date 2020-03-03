@@ -54,9 +54,11 @@ class ProcessManager:
 
         except LookupError as e:
             log.warning('Could not fetch content and/or metadata at this point: {}'.format(str(e)))
+            raise e
 
         except Exception as e:
             log.error('Could not process message: {}'.format(str(e)))
+            raise e
 
     def execute_plugins(self, data_path, message, metadata):
         log.debug('Creating processor pool of plugin executions')

@@ -2,16 +2,17 @@ packages:
   install: False
 
 msg_broker:
-  type: 'zeromq'
-  host: '*'
-  port: 5001
-  retry_interval: 0
-  process_delay: 0
-  connection_type: bind
-  socket_type: 7
-  protocol: 'tcp'
+  type: 'rabbitmq'
+  host: 'localhost'
+  port: 5672
 
-  parser: 'string'
+  routing_key: 'q_sqapi'
+  exchange_name: 'x_sqapi'
+  exchange_type: 'fanout'
+  process_delay: 0
+  requeue: false
+
+  parser: 'json'
   format: 'uuid|file|metadata'
   delimiter: '|'
 

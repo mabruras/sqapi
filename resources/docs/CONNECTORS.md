@@ -264,6 +264,7 @@ msg_broker:
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
   process_delay: 5
+  requeue: false
 
   message_fields:
     type:
