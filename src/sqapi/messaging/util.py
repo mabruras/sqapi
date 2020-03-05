@@ -7,12 +7,13 @@ log = logging.getLogger(__name__)
 
 
 def parse_message(msg_body: bytes, cfg) -> Message:
-    parser = cfg.get('parser', '')
+    parser = cfg.get('parser', {})
+    parser_type = parser.get('type', '')
 
-    if parser.lower() == 'str' or parser.lower() == 'string':
-        out = _parse_string(cfg, msg_body.decode('utf-8'))
+    if parser_type.lower() == 'str' or parser_type.lower() == 'string':
+        out = _parse_string(parser, msg_body.decode('utf-8'))
 
-    elif parser.lower() == 'json':
+    elif parser_type.lower() == 'json':
         out = json.loads(msg_body)
 
     else:

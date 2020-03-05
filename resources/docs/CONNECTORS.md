@@ -172,7 +172,7 @@ meta_store:
 ```
 
 
-### Message System
+### Broker
 Connector towards the Message System is responsible for subscribing to a
 message broker, -bus or other message system connections,
 for receiving messages for sqAPI to process.
@@ -192,7 +192,7 @@ class Listener:
         pass
 ```
 The configuration sent to the init method will contain
-the dictionary with all `msg_broker` configuration defined.
+the dictionary with all `broker` configuration defined.
 
 After receiving the message, the extracted body should be forwarded to `process_message`,
 so the `ProcessManager` are able to process the message as intended.
@@ -233,21 +233,6 @@ def process_message(self, message: bytes):
 ```
 
 #### Types
-Regardless of the chosen type,
-there should be included configuration
-for which mime types each plugin supports.
-
-The following configuration is example
-of config used in a plugin configuration.
-```yaml
-msg_broker:
-  # Supported Mime should be custom for each sqAPI Plugin,
-  # not necessarily defined in the parent configuration
-  supported_mime:
-  - 'image/jpeg'
-  - 'image/png'
-  - 'image/gif'
-```
 
 ##### RabbitMQ
 > RabbitMQ is the most widely deployed open source message broker.
@@ -255,7 +240,7 @@ msg_broker:
 
 ###### Configuration
 ```yaml
-msg_broker:
+broker:
   type: 'rabbitmq'
   host: 'localhost'
   port: 5672
@@ -264,30 +249,6 @@ msg_broker:
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
   process_delay: 5
-
-  message_fields:
-    type:
-      key: 'data_type'
-      required: True
-    data_location:
-      key: 'data_location'
-      required: True
-    meta_location:
-      key: 'meta_location'
-      required: True
-    uuid:
-      key: 'uuid_ref'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
-
-  # Supported Mime should be custom for each sqAPI Plugin,
-  # not necessarily defined in the parent configuration
-  supported_mime:
-  - 'image/jpeg'
-  - 'image/png'
-  - 'image/gif'
 ```
 
 ##### ZeroMQ
@@ -298,7 +259,7 @@ msg_broker:
 
 ###### Configuration
 ```yaml
-msg_broker:
+broker:
 
   type: 'zeromq'
   host: '*'
@@ -308,23 +269,6 @@ msg_broker:
   connection_type: bind
   socket_type: 7
   protocol: 'tcp'
-
-  message_fields:
-    type:
-      key: 'data_type'
-      required: True
-    data_location:
-      key: 'data_path'
-      required: True
-    meta_location:
-      key: 'meta_path'
-      required: True
-    uuid:
-      key: 'uuid'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
 ```
 
 ##### Kafka
@@ -337,7 +281,7 @@ msg_broker:
 
 ###### Configuration
 ```yaml
-msg_broker:
+broker:
 
   type: 'kafka'
   host: 'localhost'
@@ -351,27 +295,7 @@ msg_broker:
   topic_names:
   - 'sqapi'
   consumer_group: 'sqapi'
-  api_version:
-    - 0
-    - 10
-    - 0
-
-  message_fields:
-    type:
-      key: 'data_type'
-      required: True
-    data_location:
-      key: 'data_path'
-      required: True
-    meta_location:
-      key: 'meta_path'
-      required: True
-    uuid:
-      key: 'uuid'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
+  api_version: [ 0, 10, 0 ]
 ```
 
 

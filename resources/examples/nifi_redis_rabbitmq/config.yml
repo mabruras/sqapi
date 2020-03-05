@@ -1,7 +1,7 @@
 packages:
   install: False
 
-msg_broker:
+broker:
   type: 'rabbitmq'
   host: 'mq'
   port: 5672
@@ -11,9 +11,11 @@ msg_broker:
   exchange_type: 'fanout'
   process_delay: 0
 
-  parser: json
+message:
+  parser:
+    type: json
 
-  message_fields:
+  fields:
     type:
       key: 'data_type'
       required: True
