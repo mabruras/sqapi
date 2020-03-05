@@ -206,7 +206,7 @@ should take care of its own retry/loop logic, threading etc.
 
 ```python
 
-def start_listeners(self):
+def start_listener(self):
     pass
 ```
 
@@ -249,6 +249,8 @@ broker:
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
   process_delay: 5
+
+  requeue: false  # Requeue message on failure
 ```
 
 ##### ZeroMQ
@@ -260,7 +262,6 @@ broker:
 ###### Configuration
 ```yaml
 broker:
-
   type: 'zeromq'
   host: '*'
   port: 5001

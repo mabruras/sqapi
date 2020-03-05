@@ -10,6 +10,7 @@ broker:
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
   process_delay: 0
+  requeue: false
 
 message:
   parser:

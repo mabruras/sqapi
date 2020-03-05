@@ -17,6 +17,10 @@ message:
     format: 'uuid|hash|metadata'
     delimiter: '|'
 
+  mime:
+    path: 'mime.type'
+    path_separator: '_'
+
   fields:
     uuid:
       key: 'uuid'

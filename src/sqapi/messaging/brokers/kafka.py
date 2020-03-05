@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import logging
-import threading
 import time
 
 from kafka import KafkaConsumer
@@ -26,13 +25,7 @@ class Listener:
         self.consumer_group = config.get('consumer_group', 'sqapi')
         self.api_version = tuple(config.get('api_version', [0, 10, 0]))
 
-    def start_listeners(self):
-        threading.Thread(
-            name='Kafka Listener',
-            target=self._listen_for_messages
-        ).start()
-
-    def _listen_for_messages(self):
+    def start_listener(self):
         while True:
             log.info(f'Listening for messages from Kafka')
             consumer = KafkaConsumer(

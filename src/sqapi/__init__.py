@@ -1,8 +1,9 @@
 import logging.config
 import os
+import signal
 
 from sqapi.api.manager import ResourceManager
-from sqapi.configuration.util import Config
+from sqapi.configuration.util import Config, signal_handler
 from sqapi.plugin.manager import PluginManager
 from sqapi.processing.manager import ProcessManager
 
@@ -17,6 +18,9 @@ except KeyError:
     logging.basicConfig()
 
 log = logging.getLogger(__name__)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 
 class SqapiApplication:

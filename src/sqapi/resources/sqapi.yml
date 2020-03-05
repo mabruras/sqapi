@@ -2,14 +2,16 @@ packages:
   install: False
 
 broker:
-  type: 'zeromq'
-  host: '*'
-  port: 5001
-  retry_interval: 0
+  type: 'rabbitmq'
+  host: 'localhost'
+  port: 5672
+
+  routing_key: 'q_sqapi'
+  exchange_name: 'x_sqapi'
+  exchange_type: 'topic'
   process_delay: 0
-  connection_type: bind
-  socket_type: 7
-  protocol: 'tcp'
+
+  requeue: false
 
 message:
   parser:
