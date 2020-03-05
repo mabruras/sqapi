@@ -21,7 +21,7 @@ services:
     image: postgres:${DB_V:-latest}
     container_name: postgres
     restart: unless-stopped
-    user: "postgres:postgres"
+    user: 'postgres:postgres'
     deploy:
       replicas: 1
 

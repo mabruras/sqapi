@@ -1,7 +1,7 @@
 packages:
   install: False
 
-msg_broker:
+broker:
   type: 'rabbitmq'
   host: 'mq'
   port: 5672
@@ -12,9 +12,11 @@ msg_broker:
   process_delay: 0
   requeue: false
 
-  parser: json
+message:
+  parser:
+    type: json
 
-  message_fields:
+  fields:
     data_location:
       key: 'data_path'
       required: True

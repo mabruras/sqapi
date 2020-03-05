@@ -1,7 +1,7 @@
 packages:
   install: False
 
-msg_broker:
+broker:
   type: 'zeromq'
   host: '*'
   port: 5001
@@ -11,15 +11,17 @@ msg_broker:
   socket_type: 7
   protocol: 'tcp'
 
-  parser: 'string'
-  format: 'uuid|file|metadata'
-  delimiter: '|'
+message:
+  parser:
+    type: string
+    format: 'uuid|hash|metadata'
+    delimiter: '|'
 
   mime:
     path: 'mime.type'
     path_separator: '_'
 
-  message_fields:
+  fields:
     uuid:
       key: 'uuid'
       required: True

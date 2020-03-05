@@ -21,7 +21,8 @@ class Config:
 
         self.plugin = cfg.get('plugin') or {}
         self.database = cfg.get('database') or {}
-        self.msg_broker = cfg.get('msg_broker') or {}
+        self.broker = cfg.get('broker') or {}
+        self.message = cfg.get('message') or {}
         self.meta_store = cfg.get('meta_store') or {}
         self.data_store = cfg.get('data_store') or {}
         self.active_plugins = cfg.get('active_plugins') or []
@@ -32,7 +33,8 @@ class Config:
     def merge_config(self, override):
         self.plugin.update(override.plugin)
         self.database.update(override.database)
-        self.msg_broker.update(override.msg_broker)
+        self.broker.update(override.broker)
+        self.message.update(override.message)
         self.meta_store.update(override.meta_store)
         self.data_store.update(override.data_store)
         self.active_plugins.extend(override.active_plugins)

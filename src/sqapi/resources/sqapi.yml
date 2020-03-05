@@ -1,26 +1,29 @@
 packages:
   install: False
 
-msg_broker:
+broker:
   type: 'rabbitmq'
   host: 'localhost'
   port: 5672
 
   routing_key: 'q_sqapi'
   exchange_name: 'x_sqapi'
-  exchange_type: 'fanout'
+  exchange_type: 'topic'
   process_delay: 0
+
   requeue: false
 
-  parser: 'json'
-  format: 'uuid|file|metadata'
-  delimiter: '|'
+message:
+  parser:
+    type: 'string'
+    format: 'uuid|file|metadata'
+    delimiter: '|'
 
   mime:
     path: 'mime.type'
-    path_separator: '_'
+    path_separator: ':'
 
-  message_fields:
+  fields:
     uuid:
       key: 'uuid'
       required: True

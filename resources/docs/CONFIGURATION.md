@@ -27,7 +27,7 @@ could use different external systems based on the environment type; `dev`, `test
 
 ##### Example
 ```yaml
-msg_broker:
+broker:
   type: ${MSG_BROKER_TYPE}
   host: ${MSG_BROKER_HOST}
   port: ${MSG_BROKER_PORT}
@@ -42,7 +42,8 @@ The configuration will expose the following topics:
 ```yaml
 packages:
 plugin:
-msg_broker:
+broker:
+message:
 meta_store:
 data_store:
 database:
@@ -56,7 +57,7 @@ The `plugin` topic is defined for each plugin, and is not intended used outside 
 #### sqAPI vs. plugin
 What should be defined in which config?
 Usually all configuration which is equal across multiple plugins,
-should be defined in sqAPI config, like `msg_broker`, `meta_store`, `data_store` and `active_plugins`.
+should be defined in sqAPI config, like `broker`, `meta_store`, `data_store` and `active_plugins`.
 
 Typical plugin config are topics like `database` and `api`,
 since these usually are custom for each sqAPI plugin.
@@ -124,6 +125,31 @@ In addition to the sqAPI config, the core setup will append
 information about the plugin within the plugin processor configuration.
 This information is possible to overwrite, but is not recommended since it's system generated.
 
+#### Supported Mime
+The only part makes sense to overwrite (or even define) in the plugin configurations,
+are the `mime_types` covering which mime types the plugin supports.
+
+##### Specific Mime Types
+```yaml
+plugin:
+  mime_types:
+  - 'image/jpeg'
+  - 'image/png'
+  - 'image/gif'
+```
+
+##### All Mime Types
+```yaml
+# Empty list
+plugin:
+  mime_types:
+```
+or
+```yaml
+# Left out field
+plugin:
+```
+
 ##### Example
 ```yaml
 plugin:
@@ -132,33 +158,88 @@ plugin:
 ```
 
 
-### Message System
-The message system, usually defined in
+### Broker
+The message broker, usually defined in
 [sqAPI configuration](https://github.com/mabruras/sqapi/blob/master/src/sqapi/resources/sqapi.yml),
-must contain a reference to the type of message system and connection details.
+must contain a reference to the connection details towards the wanted message system.
+Usually this would be a broker, but broker-less systems may also be supported.
 
-Remember to list up minimum required fields of the message (`message_fields`)
-as these will be validated upon received message.
+#### Types
+See more details for each Broker type in the
+[Connector documentation](https://github.com/mabruras/sqapi/blob/master/resources/docs/CONNECTORS.md)
 
-The `key`-field, of each field in `message_fields`, is the representation of the field-name within the message.
-This means that a message defining `type` by `mime.type`, should change `key: 'data_type'` to `key: 'mime.type'`.
+* RabbitMQ
+* Kafka
+* ZeroMQ
 
+
+### Message
+The message configuration, usually defined in
+[sqAPI configuration](https://github.com/mabruras/sqapi/blob/master/src/sqapi/resources/sqapi.yml),
+must contain a details about how the message is formatted and could be parsed.
+
+#### Parser
 It must be defined a `parser`, being either `json` or `string`.
 
-###### JSON Parser
+##### JSON Parser
 Json parser does not need any other configuration,
 since it only requires a valid serialized json.
 
-Its fields should be represented within the `message_fields`.
+Its fields should be represented within the `fields`,
+at least the ones being required.
+```yaml
+message:
+  parser:
+    type: 'json'
+```
 
-###### String Parser
+##### String Parser
 When using a String parser the string `format` and a `delimiter` should be defined.
 This will help sqAPI split each message into the defined format with the field keys.
 
-A format with `uuid|hash` should have the delimiter `|`,
-and following `message_fields`:
+A format with `uuid|hash` should have the delimiter `|`.
 ```yaml
-  message_fields:
+message:
+  parser:
+    type: 'string'
+    format: 'uuid|hash'
+    delimiter: '|'
+```
+
+#### Mime
+If the mime type is detected upfront of sqAPI, and is contained within the metadata,
+it could be referred to through path within the metadata.
+
+Make sure to use a separator to match the path to look for the mime type.
+The following example metadata could be referred through the trailing configuration example.
+```json
+{
+  "root": {
+    "wrapper": {
+      "mime.type": "application/json"
+    }
+  }
+}
+```
+
+```yaml
+  mime:
+    path: 'root:wrapper:mime.type'
+    path_separator: ':'
+```
+
+#### Message Fields
+Remember to list up minimum required fields of the message (`fields`)
+as these will be validated upon received message.
+
+The `data_location`-field is required upon default, and will be enforced as required.
+Without these fields, sqAPI will not be able to query for the data content.
+
+The `key`-field, of each field in `fields`, is the representation of the field-name within the message.
+This means that a message defining `type` by `mime.type`, should change `key: 'data_type'` to `key: 'mime.type'`.
+```yaml
+message:
+  fields:
     data_location:
       key: 'hash'
       required: True
@@ -167,61 +248,39 @@ and following `message_fields`:
       required: True
 ```
 
-##### Example
+#### Example
 ```yaml
-msg_broker:
-  type: 'rabbitmq'
-  host: 'localhost'
-  port: 5672
+message:
+  parser:
+    type: 'string'
+    format: 'uuid|file_path|redis_key|data_type|metadata'
+    delimiter: '|'
 
-  routing_key: 'q_sqapi'
-  exchange_name: 'x_sqapi'
-  exchange_type: 'fanout'
-  process_delay: 5
-  requeue: false
+  mime:
+    path: 'mime.type'
+    path_separator: '_'
 
-  parser: 'string'
-  format: 'uuid|hash|sys|mod|state'
-  delimiter: '|'
-
-  message_fields:
-    type:
-      key: 'data_type'
+  fields:
+    uuid:
+      key: 'uuid'
       required: True
     data_location:
-      key: 'data_location'
+      key: 'file_path'
       required: True
     meta_location:
-      key: 'meta_location'
-      required: True
-    uuid:
-      key: 'uuid_ref'
-      required: True
+      key: 'redis_key'
+      required: False
+    type:
+      key: 'data_type'
+      required: False
     metadata:
       key: 'metadata'
       required: False
 ```
 
-##### Plugin Specific
-To overwrite and/or append, add specific mime types to support.
-```yaml
-msg_broker:
-  supported_mime:
-  - 'image/jpeg'
-  - 'image/png'
-  - 'image/gif'
-```
-To accept all mime-types sent, do *not* define any fields.
-```yaml
-# Empty list
-msg_broker:
-  supported_mime:
-```
-or
-```yaml
-# Left out field
-msg_broker:
-```
+#### Plugin Specific
+This configuration does not really make sense to overwrite in the plugin specific configurations,
+since they all is used within the core of sqAPI.
 
 
 ### Metadata Store
@@ -230,7 +289,7 @@ The metadata store is also defined by a type and connection details.
 It is important to notice that a configuration for Metadata store, is not required.
 This is because the metadata is possible to put on the message.
 If it is desirable to put the metadata on the message,
-the `message_fields` > `metadata` reference mentioned above could be used.
+the `fields` > `metadata` reference mentioned above could be used.
 
 If the metadata is not detected in the message,
 nor any configuration for a metadata storage is defined,
