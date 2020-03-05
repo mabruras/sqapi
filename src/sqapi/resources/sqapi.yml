@@ -19,7 +19,7 @@ message:
 
   mime:
     path: 'mime.type'
-    path_separator: '_'
+    path_separator: ':'
 
   fields:
     uuid:

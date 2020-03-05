@@ -172,7 +172,7 @@ meta_store:
 ```
 
 
-### Message System
+### Broker
 Connector towards the Message System is responsible for subscribing to a
 message broker, -bus or other message system connections,
 for receiving messages for sqAPI to process.
@@ -233,21 +233,6 @@ def process_message(self, message: bytes):
 ```
 
 #### Types
-Regardless of the chosen type,
-there should be included configuration
-for which mime types each plugin supports.
-
-The following configuration is example
-of config used in a plugin configuration.
-```yaml
-broker:
-  # Supported Mime should be custom for each sqAPI Plugin,
-  # not necessarily defined in the parent configuration
-  supported_mime:
-  - 'image/jpeg'
-  - 'image/png'
-  - 'image/gif'
-```
 
 ##### RabbitMQ
 > RabbitMQ is the most widely deployed open source message broker.
@@ -264,31 +249,6 @@ broker:
   exchange_name: 'x_sqapi'
   exchange_type: 'fanout'
   process_delay: 5
-
-message:
-  fields:
-    type:
-      key: 'data_type'
-      required: True
-    data_location:
-      key: 'data_location'
-      required: True
-    meta_location:
-      key: 'meta_location'
-      required: True
-    uuid:
-      key: 'uuid_ref'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
-
-  # Supported Mime should be custom for each sqAPI Plugin,
-  # not necessarily defined in the parent configuration
-  supported_mime:
-  - 'image/jpeg'
-  - 'image/png'
-  - 'image/gif'
 ```
 
 ##### ZeroMQ
@@ -309,24 +269,6 @@ broker:
   connection_type: bind
   socket_type: 7
   protocol: 'tcp'
-
-message:
-  fields:
-    type:
-      key: 'data_type'
-      required: True
-    data_location:
-      key: 'data_path'
-      required: True
-    meta_location:
-      key: 'meta_path'
-      required: True
-    uuid:
-      key: 'uuid'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
 ```
 
 ##### Kafka
@@ -353,28 +295,7 @@ broker:
   topic_names:
   - 'sqapi'
   consumer_group: 'sqapi'
-  api_version:
-    - 0
-    - 10
-    - 0
-
-message:
-  fields:
-    type:
-      key: 'data_type'
-      required: True
-    data_location:
-      key: 'data_path'
-      required: True
-    meta_location:
-      key: 'meta_path'
-      required: True
-    uuid:
-      key: 'uuid'
-      required: True
-    metadata:
-      key: 'metadata'
-      required: False
+  api_version: [ 0, 10, 0 ]
 ```
 
 

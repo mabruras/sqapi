@@ -119,7 +119,7 @@ class ProcessManager:
 
     @staticmethod
     def valid_data_type(message: Message, plugin):
-        accepted_types = plugin.config.broker.get('supported_mime') or []
+        accepted_types = plugin.config.plugin.get('mime_types') or []
 
         return message.type in accepted_types or not accepted_types
 
