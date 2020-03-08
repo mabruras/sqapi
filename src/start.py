@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
         sqapi = SqapiApplication(sqapi_type)
         sqapi.start()
+
     except Exception as e:
         log.error('Could not start sqAPI application')
         log.error(str(e))

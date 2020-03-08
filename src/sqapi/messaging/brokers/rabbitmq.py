@@ -61,6 +61,9 @@ class Listener:
                 log.error('Interrupted, exiting consumer: {}'.format(str(e)))
                 break
 
+            except Exception as e:
+                log.error('Something unexpected happened while listening on broker: {}'.format(str(e)))
+
         log.info('Finished consuming from RabbitMQ')
 
     def listen_queue(self):
