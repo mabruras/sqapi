@@ -62,7 +62,7 @@ class Listener:
                 break
 
             except Exception as e:
-                log.error('Something unexpected happened while listening on broker: {}'.format(str(e)))
+                log.error('Something unexpected happened while listening to the broker: {}'.format(str(e)))
 
         log.info('Finished consuming from RabbitMQ')
 
