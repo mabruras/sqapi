@@ -111,7 +111,7 @@ class ProcessManager:
         except Exception as e:
             log.warning('{} failed processing {}: {}'.format(plugin.name, message.uuid, str(e)))
 
-        else:
+        finally:
             run_time = (time.time() - start) * 1000.0
             log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
 
