@@ -1,5 +1,10 @@
 import uuid
 
+from configuration.broker import RabbitMQConfig
+
+from messaging.brokers import Broker
+from start import SqapiConfiguration
+
 MSG_FIELDS = {
     'uuid_ref': {'key': 'uuid_ref', 'required': True},
     'data_location': {'key': 'data_location', 'required': True},
@@ -11,10 +16,32 @@ MSG_FIELDS = {
 
 class Message:
 
-    def __init__(self, body: dict, config: dict):
+    def __init__(self, body: dict):
         self.body = body
+        self.config = SqapiConfiguration.MessageConfig()  # Load Configuration
+        self.broker = Broker()  # TODO: Load broker (from config?)
 
-        self.msg_fields = config.get('fields', MSG_FIELDS)
+
+class HearBeatMessage(Message):
+    def __init__(self, body):
+        super().__init__(body)
+
+
+class InternalMessage(Message):
+    def __init__(self, body):
+        super().__init__(body)
+
+    def _field_key(self, field_name: str):
+        field = self.msg_fields.get(field_name) or {}
+
+        return field.get('key') or field_name
+
+
+class ExternalMessage(Message):
+    def __init__(self, body):
+        super().__init__(body)
+
+        self.msg_fields = super().config.get('fields', MSG_FIELDS)
         self.msg_fields.get('data_location').update({'required': True})  # Enforce requirement of data location
 
         self.hash_digest = None
@@ -26,19 +53,6 @@ class Message:
         self.data_location = body.get(self._field_key('data_location'))
         self.meta_location = body.get(self._field_key('meta_location'))
 
-    def _field_key(self, field_name: str):
-        field = self.msg_fields.get(field_name) or {}
 
-        return field.get('key') or field_name
-
-    def __str__(self):
-        msg = {
-            'id': self.id,
-            'uuid': self.uuid,
-            'type': self.type,
-            'metadata': self.metadata,
-            'data_location': self.data_location,
-            'meta_location': self.meta_location,
-            'hash_digest': self.hash_digest,
-        }
-        return str(msg)
+if __name__ == '__main__':
+    x = RabbitMQConfig()

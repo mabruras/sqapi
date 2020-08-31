@@ -4,10 +4,23 @@ import time
 
 import zmq as zmq
 
+from messaging.brokers import BrokerConfig
+
 log = logging.getLogger(__name__)
 
 
-class Listener:
+class ZeroMQConfig(BrokerConfig):
+    def __init__(self):
+        super().__init__(5001, 'localhost')
+
+        self.retry_interval = 0
+        self.process_delay = 0
+        self.connection_type = 'bind'
+        self.socket_type = 7
+        self.protocol = 'tcp'
+
+
+class ZeroMQBroker:
 
     def __init__(self, config: dict, process_message):
         self.config = config if config else dict()
