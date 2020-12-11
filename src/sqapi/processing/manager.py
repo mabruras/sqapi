@@ -12,6 +12,7 @@ from sqapi.configuration.util import signal_blocker
 from sqapi.messaging import util
 from sqapi.messaging.message import Message
 from sqapi.plugin.manager import PluginManager
+from sqapi.processing.exception import SqapiPluginExecutionError, PluginFailure
 from sqapi.query import data, meta
 
 CHUNK_SIZE = 65536
@@ -63,16 +64,21 @@ class ProcessManager:
     def execute_plugins(self, data_path, message, metadata):
         log.debug('Creating processor pool of plugin executions')
 
-        process_pool = [
-            multiprocessing.Process(target=self.plugin_execution, args=[
-                plugin, message, metadata, data_path
-            ]) for plugin in self.plugin_manager.plugins
-            if self.valid_data_type(message, plugin)
-        ]
+        with multiprocessing.Manager() as manager:
+            failed = manager.dict()
+            process_pool = [
+                multiprocessing.Process(target=self.plugin_execution, args=[
+                    plugin, message, metadata, data_path, failed
+                ]) for plugin in self.plugin_manager.plugins
+                if self.valid_data_type(message, plugin)
+            ]
 
-        log.debug('Starting processor pool')
-        [t.start() for t in process_pool]
-        [t.join() for t in process_pool]
+            log.debug('Starting processor pool')
+            [t.start() for t in process_pool]
+            [t.join() for t in process_pool]
+
+            if failed:
+                raise SqapiPluginExecutionError([failed[k] for k in failed])
 
     def query(self, message: Message):
         log.info('Querying metadata and content stores')
@@ -95,25 +101,35 @@ class ProcessManager:
         return data_path, metadata
 
     @staticmethod
-    def plugin_execution(plugin, message, metadata, data_path):
+    def plugin_execution(plugin, message, metadata, data_path, failed):
         log.info('{} started processing on {}'.format(plugin.name, message.uuid))
         start = time.time()
 
+        timeout_seconds = plugin.config.plugin.get('timeout', 300)
+        timeout_message = f'{message.uuid} in {plugin.name}, used more execution time than threshold'
+
         try:
-            plugin.execute(
-                plugin.config,
-                plugin.database,
-                copy.deepcopy(message),
-                copy.deepcopy(metadata),
-                open(data_path, 'rb')
-            )
+            with open(data_path, 'rb') as open_file:
+                with Timeout(seconds=timeout_seconds, error_message=timeout_message):
+                    plugin.execute(
+                        plugin.config,
+                        plugin.database,
+                        copy.deepcopy(message),
+                        copy.deepcopy(metadata),
+                        open(data_path, 'rb')
+                    )
+
+        except TimeoutError as e:
+            log.warning(f'{plugin.name} timed out processing {message.uuid}: {str(e)}')
+            failed[plugin.name] = PluginFailure(plugin.name, e)
 
         except Exception as e:
-            log.warning('{} failed processing {}: {}'.format(plugin.name, message.uuid, str(e)))
+            log.warning(f'{plugin.name} failed processing {message.uuid}: {str(e)}')
+            failed[plugin.name] = PluginFailure(plugin.name, e)
 
         finally:
             run_time = (time.time() - start) * 1000.0
-            log.info('{} used {} (milliseconds) processing {}'.format(plugin.name, run_time, message.uuid))
+            log.info(f'{plugin.name} used {run_time} (milliseconds) processing {message.uuid}')
 
     @staticmethod
     def _calculate_hash_digest(file_path):
