@@ -69,4 +69,8 @@ class PluginManager:
         if SINGLE_PLUGIN:
             return SINGLE_PLUGIN == plugin_name
 
-        return not self.config.active_plugins or plugin_name in self.config.active_plugins
+        is_blacklisted = plugin_name in self.config.disabled_plugins
+        no_whitelist_defined = not self.config.active_plugins
+        is_whitelisted = plugin_name in self.config.active_plugins
+
+        return not is_blacklisted and (no_whitelist_defined or is_whitelisted)
