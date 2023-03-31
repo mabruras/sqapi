@@ -6,7 +6,7 @@ psycopg2==2.8.3
 python-swiftclient==3.7.0
 python-keystoneclient==3.15.0
 PyYAML==5.4
-redis==3.2.1
+redis==4.4.4
 requests==2.22.0
 urllib3==1.26.5
 elasticsearch==7.0.2
